@@ -1,0 +1,57 @@
+{
+  "name": "parakeet-studio",
+  "productName": "Parakeet Studio",
+  "version": "0.5.7",
+  "description": "Independent Windows interview copilot reconstruction",
+  "author": "Rohit and contributors",
+  "license": "MIT",
+  "private": true,
+  "main": "electron/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "preview": "node scripts/preview.cjs",
+    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs",
+    "test:desktop": "node scripts/verify-desktop.cjs",
+    "build:win": "electron-builder --win portable --x64",
+    "build:dir": "electron-builder --win --x64 --dir",
+    "release:source": "node scripts/release-source.cjs",
+    "test:live": "node scripts/verify-live.cjs",
+    "test:hardening": "node scripts/verify-hardening.cjs",
+    "test:soak": "node scripts/verify-soak.cjs",
+    "test:hardware": "node scripts/verify-soak.cjs --hardware"
+  },
+  "dependencies": {
+    "pdf-parse": "2.4.5"
+  },
+  "devDependencies": {
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3",
+    "playwright": "1.61.1",
+    "ws": "8.22.0"
+  },
+  "build": {
+    "appId": "local.parakeetstudio.desktop",
+    "productName": "Parakeet Studio",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "renderer/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "Parakeet-Studio-${version}-portable.${ext}",
+      "requestExecutionLevel": "user"
+    }
+  }
+}

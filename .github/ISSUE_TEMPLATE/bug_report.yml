@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible problem using synthetic or redacted information.
+body:
+  - type: markdown
+    attributes:
+      value: Never include API keys, private resumes, meeting recordings, request headers or complete profile folders. Security vulnerabilities follow SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: App and Windows versions
+      placeholder: Parakeet Studio 0.5.7; Windows 11 x64
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Synthetic reproduction steps
+      description: State input mode, provider/model names (no key), expected behavior and actual result.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Redacted error and relevant details
+      description: Check that no credentials or personal material appears before submitting.
