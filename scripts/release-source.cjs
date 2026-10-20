@@ -38,7 +38,7 @@ fs.writeFileSync(path.join(output,'release-manifest.json'), JSON.stringify(manif
 const zip = path.join(output,`Parakeet-Studio-${pkg.version}-source.zip`);
 if (fs.existsSync(zip)) fs.unlinkSync(zip);
 const quote = value => `'${value.replaceAll("'","''")}'`;
-execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',`Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory(${quote(stage)}, ${quote(zip)}, [IO.Compression.CompressionLevel]::Optimal, $false)`],{windowsHide:true,stdio:'pipe'});
+execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',`Add-Type -AssemblyName System.IO.Compression.FileSystem; $taskStageRoot=${quote(stage)}; $taskArchive=[IO.Compression.ZipFile]::Open(${quote(zip)},[IO.Compression.ZipArchiveMode]::Create); try { foreach($taskInput in [IO.Directory]::EnumerateFiles($taskStageRoot,'*',[IO.SearchOption]::AllDirectories)) { $taskEntry=$taskInput.Substring($taskStageRoot.Length+1).Replace([char]92,[char]47); [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($taskArchive,$taskInput,$taskEntry,[IO.Compression.CompressionLevel]::Optimal) | Out-Null } } finally { $taskArchive.Dispose() }`],{windowsHide:true,stdio:'pipe'});
 const artifacts = [zip, path.join(output,`Parakeet-Studio-${pkg.version}-portable.exe`)].filter(file=>fs.existsSync(file));
 fs.writeFileSync(path.join(output,'SHA256SUMS.txt'), artifacts.map(file=>`${crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')}  ${path.basename(file)}`).join('\n')+'\n');
 console.log(`Source release: ${path.basename(zip)} (${files.length} allowlisted files, MIT). Research, user data and credentials excluded.`);
