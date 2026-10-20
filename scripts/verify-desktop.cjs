@@ -376,7 +376,9 @@ function contrastCheck() {
       const current = await window.copilot.validateScreenshot({captureId:second.captureId});
       return {invalidDisplay,stale,current:current.displayId===second.displayId,width:second.width,height:second.height};
     });
-    assert.deepEqual(receipts,{invalidDisplay:true,stale:true,current:true,width:1280,height:720});
+    const primaryDisplay=await page.evaluate(async()=> (await window.copilot.listDisplays()).find(display=>display.primary));
+    const fixtureScale=Math.min(1,primaryDisplay.width/1280,primaryDisplay.height/720);
+    assert.deepEqual(receipts,{invalidDisplay:true,stale:true,current:true,width:Math.round(1280*fixtureScale),height:Math.round(720*fixtureScale)});
     await page.click('#screenshot-answer'); await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
     await electronApp.evaluate(({screen})=>screen.emit('display-metrics-changed',{},screen.getPrimaryDisplay(),['scaleFactor']));
     await page.waitForFunction(()=>document.querySelector('#screen-send').disabled && document.querySelector('#screen-error').textContent.includes('Display configuration changed'));
