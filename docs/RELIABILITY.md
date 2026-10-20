@@ -2,6 +2,8 @@
 
 This is experimental software. A successful request does not prove a correct answer. Measure audio delivery, critical-word transcription accuracy, question-routing precision/recall, answer correctness, personal-fact grounding, display/storage and latency separately.
 
+Version 0.5.8 adds a desktop UI refresh; its current UI/native/portable checks and the separately versioned 0.5.7 endurance baseline are recorded in [validation](VALIDATION.md).
+
 ## Verified scope
 
 The 0.5.7 unit suite has 79 cases. Packaged local-provider desktop integration covers audio, streamed answers, PDF import, export, screen capture exclusion, overlay behavior and browser contrast. The native hardening suite has 24 cases including storage/policy failures, stale operations, power-event overlap, stopped recording after recovery and retained partial answers. These tests use synthetic inputs and do not grade cloud-model semantics.

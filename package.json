@@ -1,7 +1,7 @@
 {
   "name": "parakeet-studio",
   "productName": "Parakeet Studio",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Independent Windows interview copilot reconstruction",
   "author": "Rohit and contributors",
   "license": "MIT",
@@ -25,7 +25,8 @@
     "test:live": "node scripts/verify-live.cjs",
     "test:hardening": "node scripts/verify-hardening.cjs",
     "test:soak": "node scripts/verify-soak.cjs",
-    "test:hardware": "node scripts/verify-soak.cjs --hardware"
+    "test:hardware": "node scripts/verify-soak.cjs --hardware",
+    "test:ui": "node scripts/verify-ui.cjs"
   },
   "dependencies": {
     "pdf-parse": "2.4.5"
@@ -50,7 +51,12 @@
       "THIRD_PARTY_NOTICES.md"
     ],
     "asar": true,
-    "extraResources": [{"from":"native/TimerPolicy.exe","to":"TimerPolicy.exe"}],
+    "extraResources": [
+      {
+        "from": "native/TimerPolicy.exe",
+        "to": "TimerPolicy.exe"
+      }
+    ],
     "win": {
       "target": [
         "portable"

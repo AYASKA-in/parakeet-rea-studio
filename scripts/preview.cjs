@@ -13,5 +13,6 @@ const server = http.createServer(async (req, res) => {
     res.end(content);
   } catch { res.writeHead(404).end('Not found'); }
 });
-server.listen(5173, '127.0.0.1', () => console.log('Parakeet Studio UI preview: http://localhost:5173 (AI and audio require the desktop app).'));
+const port = Number(process.env.PARAKEET_PREVIEW_PORT ?? 5173);
+server.listen(port, '127.0.0.1', () => console.log(`Parakeet Studio UI preview: http://127.0.0.1:${server.address().port} (AI and audio require the desktop app).`));
 module.exports = server;

@@ -16,7 +16,7 @@ npm start
 
 `npm run test:desktop` runs local mock-provider tests in Electron and Microsoft
 Edge, including real Windows capture-exclusion checks. It requires an interactive
-Windows desktop, Edge and a free port 5173. Tests use synthetic media and no paid
+Windows desktop and Edge; loopback test ports are allocated automatically. Tests use synthetic media and no paid
 provider calls. CI runs the portable core/audio/reliability tests and builds on
 Windows; an interactive native check remains part of local release verification.
 
@@ -41,3 +41,5 @@ User documentation lives in `docs/` and README. Update it with behavior changes.
 Run `npm run test:hardening` for the local safety regressions, or append `-- --packaged` after building. Tests deliberately inject a save failure only in their own profile. Real private material must not be used with an unpaid-cloud test profile; live scripts use synthetic fixtures.
 
 `npm run test:live -- --vision-only` runs one synthetic screenshot stage; `--pdf-only` runs one synthetic PDF stage. Preserve failed receipts before a focused retry and report both attempts. A later successful retry does not erase provider timeouts or establish a general success rate. `node scripts/verify-portable.cjs` checks the actual built EXE in an isolated profile.
+
+`npm run test:ui` checks all four pages at four widths, visible text contrast, keyboard navigation and normal/minimum glass layouts. It uses synthetic data, Edge and temporary loopback ports, with no cloud calls. See [desktop UI design](docs/UI_DESIGN.md). `npm run preview` defaults to port 5173; set `PARAKEET_PREVIEW_PORT` to another port (or 0 for an assigned port) if it is occupied.

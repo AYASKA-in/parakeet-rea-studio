@@ -1,4 +1,16 @@
-# Version 0.5.7 validation
+# Validation
+
+## Version 0.5.8 — desktop UI refresh
+
+- 79 unit regressions passed.
+- Full packaged Electron/Edge integration passed, including separate audio, streamed answers, PDF/screenshots, persistence, capture exclusion and native glass opacity.
+- All 24 packaged native hardening checks passed.
+- Actual portable extraction, synthetic answer/audio, saved history and graceful exit passed.
+- UI audit passed 16 page/viewport combinations and four overlay layouts, with no document overflow or clipped primary controls. Lowest sampled visible text contrast: **5.36:1**. Keyboard skip navigation and microphone disclosure passed.
+
+These checks use synthetic inputs and isolated profiles with no real provider calls. The main changes are HTML/CSS presentation; capture/provider/recording logic is unchanged. The long-session and real-model evidence below belongs to **0.5.7**, not a new 0.5.8 endurance or model-quality benchmark. See [UI design and test scope](UI_DESIGN.md).
+
+## Version 0.5.7 validation
 
 Experimental Windows x64 prerelease, 20 October 2026. These are bounded observations, not a correctness or availability guarantee.
 

@@ -8,9 +8,9 @@ Open the EXE, configure a provider and data-use policy in Settings, then test a 
 
 ## Listening
 
-Choose Microphone, System audio or Microphone + system. Test each input separately before both. Select the correct microphone; Refresh updates the device list. Names may appear only after permission. A missing selected device can fall back to Windows default; permission denial does not bypass Windows controls.
+Choose Microphone, System audio or Microphone + system. Test each input separately before both. Open Microphone options to select the correct microphone; Refresh updates the device list. Names may appear only after permission. A missing selected device can fall back to Windows default; permission denial does not bypass Windows controls.
 
-Click Start listening and grant requested permissions. System audio can include other applications' playback. Windows loopback negotiation retains a display stream, but audio mode does not read/upload its video. Use headphones to reduce microphone feedback.
+Audio source and Start listening are at the top of the transcript panel. Click Start listening and grant requested permissions. System audio can include other applications' playback. Windows loopback negotiation retains a display stream, but audio mode does not read/upload its video. Use headphones to reduce microphone feedback.
 
 You/Call audio labels identify source, not individual speakers. This is not diarization. Interim wording can change; finalized text is saved. Stop if the wrong input is being captured. Use the transcript edit control to correct finalized text, then save; the original remains for comparison. Recheck negation, numbers, names and code identifiers.
 

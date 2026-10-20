@@ -129,6 +129,8 @@ function contrastCheck() {
     await page.fill('#question-input', 'How would you design a resilient API?');
     await page.click('#generate-button');
     await page.waitForFunction(() => document.querySelector('#answer-content')?.textContent.includes('bounded retries'));
+    await page.locator('#toast').waitFor({ state: 'hidden' });
+    await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({ path: path.join(output, 'desktop-answer.png'), fullPage: true, animations: 'disabled' });
     const floatingPromise = electronApp.waitForEvent('window');
     await page.click('#toggle-overlay');
@@ -426,11 +428,12 @@ function contrastCheck() {
     assert.ok(calls.length >= 3 && calls.every(call => call.authorized));
     assert.deepEqual(errors, []);
 
+    process.env.PARAKEET_PREVIEW_PORT = '0';
     preview = require('./preview.cjs');
     await new Promise(resolve => { if (preview.listening) resolve(); else preview.once('listening', resolve); });
     browser = await chromium.launch({ channel: 'msedge', headless: true });
     const web = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-    await web.goto('http://localhost:5173');
+    await web.goto(`http://127.0.0.1:${preview.address().port}`);
     await web.locator('#preview-badge').waitFor({ state: 'visible' });
     await web.screenshot({ path: path.join(output, 'browser-preview.png'), fullPage: true, animations: 'disabled' });
     const browserContrast = [];

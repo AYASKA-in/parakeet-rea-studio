@@ -6,12 +6,14 @@
 
 An independent Windows assistant for **interview practice and permitted meetings**. Listen to microphone/call audio, draft AI answers, analyze a screenshot, and keep readable words in a movable glass overlay.
 
-**[Download Windows EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.7/Parakeet-Studio-0.5.7-portable.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.7) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
+**[Download Windows EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.8/Parakeet-Studio-0.5.8-portable.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.8) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
 
 > [!IMPORTANT]
 > **Experimental prerelease.** AI answers can be wrong. Cloud features require internet and provider access. Capture exclusion depends on Windows and the sharing tool; universal invisibility and a 100% success rate are not guaranteed. Use assistance only where allowed.
 
 The desktop app is named **Parakeet Studio**. This independently written, MIT-licensed project is not affiliated with ParakeetAI and includes no vendor binaries or extracted source.
+
+**New in 0.5.8:** a slate-and-teal workspace, larger transcript/answer text, listening controls at the top, clearer keyboard hints and more readable glass controls. [Design and accessibility notes](docs/UI_DESIGN.md).
 
 **On this page:** [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source)
 
@@ -25,12 +27,12 @@ The desktop app is named **Parakeet Studio**. This independently written, MIT-li
 | Audio access | Working devices/drivers and Windows microphone permissions |
 | Runtime | Portable app includes Electron and its helper; no Node.js, Python or separate .NET SDK needed |
 
-1. Download **[Parakeet-Studio-0.5.7-portable.exe](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.7/Parakeet-Studio-0.5.7-portable.exe)**. This is the application. The source ZIP is for developers.
+1. Download **[Parakeet-Studio-0.5.8-portable.exe](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.8/Parakeet-Studio-0.5.8-portable.exe)**. This is the application. The source ZIP is for developers.
 2. Keep it in a folder you control, such as `Documents\Parakeet Studio`. Run the EXE directly; there is no installer. First launch extracts the runtime and can take longer.
-3. Compare its hash with `SHA256SUMS.txt` from the [same release](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.7):
+3. Compare its hash with `SHA256SUMS.txt` from the [same release](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.8):
 
    ```powershell
-   Get-FileHash -Algorithm SHA256 '.\Parakeet-Studio-0.5.7-portable.exe'
+   Get-FileHash -Algorithm SHA256 '.\Parakeet-Studio-0.5.8-portable.exe'
    ```
 
 4. This community build is **unsigned** and may show an unknown-publisher warning. Verify the source/checksum before deciding to run it. Do not disable Windows security.
@@ -163,7 +165,7 @@ During reconnection, up to **eight seconds of new audio** is buffered. Earlier i
 
 The bundled original Windows helper applies a per-process timer optimization only to this app while listening and restores its prior policy afterward. It does not change your power plan or other apps. See [measured validation results](docs/VALIDATION.md) and [reliability and remaining work](docs/RELIABILITY.md).
 
-**Release checks:** 79 unit regressions, 24 packaged native hardening checks, desktop/portable integration and real 60.04-minute microphone / 120.04-minute dual-source synthetic endurance passed. See [exact scope and limitations](docs/VALIDATION.md).
+**0.5.8 checks:** 79 unit regressions, 24 packaged native hardening checks, desktop/portable integration, 16 page/viewport combinations and four overlay layouts passed. **Endurance baseline:** the real 60.04-minute microphone and 120.04-minute dual-source synthetic runs were completed on 0.5.7. See [exact scope and limitations](docs/VALIDATION.md).
 
 No finite test proves perfect recognition, correct coding/factual/personal answers, universal capture exclusion or continuous free-tier availability. Real device/network behavior varies. Legacy S3 sleep and physical dock combinations are not validated.
 
@@ -198,6 +200,7 @@ npm start
 
 | Command | Purpose |
 |---|---|
+| `npm run test:ui` | Check layouts, text contrast, keyboard navigation and glass controls |
 | `npm run build:win` | Build the portable Windows EXE |
 | `npm run test:desktop -- --packaged` | Native audio/UI/capture/import/export integration |
 | `npm run test:hardening -- --packaged` | Native lifecycle, storage and policy regressions |
