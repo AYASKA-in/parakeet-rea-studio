@@ -36,3 +36,14 @@ function inspectResume(text) {
   return { text: text.slice(0, 50000), characters: text.length, warnings };
 }
 module.exports = { normalizeResumeText, resumeEvidence, inspectResume };
+
+function anchoredResumeEvidence(text, question, limit = 8000) {
+  const normalized=normalizeResumeText(text);if(!normalized)return '';
+  const selected=resumeEvidence(normalized,question,Math.max(200,limit-600));
+  const chunks=selected.replace(/^\[Selected verbatim resume excerpts[^\n]*\n/,'').split('\n\n[…]\n\n');
+  const source=require('node:crypto').createHash('sha256').update(normalized).digest('hex').slice(0,12);
+  let output='[Verbatim excerpts from normalized resume '+source+'; anchors locate quoted data, not verified qualifications.]\n';
+  for(const chunk of chunks){const at=normalized.indexOf(chunk);if(at<0)continue;const start=normalized.slice(0,at).split('\n').length,end=start+chunk.split('\n').length-1;const part='[R_'+source+'_L'+start+'-'+end+']\n'+chunk+'\n';if(output.length+part.length<=limit)output+=part;}
+  return output;
+}
+module.exports.anchoredResumeEvidence=anchoredResumeEvidence;

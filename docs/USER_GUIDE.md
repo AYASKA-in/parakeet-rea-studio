@@ -79,3 +79,15 @@ While listening, a bundled original Windows helper keeps this app's timer-resolu
 To update, stop listening, wait for saved status, close the old app and run the new checksum-verified EXE. Settings/history stay in the same Windows profile. No automatic updater is bundled. Export important content before updates; a new Windows account/computer may require key re-entry.
 
 To remove the app, close it and delete the EXE. Its data remains at `%APPDATA%\Parakeet Studio`. To remove local data too, export what you need, remove the saved key in Settings, close the app and delete that exact folder through Explorer. This is irreversible and does not remove external exports or provider copies.
+
+## Local privacy and diagnostics (0.6+)
+
+Settings → Local data and diagnostics controls workspace history, retention and optional Windows encryption. Stop listening/requests before changing them. Memory only erases the saved workspace/recovery copy when settings are saved; current content stays in memory, so export before closing. Retention removes inactive dated sessions after 7, 30 or 90 days at save/startup; unknown dates and reusable context remain.
+
+Encryption protects saved resume/context, transcripts and answers, including recovery snapshots. Keep the original Windows profile/user to decrypt. Exports remain plaintext. Never open an encrypted profile in 0.5.8 or earlier. Export before downgrade or migration; no data reset occurs when a newer unsupported format or decryption error is detected.
+
+Export diagnostic timings produces a content-free JSON report for up to 500 attempts from the current process, grouped by answer mode, network setting and task kind. It includes failures/cancellations and final save status, with p50/p95 for available stages. Speech end is estimated from audio activity and may be unavailable; blank stages are not zero latency. Clear timings discards these counters. This report does not contain your prompts, transcript, resume, images, keys or raw provider errors.
+
+For keyboard cropping, focus the screen preview and press Enter to select its center. Arrow keys move the crop; Shift+arrows resize; Escape clears it. Tab reaches the remaining review controls. Resume source anchors locate quoted lines but do not verify qualifications or prove a generated claim.
+
+See [evaluation](EVALUATION.md), [local/offline deployment](LOCAL_MODE.md) and [hardware validation](HARDWARE_VALIDATION.md) for developer acceptance procedures and their limits.

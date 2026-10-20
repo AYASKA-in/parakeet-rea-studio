@@ -56,3 +56,58 @@ test('Live setup errors cannot expose the credential to the renderer',async()=>{
  const live=new GeminiLive({settings:DEFAULT_SETTINGS,key:secret,onTranscript:()=>{},onError:()=>{},WebSocketImpl:Socket});
  await assert.rejects(()=>live.start(),error=>error.message.includes('[redacted]')&&!error.message.includes(secret));
 });
+
+
+test('SSE rejects oversized answers before display even when completion shares the chunk', async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');
+ for(const provider of ['openai','gemini']) {
+  const payload=provider==='gemini'?{candidates:[{content:{parts:[{text:'x'.repeat(200001)}]},finishReason:'STOP'}]}:{choices:[{delta:{content:'x'.repeat(200001)}}]};
+  async function* body(){yield Buffer.from('data: '+JSON.stringify(payload)+'\n\ndata: [DONE]\n\n');}
+  let displayed=0;
+  await assert.rejects(()=>readAnswerStream(body(),text=>displayed+=text.length,provider),/size limit/);
+  assert.equal(displayed,0);
+ }
+});
+
+test('SSE bounds complete metadata traffic and closes the upstream iterator on failure',async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');let closed=false;let chunks=0;
+ async function* body(){try{for(let i=0;i<10;i++){chunks++;yield Buffer.from(':'+ 'x'.repeat(1024*1024)+'\n\n');}yield Buffer.from('data: [DONE]\n\n');}finally{closed=true;}}
+ await assert.rejects(()=>readAnswerStream(body(),()=>{}),/size limit/);
+ assert.equal(closed,true);assert.ok(chunks<10);
+});
+
+test('Gemini completion closes the stream and never appends later candidate text',async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');let closed=false;const deltas=[];
+ async function* body(){try{yield Buffer.from('data: '+JSON.stringify({candidates:[{content:{parts:[{text:'Complete'}]},finishReason:'STOP'}]})+'\n\n');yield Buffer.from('data: '+JSON.stringify({candidates:[{content:{parts:[{text:'unexpected'}]}}]})+'\n\n');}finally{closed=true;}}
+ assert.equal(await readAnswerStream(body(),text=>deltas.push(text),'gemini'),'Complete');
+ assert.deepEqual(deltas,['Complete']);assert.equal(closed,true);
+});
+
+test('malformed JSON provider envelopes fail with actionable errors',async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');
+ for(const payload of [null,[],42,'wrong']) {
+  assert.throws(()=>jsonAnswer(payload,'gemini',()=>{}),/invalid.*response/i);
+  async function* body(){yield Buffer.from('data: '+JSON.stringify(payload)+'\n\n');}
+  await assert.rejects(()=>readAnswerStream(body(),()=>{}),/invalid.*response/i);
+ }
+});
+
+
+test('response budgets preserve earlier valid deltas but never emit the overflowing delta',async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');let displayed='';
+ async function* body(){yield Buffer.from('data: '+JSON.stringify({choices:[{delta:{content:'Retained draft'}}]})+'\n\n');yield Buffer.from('data: '+JSON.stringify({choices:[{delta:{content:'x'.repeat(200000)}}]})+'\n\n');}
+ await assert.rejects(()=>readAnswerStream(body(),text=>displayed+=text),/size limit/);
+ assert.equal(displayed,'Retained draft');
+ let emitted=false;assert.throws(()=>jsonAnswer({choices:[{message:{content:'x'.repeat(200001)},finish_reason:'stop'}]},'openai',()=>emitted=true),/size limit/);assert.equal(emitted,false);
+});
+
+test('an oversized complete SSE event is rejected before its payload is parsed',async()=>{
+ const {readAnswerStream}=require('../electron/core.cjs');
+ async function* body(){yield Buffer.from('data: '+JSON.stringify({padding:'x'.repeat(2*1024*1024),choices:[]})+'\n\ndata: [DONE]\n\n');}
+ await assert.rejects(()=>readAnswerStream(body(),()=>{}),/size limit/);
+});
+
+
+test('provider error redaction discards upstream stacks and encoded credential copies',()=>{
+ const {redactProviderFailure}=require('../electron/response.cjs');const secret='private/key+example';const upstream=new Error('Rejected '+secret+' and '+encodeURIComponent(secret));const sanitized=redactProviderFailure(upstream,secret);assert.ok(sanitized.message.includes('[redacted]'));assert.ok(!sanitized.stack.includes(secret));assert.ok(!sanitized.stack.includes(encodeURIComponent(secret)));assert.equal(redactProviderFailure(new DOMException('cancelled','AbortError')).name,'AbortError');assert.equal(redactProviderFailure(new Error('x'.repeat(10000))).message.length,2000);
+});

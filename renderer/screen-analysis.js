@@ -37,6 +37,21 @@ export async function reviewScreenshot(bridge, defaultQuestion = '', {signal} = 
     Object.assign(selection.style, { left: `${rectangle.x * 100}%`, top: `${rectangle.y * 100}%`, width: `${rectangle.width * 100}%`, height: `${rectangle.height * 100}%` }); selection.hidden = false;
   };
   const up = () => { start = null; if (!rectangle || rectangle.width < .01 || rectangle.height < .01) reset(); else $('#screen-crop-status').textContent = 'Selected region only will be sent. Use Clear crop to send the whole screen.'; };
+  const keyboardCrop = event => {
+    if(!captured || busy || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter','Escape'].includes(event.key))return;
+    event.preventDefault();event.stopPropagation();
+    if(event.key==='Escape'){reset();return;}
+    rectangle ||= {x:.25,y:.25,width:.5,height:.5};
+    const horizontal=['ArrowLeft','ArrowRight'].includes(event.key),delta=['ArrowLeft','ArrowUp'].includes(event.key)?-.05:.05;
+    if(event.key!=='Enter') {
+      if(event.shiftKey){const dimension=horizontal?'width':'height',position=horizontal?'x':'y';rectangle[dimension]=Math.max(.05,Math.min(1-rectangle[position],rectangle[dimension]+delta));}
+      else {const position=horizontal?'x':'y',dimension=horizontal?'width':'height';rectangle[position]=Math.max(0,Math.min(1-rectangle[dimension],rectangle[position]+delta));}
+    }
+    Object.assign(selection.style,{left:rectangle.x*100+'%',top:rectangle.y*100+'%',width:rectangle.width*100+'%',height:rectangle.height*100+'%'});selection.hidden=false;
+    $('#screen-crop-status').textContent='Selected region: '+Math.round(rectangle.width*100)+'% wide by '+Math.round(rectangle.height*100)+'% high. Only this region will be sent.';
+  };
+  surface.tabIndex=0;surface.setAttribute('role','group');surface.setAttribute('aria-label','Screenshot crop. Enter selects the center. Arrow keys move the crop; Shift plus arrows resize. Escape clears the crop.');
+  surface.addEventListener('keydown',keyboardCrop);
   surface.addEventListener('pointerdown',down); surface.addEventListener('pointermove',move); surface.addEventListener('pointerup',up); surface.addEventListener('pointercancel',up);
   displaySelect.addEventListener('change',capture); $('#screen-refresh').addEventListener('click',capture); $('#screen-clear-crop').addEventListener('click',reset);
   const submit = async event => {
@@ -56,7 +71,7 @@ export async function reviewScreenshot(bridge, defaultQuestion = '', {signal} = 
   });
   const cancel=()=>{closed=true;if(dialog.open)dialog.close('cancel');};
   signal?.addEventListener('abort',cancel,{once:true});
-  const remove = () => { surface.removeEventListener('pointerdown',down);surface.removeEventListener('pointermove',move);surface.removeEventListener('pointerup',up);surface.removeEventListener('pointercancel',up);displaySelect.removeEventListener('change',capture);$('#screen-refresh').removeEventListener('click',capture);$('#screen-clear-crop').removeEventListener('click',reset); };
+  const remove = () => { surface.removeEventListener('keydown',keyboardCrop);surface.removeEventListener('pointerdown',down);surface.removeEventListener('pointermove',move);surface.removeEventListener('pointerup',up);surface.removeEventListener('pointercancel',up);displaySelect.removeEventListener('change',capture);$('#screen-refresh').removeEventListener('click',capture);$('#screen-clear-crop').removeEventListener('click',reset); };
   try {
     if(signal?.aborted)return null;
     const displays = await bridge.listDisplays(); displaySelect.replaceChildren();

@@ -23,8 +23,8 @@ affected dependency entries). It is not bundled in the production application.
 Maintainers should review the upstream fix rather than blindly applying npm's
 suggested toolchain downgrade. See GHSA-hp3w-g68c-fv3c on GitHub Advisory Database.
 
-Keys are encrypted using Windows secure storage. Transcripts, resume context and
-their recovery snapshots are local plain-text JSON. The selected provider receives
+Keys are encrypted using Windows secure storage. By default, transcripts, resume context and
+their recovery snapshots are local plain-text JSON. Version 0.6 adds optional Windows workspace encryption, memory-only storage and age-based retention. The selected provider receives
 audio, relevant context and requested screen images. Free-tier providers can have
 different data-use policies; consult their terms before sending private material.
 
@@ -37,4 +37,8 @@ hide processes or guarantee invisibility in every meeting/capture tool. Check th
 actual meeting preview. Releases are unsigned unless separately signed by a
 maintainer; verify published SHA-256 checksums and build from source if desired.
 
-0.5.2 binds credentials to provider/origin, snapshots request profiles, guards single-instance storage ownership and refreshes recovery copies on explicit context/key removal. Data-use mode defaults to unknown and blocks sends until selected. Unpaid practice mode omits saved personal context and disables AI PDF uploads and stored-session summaries. A reviewed mode is a user declaration about provider terms, not a privacy or billing guarantee. Recognizable contact filtering cannot identify every private item, and no-history/encrypted-content storage remains planned.
+0.5.2 binds credentials to provider/origin, snapshots request profiles, guards single-instance storage ownership and refreshes recovery copies on explicit context/key removal. Data-use mode defaults to unknown and blocks sends until selected. Unpaid practice mode omits saved personal context and disables AI PDF uploads and stored-session summaries. A reviewed mode is a user declaration about provider terms, not a privacy or billing guarantee. Recognizable contact filtering cannot identify every private item, and contact filtering does not replace a suitable provider/data arrangement.
+
+Workspace encryption covers primary and recovery workspace snapshots, not plaintext exports, crash dumps, external backups or copies already sent to providers. It depends on the original Windows user/profile key material. Do not downgrade an encrypted profile to 0.5.8 or earlier: those versions cannot read the encrypted envelope. Export important content and back up the closed profile before migration. Memory-only mode clears app-owned saved workspace copies; it is not forensic secure erasure. Content-free timing counters are memory-only, capped at 500 attempts and exported only on request.
+
+The optional evaluation runner is a developer tool, separate from the desktop application. Model code runs only in the pinned restricted container, without host mounts or network. Docker/OS isolation is a boundary to maintain and patch, not a proof of arbitrary-code safety.

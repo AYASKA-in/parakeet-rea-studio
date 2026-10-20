@@ -57,3 +57,10 @@ html, body { margin: 0; width: 100%; height: 100%; background: transparent; }
   .floating-content { padding-block: 10px; }
   .floating-footer { padding-block: 8px; }
 }
+
+@media (forced-colors: active) {
+  body, .panel, .form-panel, .floating-card { background: Canvas; color: CanvasText; }
+  button, input, select, textarea, summary { border: 1px solid ButtonText; }
+  :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+  .floating-answer, .floating-question, .floating-footer, .field-help { color: CanvasText; text-shadow: none; }
+}

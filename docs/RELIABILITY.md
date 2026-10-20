@@ -56,3 +56,5 @@ Bounded real Gemini checks on 20 October 2026 passed synthetic speech (16.905 se
 Provisional short-question target: first text p50 ≤3 seconds, p95 ≤8 seconds from question end on a declared usable network; this includes finalization/pause/upload. Complex coding needs a separate budget. These are targets, not measured service guarantees. Correctness and abstention must be reported alongside speed.
 
 Even zero failures in 1,000 independent representative trials gives an approximate 95% failure-rate upper bound of 0.3%, not zero. Correlated audio chunks from one fixture are not independent interview trials. Finite evidence supports improvement, never a universal 100% claim.
+
+Version 0.6 implements initial timing export, bounded retry/cooldown and local privacy controls. See [production readiness](PRODUCTION_READINESS.md) for updated implementation status, live-provider failures and remaining acceptance gates. [Evaluation](EVALUATION.md) separates raw lexical/structured scores, transport failures and human review.

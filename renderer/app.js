@@ -74,7 +74,7 @@ function runPendingAutoAnswer() {
   if (!questionQueue.pending || !$('#auto-answer').checked || state.stopping || state.desktopPaused || questionQueue.pending.sessionId !== state.active?.id || state.requestId || state.screenshotPending) return;
   if (!state.settings.hasApiKey || !['unpaid','reviewed','local'].includes(state.settings.dataPolicy)) return;
   if (status.reason === 'waiting') autoAnswerTimer = setTimeout(runPendingAutoAnswer, Math.max(20,status.delay));
-  else if (status.reason === 'ready') { const pending = questionQueue.take(); renderPendingQuestion(); void generateAnswer({ question:pending.text,automatic:true }); }
+  else if (status.reason === 'ready') { const pending = questionQueue.take(); renderPendingQuestion(); void generateAnswer({ question:pending.text,automatic:true,timing:pending }); }
 }
 function scheduleAutoAnswer(text, source = 'audio') {
   if (state.stopping || state.desktopPaused || !$('#auto-answer').checked || !text || !acceptQuestionSource($('#audio-source').value,source)) return;
@@ -156,11 +156,13 @@ async function generateNotes() {
   if (!requireAI()) return;
   const session = state.active;
   const requestId = uid(); state.notesRequestId = requestId; renderNotes();
+  const start=performance.now(),metric={mode:state.settings.answerMode,network:state.settings.networkMode,kind:'notes',requestMs:0,outcome:'error',save:'failed'};
+  const unsubscribe=bridge.onAnswer(event=>{if(event.requestId===requestId && metric.firstTextMs===undefined && event.delta)metric.firstTextMs=performance.now()-start;});
   try {
     const result = await bridge.generate({ requestId, kind: 'notes', question: '', transcript: transcriptText(session), context: session.context });
-    session.notes = result.text; storeSession(); renderNotes(); toast('Session notes are ready.');
+    metric.completedMs=performance.now()-start;metric.outcome='success';session.notes = result.text;const saved=await storeSession();metric.save=saved===false?'failed':state.settings.historyMode==='ephemeral'?'memory-only':'durable';if(metric.save==='durable')metric.savedMs=performance.now()-start;renderNotes();toast(saved===false?'Notes are ready, but saving failed. Export now.':'Session notes are ready.');
   } catch (error) { toast(`Notes failed: ${message(error)}`, true); }
-  finally { state.notesRequestId = null; renderNotes(); }
+  finally { unsubscribe?.();metric.completedMs??=performance.now()-start;if(bridge.recordMetric)await bridge.recordMetric(metric).catch(()=>{});state.notesRequestId = null; renderNotes(); }
 }
 function toast(text, error = false) {
   clearTimeout(toastTimer);
@@ -218,8 +220,8 @@ function persistWorkspace() {
       if (desktop) await bridge.saveWorkspace(snapshot);
       else localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
       $('#retry-save').hidden = true;$('#retry-context-save').hidden=true;
-      $('#context-save-status').textContent = 'All changes saved';
-      $('#transcript-save-status').textContent = pendingWorkspace ? 'Saving latest changes…' : 'Transcript and drafts saved on this device';
+      $('#context-save-status').textContent = state.settings.historyMode === 'ephemeral' ? 'Memory only — not saved to disk' : 'All changes saved';
+      $('#transcript-save-status').textContent = state.settings.historyMode === 'ephemeral' ? 'Memory only — export before closing' : pendingWorkspace ? 'Saving latest changes…' : 'Transcript and drafts saved on this device';
     } catch (error) {
       $('#context-save-status').textContent = 'Could not save changes';
       $('#transcript-save-status').textContent = 'Save failed — export the session now';
@@ -396,6 +398,10 @@ async function generateAnswer(options = {}) {
   if (!options.automatic) clearAutoAnswer();
   lastAnswerStartedAt = performance.now(); questionQueue.markSent(question,session.id); state.answerIndex = -1;
   const requestId = uid();
+  const clockStart=performance.now(), speech=Number.isFinite(options.timing?.speechEndedAt)?options.timing.speechEndedAt:null;
+  const baseline=speech ?? clockStart;
+  const metric={mode:state.settings.answerMode,network:state.settings.networkMode,kind:options.imageDataUrl?'screen':options.automatic?'audio':'typed',speechEndMs:speech===null?null:0,finalTranscriptMs:Number.isFinite(options.timing?.finalAt)?Math.max(0,options.timing.finalAt-baseline):null,requestMs:clockStart-baseline,firstTextMs:null,outcome:'error',save:'failed'};
+  state.attemptMetric=metric;
   const previousAnswers = session.exchanges.slice(-3);
   const exchange = { id: uid(), question, answer: '', style: state.style, status: 'streaming', screenshotUsed: Boolean(options.imageDataUrl), createdAt: new Date().toISOString() };
   session.exchanges.push(exchange); let lastCheckpoint = Date.now();
@@ -403,6 +409,7 @@ async function generateAnswer(options = {}) {
   renderAnswer(); syncOverlay(); storeSession();
   const stopStreaming = bridge.onAnswer(event => {
     if (event.requestId !== requestId || state.requestId !== requestId) return;
+    if(metric.firstTextMs===null && event.delta)metric.firstTextMs=performance.now()-baseline;
     state.currentAnswer += event.delta || '';
     exchange.answer = state.currentAnswer;
     if (!answerPaintTimer) answerPaintTimer = setTimeout(() => {
@@ -416,22 +423,27 @@ async function generateAnswer(options = {}) {
   try {
     const result = await bridge.generate({ requestId, question, transcript: transcriptText(session), previousAnswers, ...(options.imageDataUrl ? { imageDataUrl: options.imageDataUrl, screenQuality: options.screenQuality, captureId: options.captureId } : {}), context: session.context || state.context, style: state.style, kind: 'answer' });
     if (state.requestId === requestId) state.currentAnswer = result.text || state.currentAnswer;
-    exchange.metrics = result.metrics; exchange.status = 'complete';
+    exchange.metrics = result.metrics; exchange.status = 'complete';metric.outcome='success';
   } catch (error) {
     if (state.requestId === requestId) state.answerError = message(error);
     exchange.error = message(error); exchange.status = state.currentAnswer ? 'partial' : 'failed';
+    if(metric.outcome!=='cancelled')metric.outcome=state.currentAnswer?'partial':'error';
   } finally {
     stopStreaming?.();
     clearTimeout(answerPaintTimer); answerPaintTimer = null;
     if (state.requestId === requestId) state.requestId = null;
     exchange.answer = state.currentAnswer;
-    if (state.active?.id === session.id) storeSession();
+    metric.completedMs=performance.now()-baseline;
+    if (state.active?.id === session.id) { const saved=await storeSession();metric.save=saved===false?'failed':state.settings.historyMode==='ephemeral'?'memory-only':'durable';if(metric.save==='durable')metric.savedMs=performance.now()-baseline; }
+    if(state.attemptMetric===metric)state.attemptMetric=null;
+    if(bridge.recordMetric)await bridge.recordMetric(metric).catch(()=>{});
     renderAnswer(); syncOverlay(); runPendingAutoAnswer();
   }
 }
 async function cancelGeneration() {
   const requestId = state.requestId;
   if (!requestId) return;
+  if(state.attemptMetric)state.attemptMetric.outcome='cancelled';
   try { await bridge.cancel({ requestId }); } catch (error) { toast(message(error), true); }
   // The generation promise persists any partial draft before returning to ready.
 }
@@ -601,6 +613,9 @@ function bindEvents() {
     if(!desktop)return;$('#retry-shortcuts').disabled=true;
     try{renderShortcutStatus(await bridge.retryShortcuts());}catch(error){toast(message(error),true);}finally{$('#retry-shortcuts').disabled=false;}
   });
+  $('#check-local-provider').addEventListener('click',async()=>{const button=$('#check-local-provider'),status=$('#local-provider-status');if(!desktop){status.textContent='Local server checks require the desktop app.';return;}button.disabled=true;status.textContent='Checking the saved local server…';try{const result=await bridge.checkLocalProvider();status.textContent=`Server reached. Answer model listed: ${result.answerModelListed?'yes':'no'}. Transcription model listed: ${result.transcriptionModelListed?'yes':'no'}. ${result.scope}`;}catch(error){status.textContent=message(error);}finally{button.disabled=false;}});
+  $('#export-diagnostics').addEventListener('click',()=>void bridge?.exportDiagnostics?.().catch(error=>toast(message(error),true)));
+  $('#clear-diagnostics').addEventListener('click',async()=>{await bridge?.clearDiagnostics?.();toast('Content-free diagnostic counters cleared.');});
   $('#retry-save').addEventListener('click',()=>void persistWorkspace());
   $('#retry-context-save').addEventListener('click',()=>void persistWorkspace());
   $('#delete-key').addEventListener('click',async()=>{if(!desktop)return;try{const s=await bridge.getSettings();state.settings=await bridge.saveSettings({...s,apiKey:''});$('#provider-key').value='';updateConnectionUI();toast('Saved key removed from app settings and recovery copy.');}catch(error){toast(message(error),true);}});
@@ -716,7 +731,8 @@ function bindEvents() {
     if (!desktop) { toast('Open the desktop app to securely save a provider connection.'); return; }
     const form = new FormData(e.target);
     const settings = { provider: form.get('provider'), baseUrl: form.get('baseUrl').trim(), model: form.get('model').trim(), transcriptionModel: form.get('transcriptionModel').trim(), captureProtection: $('#capture-protection').checked };
-    for (const key of ['dataPolicy','answerMode', 'networkMode', 'codingLanguage', 'transcriptionLanguage', 'transcriptionMode', 'transcriptionVocabulary']) settings[key] = form.get(key);
+    for (const key of ['dataPolicy','answerMode', 'networkMode', 'codingLanguage', 'transcriptionLanguage', 'transcriptionMode', 'transcriptionVocabulary','historyMode','retentionDays']) settings[key] = form.get(key);
+    settings.encryptWorkspace=$('#encrypt-workspace').checked;
     const key = form.get('apiKey').trim();
     if (key) settings.apiKey = key;
     $('#settings-error').hidden = true; $('#save-settings').disabled = true; $('#settings-save-status').textContent = 'Saving securely…';
@@ -746,7 +762,7 @@ async function init() {
   $('#preview-badge').hidden = desktop; $('#preview-notice').hidden = desktop; $('#window-controls').hidden = !desktop;
   if (!desktop) {
     $('#provider-key').disabled = true; $('#provider-key').placeholder = 'Connect securely in the desktop app';
-    $('#save-settings').disabled = true; $('#reveal-key').disabled = true;
+    $('#save-settings').disabled = true; $('#reveal-key').disabled = true;for(const id of ['export-diagnostics','clear-diagnostics','check-local-provider'])$('#'+id).disabled=true;
     $('#key-storage-help').textContent = 'API keys are accepted only in the desktop app and are never saved in browser storage.';
     $('#settings-save-status').textContent = 'Provider settings are available in the desktop app.';
   }
@@ -763,6 +779,7 @@ async function init() {
   $('#provider-url').value = state.settings.baseUrl; $('#answer-model').value = state.settings.model; $('#transcription-model').value = state.settings.transcriptionModel;
   $('#provider-type').value = state.settings.provider; $('#capture-protection').checked = state.settings.captureProtection !== false;
   for (const [id, key, fallback] of [['data-policy','dataPolicy','unknown'],['answer-mode','answerMode','balanced'],['network-mode','networkMode','standard'],['coding-language','codingLanguage','auto'],['transcription-language','transcriptionLanguage',''],['transcription-mode','transcriptionMode','SMART']]) $(`#${id}`).value = state.settings[key] ?? fallback;
+  $('#history-mode').value=state.settings.historyMode || 'persist';$('#retention-days').value=String(state.settings.retentionDays || 0);$('#encrypt-workspace').checked=state.settings.encryptWorkspace===true;
   $('#transcription-vocabulary').value = (state.settings.transcriptionVocabulary || []).join(', ');
   try { const saved = localStorage.getItem('parakeet-auto-draft'); if (saved !== null) $('#auto-answer').checked = saved === 'true'; } catch {}
   if (desktop && bridge.getStorageStatus) bridge.getStorageStatus().then(value => { if (value.recoveryNotices.length) toast(value.recoveryNotices.join(' '), true); }).catch(() => {});

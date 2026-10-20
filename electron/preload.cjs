@@ -7,6 +7,7 @@ const subscribe = channel => callback => {
 };
 contextBridge.exposeInMainWorld('copilot', {
   isDesktop: true,
+  recordMetric: invoke('diagnostics:add'), exportDiagnostics: invoke('diagnostics:export'), clearDiagnostics: invoke('diagnostics:clear'),
   getSettings: invoke('settings:get'), saveSettings: invoke('settings:save'),
   getProtectionStatus: invoke('protection:get'),
   getRuntime:invoke('app:runtime'),lifecycleReady:invoke('app:lifecycle-ready'),onLifecycle:subscribe('app:lifecycle'),
@@ -16,7 +17,7 @@ contextBridge.exposeInMainWorld('copilot', {
   onLiveInterim: subscribe('live:interim'), onLiveStatus: subscribe('live:status'), getStorageStatus: invoke('storage:status'),
   onAudioTimingStatus:subscribe('audio:timing-status'),
   loadWorkspace: invoke('workspace:get'), saveWorkspace: invoke('workspace:save'),
-  previewRequest: invoke('provider:preview'), transcribe: invoke('provider:transcribe'), generate: invoke('provider:generate'), cancel: invoke('provider:cancel'),
+  checkLocalProvider: invoke('provider:local-check'), previewRequest: invoke('provider:preview'), transcribe: invoke('provider:transcribe'), generate: invoke('provider:generate'), cancel: invoke('provider:cancel'),
   onAnswer: subscribe('answer:delta'), onShortcut: subscribe('shortcut'),
   toggleOverlay: invoke('overlay:toggle'), setOverlay: invoke('overlay:set'), getOverlay: invoke('overlay:get'), onOverlay: subscribe('overlay:state'),
   getOverlayPreferences: invoke('overlay:preferences:get'), setOverlayPreferences: invoke('overlay:preferences:set'), onOverlayCommand: subscribe('overlay:command'),

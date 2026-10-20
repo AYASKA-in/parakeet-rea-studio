@@ -292,3 +292,10 @@ dialog::backdrop { background: #0b1d345e; }
 @media (max-width: 680px) { .capture-status { font-size: 12px; } }
 /* Put the listening action before the scrollable transcript, including at small window sizes. */
 .capture-controls { border-top: 0; flex-shrink: 0; }
+
+@media (forced-colors: active) {
+  body, .panel, .form-panel, .floating-panel { background: Canvas; color: CanvasText; }
+  button, input, select, textarea, summary { border: 1px solid ButtonText; }
+  :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+  .floating-answer, .floating-question, .floating-footer, .field-help { color: CanvasText; text-shadow: none; }
+}

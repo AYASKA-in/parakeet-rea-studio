@@ -14,8 +14,13 @@ const { windowsTimingLease } = require('./audio-timing.cjs');
 const { extractDocument, PDF_TRANSCRIPTION_PROMPT } = require('./document-import.cjs');
 const { inspectResume } = require('./resume.cjs');
 const { credentialBinding, requireDataPolicy, prepareOutbound, personalDataRemoved } = require('./safety.cjs');
-const { readBoundedJson, jsonAnswer } = require('./response.cjs');
+const { readBoundedJson, jsonAnswer, redactProviderFailure } = require('./response.cjs');
 const os = require('node:os');
+const { checkLocalProvider } = require('./local-provider.cjs');
+const { retainedWorkspace, encodeWorkspace, decodeWorkspace } = require('./workspace-privacy.cjs');
+const { createDiagnostics } = require('./diagnostics.cjs');
+const diagnostics = createDiagnostics();
+let workspaceQueue = Promise.resolve();
 
 // Audio processing must retain normal renderer priority when the workspace is
 // hidden behind the floating assistant. Disabling timer throttling alone did
@@ -52,6 +57,13 @@ const recoveryNotices = [];
 const storage = createStorage(() => app.getPath('userData'), message => recoveryNotices.push(message));
 const readJson = (name, fallback) => storage.read(name, fallback);
 const writeJson = (name, value, options) => storage.write(name, value, options);
+function persistPrivateWorkspace(value, profile = settings, preservePrevious = true) {
+  const operation = workspaceQueue.catch(()=>{}).then(async()=>{
+    const encoded = await encodeWorkspace(value,profile,safeStorage);
+    await writeJson('workspace.json',encoded,{preservePrevious});
+  });
+  workspaceQueue=operation;return operation;
+}
 function redactedSettings() {
   return { ...validateSettings({ ...DEFAULT_SETTINGS, ...settings }), hasApiKey: Boolean(settings.encryptedKey) };
 }
@@ -209,7 +221,14 @@ function registerHandlers() {
         next.encryptedKey = (await safeStorage.encryptStringAsync(key)).toString('base64');
       } else delete next.encryptedKey;
     }
-    await writeJson('settings.json', next, { preservePrevious: false }); settings = next;
+    const privacyChanged = next.historyMode !== settings.historyMode || next.retentionDays !== settings.retentionDays || next.encryptWorkspace !== settings.encryptWorkspace;
+    if (privacyChanged) {
+      if(requests.size || transcriptionRequests.size)throw new Error('Finish active AI requests before changing local-data settings.');
+      await persistPrivateWorkspace(workspace,next,false);
+    }
+    try { await writeJson('settings.json', next, { preservePrevious: false }); }
+    catch(error) { if(privacyChanged)await persistPrivateWorkspace(workspace,settings,false);throw error; }
+    settings = next;
     for (const window of [mainWindow, overlayWindow]) if (window && !window.isDestroyed()) { window.setContentProtection(next.captureProtection); window.setSkipTaskbar(next.captureProtection); if(window===overlayWindow)window.setAlwaysOnTop(true, 'pop-up-menu'); }
     return redactedSettings();
   };
@@ -239,12 +258,20 @@ function registerHandlers() {
   handle('live:audio', input => { runtime.begin();const connection = liveTranscriptions.get(input?.source || 'microphone'); if (!connection) throw new Error('Live transcription source is not connected.'); connection.send(input?.audio); return { ok: true }; });
   handle('live:end-audio', input => { for (const [source, connection] of liveTranscriptions) if (!input?.source || input.source === source) connection.endAudio(); return { ok: true }; });
   handle('live:stop', () => liveSession.stop());
+  handle('diagnostics:add', value => diagnostics.add(value));
+  handle('diagnostics:clear', () => { diagnostics.clear();return {ok:true}; });
+  handle('diagnostics:export', async () => {
+    const target = await dialog.showSaveDialog(mainWindow,{title:'Export content-free diagnostics',defaultPath:'Parakeet-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});
+    if(target.canceled)return {cancelled:true};
+    await fs.writeFile(target.filePath,JSON.stringify(diagnostics.report(),null,2),'utf8');return {ok:true};
+  });
   handle('workspace:get', () => workspace);
   handle('storage:status', () => ({ recoveryNotices, directory: app.getPath('userData') }));
   handle('workspace:save', async value => {
+    await settingsQueue;
     const next = sanitizeWorkspace(value);
     const removed = personalDataRemoved(workspace, next);
-    await writeJson('workspace.json', next, { preservePrevious: !removed }); workspace = next;
+    await persistPrivateWorkspace(next,settings,!removed && settings.historyMode !== 'ephemeral' && !settings.retentionDays); workspace = next;
     return { ok: true };
   });
   handle('provider:transcribe', async input => {
@@ -254,12 +281,13 @@ function registerHandlers() {
     if (!(input?.audio instanceof ArrayBuffer) || input.audio.byteLength > 24 * 1024 * 1024 || input.audio.byteLength < 44) throw new Error('Audio must be a WAV segment smaller than 24 MB.');
     if (input.mimeType !== 'audio/wav') throw new Error('Unsupported audio format.');
     const profile = Object.freeze({ ...settings, ...(settings.dataPolicy === 'unpaid' ? {transcriptionVocabulary:DEFAULT_SETTINGS.transcriptionVocabulary} : {}) }); requireDataPolicy(profile, 'audio');
-    const key = await getKey(profile);
-    runtime.assert(operation);
     const controller = new AbortController();
     transcriptionRequests.add(controller);
     const timeout = setTimeout(() => controller.abort(), 60000);
+    let key='';
     try {
+      key = await getKey(profile);
+      runtime.assert(operation);controller.signal.throwIfAborted();
       const form = new FormData();
       form.append('file', new Blob([input.audio], { type: 'audio/wav' }), 'segment.wav');
       form.append('model', profile.transcriptionModel);
@@ -272,7 +300,7 @@ function registerHandlers() {
       runtime.assert(operation);
       if (typeof result.text !== 'string') throw new Error('The transcription provider returned no text.');
       return { text: boundedText(result.text, 16000).trim(), source: input.source === 'system' ? 'system' : 'microphone' };
-    } finally { clearTimeout(timeout); transcriptionRequests.delete(controller); }
+    } catch(error) { throw redactProviderFailure(error,key); } finally { clearTimeout(timeout); transcriptionRequests.delete(controller); }
   });
   handle('provider:generate', async input => {
     const operation=runtime.begin();
@@ -286,15 +314,15 @@ function registerHandlers() {
     const policy = answerPolicy(enriched);
     const screenshotPart = imagePart(input.imageDataUrl, providerSettings.provider);
     if (screenshotPart) captureLease.assert(input.captureId, displayRevision);
-    const key = await getKey(providerSettings);
-    runtime.assert(operation);
-    if (screenshotPart) captureLease.assert(input.captureId, displayRevision);
     const controller = new AbortController();
     requests.set(requestId, controller);
     const timeout = setTimeout(() => controller.abort(), policy.thinkingLevel === 'HIGH' ? 150000 : 90000);
-    const startedAt = Date.now(); let firstTokenMs = null; let retries = 0;
+    const startedAt = Date.now(); let firstTokenMs = null; let retries = 0;let key='';
     const emit = delta => { runtime.assert(operation);if (firstTokenMs === null) firstTokenMs = Date.now() - startedAt; safeSend(mainWindow, 'answer:delta', { requestId, delta }); };
     try {
+      key = await getKey(providerSettings);
+      runtime.assert(operation);controller.signal.throwIfAborted();
+      if (screenshotPart) captureLease.assert(input.captureId, displayRevision);
       const gemini = providerSettings.provider === 'gemini';
       const url = gemini ? `${providerSettings.baseUrl}/models/${encodeURIComponent(providerSettings.model)}:streamGenerateContent?alt=sse` : `${providerSettings.baseUrl}/chat/completions`;
       const body = gemini ? {
@@ -316,7 +344,15 @@ function registerHandlers() {
       if (!text?.trim()) throw new Error('The provider returned an empty answer. Check that the model supports text chat.');
       runtime.assert(operation);
       return { text, metrics: { firstTokenMs, totalMs: Date.now() - startedAt, retries, thinkingLevel: policy.thinkingLevel } };
-    } finally { clearTimeout(timeout); requests.delete(requestId); }
+    } catch(error) { throw redactProviderFailure(error,key); } finally { clearTimeout(timeout); requests.delete(requestId); }
+  });
+  handle('provider:local-check',async()=>{
+    const operation=runtime.begin(),profile=Object.freeze({...settings});requireDataPolicy(profile);
+    if(profile.provider!=='openai'||profile.dataPolicy!=='local')throw new Error('Save an OpenAI-compatible loopback provider in Local server mode before this check.');
+    if(transcriptionRequests.size>=2)throw new Error('Wait for active transcription before checking the local server.');
+    const controller=new AbortController();transcriptionRequests.add(controller);const timer=setTimeout(()=>controller.abort(),5000);let key='';
+    try{if(profile.encryptedKey)key=await getKey(profile);runtime.assert(operation);controller.signal.throwIfAborted();const result=await checkLocalProvider(profile,key,{signal:controller.signal});runtime.assert(operation);return result;}
+    catch(error){throw redactProviderFailure(error,key);}finally{clearTimeout(timer);transcriptionRequests.delete(controller);}
   });
   handle('provider:preview', input => { const profile = Object.freeze({ ...settings }); const safe = prepareOutbound(input || {}, profile); return { origin:new URL(profile.baseUrl).origin, dataPolicy:profile.dataPolicy, messages:buildMessages(safe), imageIncluded:Boolean(input?.imageDataUrl) }; });
   handle('provider:cancel', input => { requests.get(input?.requestId)?.abort(); return { ok: true }; });
@@ -433,7 +469,8 @@ if(profileLock) app.whenReady().then(async () => {
   powerMonitor.on('unlock-screen',()=>returned('lock'));
   settings = migrateSettings(await readJson('settings.json', {}));
   validateSettings(settings);
-  workspace = sanitizeWorkspace(await readJson('workspace.json', {}));
+  workspace = settings.historyMode === 'ephemeral' ? sanitizeWorkspace({}) : retainedWorkspace(await decodeWorkspace(await readJson('workspace.json', {}),safeStorage),settings);
+  if(settings.historyMode === 'ephemeral' || settings.retentionDays || settings.encryptWorkspace) await persistPrivateWorkspace(workspace,settings,false);
   overlayPreferences = validateOverlayPreferences(await readJson('overlay.json', {}));
   audioTiming=windowsTimingLease({app,warn:message=>safeSend(mainWindow,'audio:timing-status',{message})});
   mainWindow = new BrowserWindow({
@@ -489,6 +526,6 @@ app.on('before-quit', event => {
   clearTimeout(positionSaveTimer);
   clearTimeout(displayRecoveryTimer);
   if (overlayPreferences) void writeJson('overlay.json', overlayPreferences).catch(() => {});
-  settingsQueue.catch(()=>{}).then(()=>audioTiming?.stop()).then(()=>storage.drain()).catch(() => {}).finally(() => app.quit());
+  settingsQueue.catch(()=>{}).then(()=>workspaceQueue).then(()=>audioTiming?.stop()).then(()=>storage.drain()).catch(() => {}).finally(() => app.quit());
 });
 app.on('will-quit', () => { globalShortcut.unregisterAll(); liveSession.close(); for (const controller of requests.values()) controller.abort(); for (const controller of transcriptionRequests) controller.abort(); });

@@ -1,5 +1,25 @@
 # Validation
 
+## Version 0.6.0 candidate — production hardening
+
+Status: experimental, unsigned. Final candidate packaged/portable checks passed; fresh long-session runs and hosted CI are still pending.
+
+- 102 deterministic tests pass, including stream bounds, retry/cooldown, encryption/retention, strict diagnostic allowlists, routing corpus and evaluator checks.
+- Source and final packaged native production checks pass ten scenarios, including the newly reproduced request-admission race, actual Windows encryption/restart, low-disk rollback, forced termination, no-history disk copies, retention, timing export and keyboard cropping.
+- All 24 final packaged native hardening checks pass. Full packaged desktop integration and the actual portable EXE also pass after all fixes. Extracted ASAR SHA-256: 52a647669dd981523f2814c0d57491d77eb22dc9ce86487e32c42e6f8547e605; helper SHA-256: 8808af1ef46f195e07a2eb63998d7e4654beecf86fb9d8abe5713b2c8842bdde.
+- UI: 16 view/viewport combinations and four overlay layouts pass visible text contrast, overflow and keyboard checks.
+- Pinned Docker runner self-test passed ten reference task families, wrong-code rejection, timeout cleanup, non-root/read-only root and blocked external network. Generated model code is never executed on Windows directly.
+- The 12-case live smoke passed three finite coding cases, three screen token/limit extraction checks and three structured resume checks. Three raw ASR lexical cases failed. The additional budget is recorded below; no private resume, screen or microphone was uploaded.
+- A genuine physical sleep/wake and real audio delivery run passed on the existing laptop: 94 microphone frames and 93 loopback frames, no cloud requests or saved raw audio. Native suspend 18:11:39.910 UTC and resume 18:13:18.520 UTC on 20 October 2026; recording stayed stopped, context remained, explicit restart/stop succeeded.
+- That hardware run and the 302-second encrypted dual-source synthetic soak are tied to candidate ASAR 6e99191e8e9b8159b80fc6df2022d4472be7a65555e1f6dac9ebe000791d272e, before the subsequent request-admission fix. Audio processing is unchanged by that fix; these are not automatically final-binary endurance receipts.
+
+Paired synthetic ASR: raw critical-token pass counts SMART 8/10, VERBATIM 9/10. One failure in each was thousands grouping (100000 vs 100,000); offline explicit numeric-grouping adjudication gives 9/10 and 10/10 for these narrow lexical checks. SMART also shortened an explicit contrast. Raw reports remain unchanged. This does not establish general semantic accuracy or justify a universal model ranking.
+
+In the additional batch, seven of ten coding attempts passed finite input cases; three failed with provider HTTP 503 high demand, not wrong-code grades. The next screen stage encountered three more 503s and then a local cooldown rejection, stopping at 34 attempts. Unrun cases are not successes. A remaining-budget recovery run is recorded separately. Some later cloud timing overlapped the physical sleep step; those elapsed times cannot establish steady-state network latency.
+
+Independent human-authored holdouts, real accents/noise/overlap, diverse screen diagrams, difficult coding, screen-reader/200% zoom usability, additional hardware/docks, signed distribution and a real internet-disconnected local-model benchmark remain open. Earlier 0.5.7 60/120-minute evidence is version-specific. See [readiness](PRODUCTION_READINESS.md) and [evaluation](EVALUATION.md).
+
+
 ## Version 0.5.8 — desktop UI refresh
 
 - 79 unit regressions passed.
@@ -52,3 +72,9 @@ Completed on 2026-10-20. Original failed/superseded receipts remain private and 
 Working sets sum processes and include shared pages. Both runs overlapped for their first hour under other test workload. CPU counters share measurement intervals and are diagnostic checkpoints, not exclusive averages. Mock drain notices are disclosed separately; the fixture does not transcribe every generated tone. These results do not grade real ASR, coding correctness or provider availability.
 
 Frozen portable SHA-256: `e5a7e7b4bcc1d95dd60f5153f24112956e07897dcd78add5f8036f242b8846e3`. Artifact and harness hashes remained unchanged.
+
+The remaining-budget recovery run completed the additional 50-case ceiling: eight structured screen cases passed; five of eight resume cases passed, with three company-field mismatches. The earlier failures remain recorded. Across this mixed, correlated 50-case set, 37 raw rubric passes and 13 failures were observed (including six HTTP 503 failures and one local cooldown rejection); this pooled count is not a general accuracy or availability estimate. The company-field failures need observed-value adjudication in future frozen tests; this run did not retain those values, so they are not assumed to be harmless formatting differences. Some screen timings overlapped genuine sleep and are excluded from steady-state latency claims. No further cloud calls are planned under this budget.
+
+Final hardening also redacts credentials from JSON/SSE provider-error messages and upstream stacks. A native regression reproduces both HTTP-200 error forms. Local server readiness now explicitly probes the saved loopback model listing without conversation content; model discovery is not an offline quality or ASR/vision capability guarantee.
+
+Fresh frozen final-candidate encrypted endurance runs started at approximately 18:30 UTC on 20 October (21 October IST): dual-source 120 minutes and microphone 60 minutes. Their results are pending; do not substitute the earlier five-minute candidate pass or 0.5.7 long-session evidence. Both use the same synthetic fake-microphone fixture per source and local mock providers under competing load, with test-only idle-display-sleep prevention.

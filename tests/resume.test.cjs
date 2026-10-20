@@ -25,3 +25,10 @@ test('dated resume answers use a trusted current date and request status confirm
   assert.match(messages[0].content,/do not assume they started, completed/);
   assert.match(messages[0].content,/Do not describe a past graduation date as an upcoming graduation/);
 });
+
+
+test('resume anchors identify normalized source lines and change when the source changes',()=>{
+ const {anchoredResumeEvidence}=require('../electron/resume.cjs');const text='EXPERIENCE\nExampleCo engineer, 2022-2024.\nReduced latency by 37%.';
+ const evidence=anchoredResumeEvidence(text,'latency');assert.match(evidence,/R_[a-f0-9]{12}_L1-3/);assert.ok(evidence.includes(text));assert.notEqual(evidence,anchoredResumeEvidence(text.replace('37%','38%'),'latency'));assert.ok(anchoredResumeEvidence(text.repeat(100),'latency',1200).length<=1200);
+ const prompt=buildMessages({question:'Tell me about my experience',context:{resume:text}});assert.match(prompt[0].content,/Missing or conflicting evidence requires a clarification/);assert.match(prompt[1].content,/R_[a-f0-9]{12}_L/);
+});

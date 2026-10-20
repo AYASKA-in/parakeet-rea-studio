@@ -13,7 +13,7 @@ const output=path.join(root,'test-results',`${hardware?'hardware':'soak'}-${sour
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
  await fs.mkdir(output,{recursive:true});const profile=path.join(output,'profile');
- const report={version:require('../package.json').version,minutesRequested:minutes,source,hardware,syntheticOnly:true,cloudRequests:0,realDeviceCapture:false,hiddenWindows:!visible,samples:[],faults:[],reviewActions:[],errors:[],transcripts:0,answers:0,audioFrames:0,audioBytes:0,connections:0};
+ const report={version:require('../package.json').version,minutesRequested:minutes,source,hardware,encryptedWorkspace:process.argv.includes('--encrypt'),syntheticOnly:true,cloudRequests:0,realDeviceCapture:false,hiddenWindows:!visible,samples:[],faults:[],reviewActions:[],errors:[],transcripts:0,answers:0,audioFrames:0,audioBytes:0,connections:0};
  let app,page,blocker,server,ws;const sent=new Set(),received=new Set();let answerRequests=0;
  const persist=()=>fs.writeFile(path.join(output,'progress.json'),JSON.stringify(report,null,2));
  try{
@@ -43,9 +43,9 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
   report.harnessSha256=crypto.createHash('sha256').update(await fs.readFile(__filename)).digest('hex');if(!sourceBuild)report.appAsarSha256=crypto.createHash('sha256').update(await fs.readFile(path.join(root,'dist/win-unpacked/resources/app.asar'))).digest('hex');
   page.on('pageerror',error=>report.errors.push({kind:'renderer',message:error.message}));
   await page.waitForFunction(()=>document.querySelector('#connection-status')?.textContent!=='Checking connection');
-  await page.evaluate(async baseUrl=>{const s=await window.copilot.getSettings();await window.copilot.saveSettings({...s,provider:'gemini',baseUrl,apiKey:'synthetic-soak-only',dataPolicy:'local',networkMode:'standard',answerMode:'fast'});
+  await page.evaluate(async ({baseUrl,encrypt})=>{const s=await window.copilot.getSettings();await window.copilot.saveSettings({...s,encryptWorkspace:encrypt,provider:'gemini',baseUrl,apiKey:'synthetic-soak-only',dataPolicy:'local',networkMode:'standard',answerMode:'fast'});
    await window.copilot.saveWorkspace({context:{},sessions:Array.from({length:99},(_,i)=>({id:`history-${i}`,title:`Synthetic history ${i}`,createdAt:new Date().toISOString(),transcript:Array.from({length:40},(_,j)=>({id:`h-${i}-${j}`,text:`Synthetic retained segment ${j}`,source:'system',timestamp:Date.now()})),exchanges:[],context:{}}))});
-  },`http://127.0.0.1:${server.address().port}/v1beta`);
+  },{baseUrl:`http://127.0.0.1:${server.address().port}/v1beta`,encrypt:process.argv.includes('--encrypt')});
   await page.reload();await page.waitForFunction(()=>document.querySelector('#connection-status')?.textContent==='AI provider configured');
   await page.evaluate(async nativeFixture=>{
    globalThis.soakContexts=[];globalThis.soakEvents=[];
@@ -80,6 +80,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
   }
   await page.evaluate(()=>document.querySelector('#capture-button').click());await page.waitForFunction(()=>document.querySelector('#capture-label').textContent==='Start listening',null,{timeout:20000});await pause(1800);
   const workspace=await page.evaluate(()=>window.copilot.loadWorkspace());const saved=JSON.stringify(workspace);
+  report.savedNotices=workspace.sessions.flatMap(session=>session.transcript||[]).filter(segment=>segment.source==='status').map(segment=>segment.text);
   report.missingSavedIds=[...sent].filter(id=>!saved.includes(id));assert.deepEqual(report.missingSavedIds,[],'Finalized synthetic transcript missing from saved history');
   report.answerRequests=answerRequests;assert.ok(answerRequests>0);if(hardware)assert.equal(report.explicitRestartPassed,true,'A genuine OS resume event and explicit capture restart were not observed');else assert.ok(report.audioFrames>minutes*200,'Audio did not sustain expected throughput');
   assert.deepEqual(report.errors,[],'Unexpected renderer or Live errors');report.status='passed';

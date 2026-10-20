@@ -2,6 +2,8 @@
 
 # Parakeet REA Studio
 
+[Production readiness review and prioritized patch queue](docs/PRODUCTION_READINESS.md) — current gaps, completed response-integrity fixes, and acceptance gates.
+
 [![Windows build](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml/badge.svg)](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-e9ae86?style=flat-square)](LICENSE) ![Windows x64](https://img.shields.io/badge/platform-Windows_x64-304c55?style=flat-square) ![Bring your own key](https://img.shields.io/badge/API-bring_your_own_key-304c55?style=flat-square)
 
 An independent Windows assistant for **interview practice and permitted meetings**. Listen to microphone/call audio, draft AI answers, analyze a screenshot, and keep readable words in a movable glass overlay.
@@ -136,7 +138,7 @@ Settings reports unavailable global shortcuts and offers **Retry global shortcut
 | **Audio** | Uploaded while listening. Listening is explicit; sleep/lock stops capture |
 | **Screenshots** | Captured explicitly and sent only after review; other visible apps can appear, so inspect before upload |
 | **Context** | Relevant reviewed content may accompany answers under your selected policy; Review outgoing text previews filtered answer text |
-| **History** | Transcripts, resume context and recovery snapshots are **plain-text local JSON** under `%APPDATA%\Parakeet Studio` |
+| **History** | Defaults to local JSON; 0.6+ adds optional Windows encryption, memory-only storage and retention controls. Data lives under `%APPDATA%\Parakeet Studio` |
 | **Exports** | Markdown/text files remain wherever you save them; app deletion does not remove external copies |
 | **Screen sharing** | Capture exclusion is enabled by default on supported Windows paths. Test your actual meeting tool's shared-screen preview |
 
@@ -217,3 +219,5 @@ Use [Issues](https://github.com/AYASKA-in/parakeet-rea-studio/issues) for minima
 Contributions must be original or compatibly licensed. Quality benchmarks, broader hardware coverage, explicit local-model support and signed releases remain on the [roadmap](docs/RELIABILITY.md#optimization-roadmap).
 
 Project source is [MIT-licensed](LICENSE). Dependencies retain their [own licenses](THIRD_PARTY_NOTICES.md).
+
+Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device watcher](docs/HARDWARE_VALIDATION.md), and [local/offline deployment scope](docs/LOCAL_MODE.md). Version 0.6 source adds bounded diagnostic timings, provider cooldowns, optional workspace encryption and memory-only history; the pinned download above remains the last published release until a new artifact is verified.

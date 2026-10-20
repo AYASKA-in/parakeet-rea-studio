@@ -1,11 +1,11 @@
 const { readBoundedText } = require('./response.cjs');
-const { resumeEvidence } = require('./resume.cjs');
+const { anchoredResumeEvidence } = require('./resume.cjs');
 const DEFAULT_SETTINGS = Object.freeze({
   provider: 'gemini',
   baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
   model: 'gemini-3.5-flash-lite',
   transcriptionModel: 'gemini-3.5-transcribe-live',
-  captureProtection: true, dataPolicy: 'unknown',
+  captureProtection: true, dataPolicy: 'unknown', historyMode: 'persist', retentionDays: 0, encryptWorkspace: false,
   answerMode: 'balanced', networkMode: 'standard', codingLanguage: 'auto',
   transcriptionLanguage: '', transcriptionMode: 'SMART',
   transcriptionVocabulary: ['Kubernetes', 'PostgreSQL', 'TypeScript', 'JavaScript', 'Python', 'SQL', 'GraphQL', 'OAuth', 'Redis', 'Big O', 'binary search', 'hash map'],
@@ -32,7 +32,7 @@ function validateSettings(value = {}) {
   const language = boundedText(value.transcriptionLanguage, 30).trim();
   if (language && !/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8}){0,2}$/.test(language)) throw new Error('Use a language code such as en-IN, or leave automatic detection enabled.');
   const vocabulary = Array.isArray(value.transcriptionVocabulary) ? value.transcriptionVocabulary : typeof value.transcriptionVocabulary === 'string' ? value.transcriptionVocabulary.split(/[,\n]/) : DEFAULT_SETTINGS.transcriptionVocabulary;
-  return { provider, baseUrl, model, transcriptionModel, dataPolicy: ['unpaid','reviewed','local'].includes(value.dataPolicy) ? value.dataPolicy : 'unknown', captureProtection: value.captureProtection !== false,
+  return { provider, baseUrl, model, transcriptionModel, historyMode: value.historyMode === 'ephemeral' ? 'ephemeral' : 'persist', retentionDays: [7,30,90].includes(Number(value.retentionDays)) ? Number(value.retentionDays) : 0, encryptWorkspace: value.encryptWorkspace === true, dataPolicy: ['unpaid','reviewed','local'].includes(value.dataPolicy) ? value.dataPolicy : 'unknown', captureProtection: value.captureProtection !== false,
     answerMode: ['fast', 'balanced', 'deep'].includes(value.answerMode) ? value.answerMode : 'balanced',
     networkMode: value.networkMode === 'economy' ? 'economy' : 'standard',
     codingLanguage: ['auto', 'python', 'javascript', 'typescript', 'java', 'cpp', 'csharp', 'go', 'rust', 'sql'].includes(value.codingLanguage) ? value.codingLanguage : 'auto',
@@ -70,7 +70,7 @@ function sanitizeWorkspace(value = {}) {
   if (Array.isArray(value.sessions) && value.sessions.length > 100) throw new Error('History is full (100 sessions). Export and explicitly delete older sessions before saving a new one. No history was removed.');
   const sessions = Array.isArray(value.sessions) ? value.sessions : [];
   const serialized = JSON.stringify(sessions);
-  if (serialized.length > 16 * 1024 * 1024) throw new Error('Session history exceeds 16 MB. Export and remove older sessions.');
+  if (Buffer.byteLength(serialized, 'utf8') > 16 * 1024 * 1024) throw new Error('Session history exceeds 16 MB. Export and remove older sessions.');
   return { context: sanitizeContext(value.context), sessions: JSON.parse(serialized) };
 }
 
@@ -79,7 +79,7 @@ function buildMessages(input = {}) {
   const fullContext = sanitizeContext(input.context);
   const context = Object.fromEntries(Object.entries(fullContext).map(([key, value]) => [key, boundedText(value, ['role', 'company'].includes(key) ? 300 : policy.contextLimit)]));
   const question = boundedText(input.question, 12000).trim();
-  context.resume = resumeEvidence(fullContext.resume, `${question} ${fullContext.role}`, policy.contextLimit);
+  context.resume = anchoredResumeEvidence(fullContext.resume, `${question} ${fullContext.role}`, policy.contextLimit);
   const transcript = recentText(input.transcript, input.kind === 'notes' ? 60000 : policy.transcriptLimit);
   if (!question && input.kind !== 'notes') throw new Error('Add a question or select one from the transcript.');
   if (input.kind === 'notes' && !transcript.trim()) throw new Error('There is no transcript to summarize yet.');
@@ -93,7 +93,7 @@ function buildMessages(input = {}) {
     ? 'Summarize this session with sections: Summary, Questions discussed, Follow-ups, and Practice next. Only include information present in the transcript. State any missing details.'
     : `You are an interview preparation and conversation assistant. Help the user formulate an accurate, clear response to the latest question. ${styles[input.style] || styles.concise}
 Today's date is ${/^\d{4}-\d{2}-\d{2}$/.test(input.currentDate || '') ? input.currentDate : new Date().toISOString().slice(0,10)} (UTC). Compare resume dates against today before describing past, present or future events. A resume may be out of date. If it labels a role 'incoming', 'selected' or 'upcoming' but the start date has passed, briefly flag the inconsistency and ask the user to confirm their current status; do not assume they started, completed or are still awaiting the role. Attribute the status to what the resume lists until confirmed. Do not describe a past graduation date as an upcoming graduation, or infer completion solely from dates. Preserve the document's facts without silently updating them.
-Write like a person speaking: lead with the actual answer, use plain words and contractions where natural, vary sentence length, and avoid canned introductions, flattery, repeated question text, and phrases like "delve" or "leverage". Use first person naturally for hypothetical approaches, such as "I would start", but claims about past experience must be supported by the candidate context. For behavioral answers, connect a specific real example to the role; never fabricate achievements, employment, qualifications, or metrics. When context is missing, say what to personalize.
+Write like a person speaking: lead with the actual answer, use plain words and contractions where natural, vary sentence length, and avoid canned introductions, flattery, repeated question text, and phrases like "delve" or "leverage". Use first person naturally for hypothetical approaches, such as "I would start", but claims about past experience must be supported by the candidate context. For personal claims, use only the quoted evidence. When resume anchors are present, add one compact Evidence line after the spoken response naming the anchors supporting material personal claims. Anchors locate source text; they do not prove a qualification or current status. Missing or conflicting evidence requires a clarification or a placeholder, not a guessed fact. For behavioral answers, connect a specific real example to the role; never fabricate achievements, employment, qualifications, or metrics. When context is missing, say what to personalize.
 The transcript may contain speech-recognition mistakes, broken grammar, accents, or spoken self-corrections. Infer the intended term only when recent context makes it clear; preserve numbers, negation, constraints and identifiers. If an ambiguity changes the answer, state a brief assumption or ask one focused clarification. Never claim the raw transcript has been corrected or hide uncertainty.
 ${policy.coding ? `This is a coding task. First identify requirements and assumptions, then explain the approach briefly and provide executable code with correct syntax, explicit imports, and the requested interface. Honor any language explicitly requested by the question; otherwise prefer ${input.codingLanguage && input.codingLanguage !== 'auto' ? input.codingLanguage : 'the language requested in the question, otherwise Python'}. Check boundary cases, empty input, duplicates, overflow where relevant, and give honest time and space complexity. Distinguish a proposed example from tests actually executed: no code is run by this app. Do not invent missing APIs or silently change problem constraints. Use a fenced code block and a small example.` : 'For conceptual and system-design questions, explain the decision and the most relevant tradeoffs; avoid turning every answer into a long checklist.'}
 ${input.answerMode === 'fast' ? 'Prioritize a concise usable first answer. Keep only necessary detail.' : input.answerMode === 'deep' ? 'Spend more care on correctness, alternatives and edge cases, while keeping the spoken explanation clear.' : 'Balance speed with correctness and useful detail.'}
@@ -122,19 +122,26 @@ function answerPolicy(input = {}) {
 
 async function readAnswerStream(body, onDelta, provider = 'openai') {
   const decoder = new TextDecoder();
-  let pending = '', text = '', done = false;
+  let pending = '', text = '', done = false, wireBytes = 0;
+  const sizeError = () => new Error('Provider response exceeded the size limit.');
+  function emit(delta) {
+    if (text.length + delta.length > 200000) throw sizeError();
+    text += delta; onDelta(delta);
+  }
   function consume(event) {
+    if (event.length > 2 * 1024 * 1024) throw sizeError();
     const data = event.split('\n').filter(line => line.startsWith('data:')).map(line => line.slice(5).trimStart()).join('\n');
     if (!data) return;
     if (data === '[DONE]') { if(provider === 'gemini' && !done) throw new Error('Gemini stream ended without a completion reason.');done = true; return; }
     let payload;
     try { payload = JSON.parse(data); } catch { throw new Error('The provider returned an invalid streaming response.'); }
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('The provider returned an invalid streaming response.');
     if (payload.error) throw new Error(payload.error.message || 'The provider reported a streaming error.');
     if (provider === 'gemini') {
       if (payload.promptFeedback?.blockReason) throw new Error(`Gemini blocked this prompt: ${payload.promptFeedback.blockReason}`);
       const candidate = payload.candidates?.[0];
       for (const part of candidate?.content?.parts || []) {
-        if (typeof part.text === 'string' && !part.thought) { text += part.text; onDelta(part.text); }
+        if (typeof part.text === 'string' && !part.thought) { emit(part.text); }
       }
       if (candidate?.finishReason) {
         if (candidate.finishReason === 'MAX_TOKENS') throw new Error('Answer reached the output limit. The partial draft was retained; choose Careful or ask for a narrower solution.');
@@ -144,18 +151,20 @@ async function readAnswerStream(body, onDelta, provider = 'openai') {
       return;
     }
     const delta = payload.choices?.[0]?.delta?.content;
-    if (typeof delta === 'string') { text += delta; onDelta(delta); }
+    if (typeof delta === 'string') { emit(delta); }
     const finish=payload.choices?.[0]?.finish_reason;
     if (finish === 'length') throw new Error('Answer reached the output limit. The partial draft was retained.');
     if(finish && finish !== 'stop') throw new Error(`Provider stopped the answer: ${finish}. The partial draft was retained.`);
   }
   for await (const bytes of body) {
+    wireBytes += bytes.byteLength;
+    if (wireBytes > 8 * 1024 * 1024) throw sizeError();
     pending += decoder.decode(bytes, { stream: true });
     pending = pending.replace(/\r\n/g, '\n');
     let end;
     while ((end = pending.indexOf('\n\n')) !== -1) {
       consume(pending.slice(0, end)); pending = pending.slice(end + 2);
-      if (done && provider !== 'gemini') return text;
+      if (done) return text;
     }
     if (pending.length > 2 * 1024 * 1024 || text.length > 200000) throw new Error('Provider response exceeded the size limit.');
   }

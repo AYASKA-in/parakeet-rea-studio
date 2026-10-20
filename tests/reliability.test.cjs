@@ -71,7 +71,7 @@ test('HTTP retries a transient response once but never authentication or quota e
   }
   const controller = new AbortController(); controller.abort(); calls = 0;
   await assert.rejects(() => fetchWithRetry('http://local', { signal: controller.signal }, { fetchImpl: async () => { calls++; throw new TypeError('offline'); } }));
-  assert.equal(calls, 1);
+  assert.equal(calls, 0);
 });
 
 function fakeLive() {

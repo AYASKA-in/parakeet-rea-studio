@@ -18,14 +18,15 @@ export function questionCue(text, followUp = false) {
 // Local routing only. Model answers still come from the configured provider.
 export class QuestionQueue {
   constructor({ now = () => performance.now(), maxChars = 4000 } = {}) {
-    this.now = now; this.maxChars = maxChars; this.pending = null; this.partials = new Map(); this.reviewSources = new Map();
+    this.activityTimes = new Map(); this.now = now; this.maxChars = maxChars; this.pending = null; this.partials = new Map(); this.reviewSources = new Map();
   }
-  clear() { this.pending = null; this.partials.clear(); this.reviewSources.clear(); }
+  clear() { this.pending = null; this.partials.clear(); this.reviewSources.clear(); this.activityTimes.clear(); }
   interim(text, source, sessionId) {
     if (text?.trim()) this.partials.set(source, sessionId); else this.partials.delete(source);
     if (this.pending?.sessionId === sessionId && this.pending.source === source) this.pending.at = this.now();
   }
   activity(source, sessionId) {
+    this.activityTimes.set(source,{sessionId,at:this.now()});
     if (this.pending?.sessionId === sessionId && this.pending.source === source && this.now() - this.pending.at < 45000) this.pending.at = this.now();
   }
   hold(source, sessionId) {
@@ -47,7 +48,8 @@ export class QuestionQueue {
     if (!continuation && !questionCue(clean, recent)) return false;
     if (continuation && normalize(current.lastSegment) === normalize(clean)) return false;
     const combined = continuation ? (clean.startsWith(current.text) ? clean : `${current.text} ${clean}`) : clean;
-    this.pending = { text: combined.slice(0, this.maxChars), source, sessionId, at: now, held: false, reviewRequired: this.reviewSources.get(source)===sessionId || Boolean(continuation && current.reviewRequired), overflow: Boolean(continuation && current.overflow) || combined.length > this.maxChars, lastSegment: clean.slice(0, this.maxChars) };
+    const activity = this.activityTimes.get(source);
+    this.pending = { speechEndedAt: activity?.sessionId === sessionId ? activity.at : null, finalAt: now, text: combined.slice(0, this.maxChars), source, sessionId, at: now, held: false, reviewRequired: this.reviewSources.get(source)===sessionId || Boolean(continuation && current.reviewRequired), overflow: Boolean(continuation && current.overflow) || combined.length > this.maxChars, lastSegment: clean.slice(0, this.maxChars) };
     return true;
   }
   status({ sessionId, mode = 'balanced', lastStartedAt = -Infinity } = {}) {
