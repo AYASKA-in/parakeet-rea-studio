@@ -7,6 +7,7 @@ const output = path.join(root,'test-results');
 const model = process.argv.find(value=>value.startsWith('--model='))?.slice(8) || 'gemini-3.5-flash-lite';
 if(!['gemini-3.8-flash','gemini-3.5-flash-lite'].includes(model))throw new Error('This bounded test permits only the documented free-tier Gemini models.');
 const pdfOnly = process.argv.includes('--pdf-only');
+const visionOnly=process.argv.includes('--vision-only');
 const readSecret = () => new Promise((resolve,reject)=>{
   let text=''; const input=process.stdin; const raw=Boolean(input.isTTY);
   if(raw)input.setRawMode(true);input.resume();
@@ -26,7 +27,7 @@ const readSecret = () => new Promise((resolve,reject)=>{
   const redact=value=>String(value).split(key).join('[redacted]');
   await fs.mkdir(output,{recursive:true});
   const report={startedAt:new Date().toISOString(),model,provider:'Google Gemini, user-authorized bounded live tests',syntheticMediaOnly:true,stages:[]};
-  const stage=async(name,task)=>{if(pdfOnly&&!name.startsWith('scanned'))return;const started=Date.now();try{const detail=await task();report.stages.push({name,passed:true,milliseconds:Date.now()-started,...detail});console.log(`PASS ${name}`);}catch(error){report.stages.push({name,passed:false,milliseconds:Date.now()-started,error:redact(error.message)});console.log(`FAIL ${name}: ${redact(error.message)}`);}};
+  const stage=async(name,task)=>{if(pdfOnly&&!name.startsWith('scanned')||visionOnly&&!name.startsWith('screen'))return;const started=Date.now();try{const detail=await task();report.stages.push({name,passed:true,milliseconds:Date.now()-started,...detail});console.log(`PASS ${name}`);}catch(error){report.stages.push({name,passed:false,milliseconds:Date.now()-started,error:redact(error.message)});console.log(`FAIL ${name}: ${redact(error.message)}`);}};
   const wav=path.join(output,'live-synthetic-speech.wav');
   const quote=value=>`'${value.replaceAll("'","''")}'`;
   execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',`Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; $f = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(16000, [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen, [System.Speech.AudioFormat.AudioChannel]::Mono); $s.SetOutputToWaveFile(${quote(wav)}, $f); $s.Speak('A cache stores recently used data. The time to live is sixty seconds.'); $s.Dispose()`],{windowsHide:true,stdio:'pipe'});
@@ -91,9 +92,9 @@ const readSecret = () => new Promise((resolve,reject)=>{
       await page.evaluate(async()=>{await window.copilot.stopLive();const s=await window.copilot.getSettings();await window.copilot.saveSettings({...s,apiKey:''});await window.copilot.saveSettings({...s,apiKey:''});}).catch(()=>{});
     }
     await app?.close();
-    report.completedAt=new Date().toISOString();report.passed=report.stages.length===(pdfOnly?1:4)&&report.stages.every(item=>item.passed);
+    report.completedAt=new Date().toISOString();report.passed=report.stages.length===((pdfOnly||visionOnly)?1:4)&&report.stages.every(item=>item.passed);
     await fs.writeFile(path.join(output,'live-verification.json'),JSON.stringify(report,null,2));
-    await fs.writeFile(path.join(output,`live-verification-${model}${pdfOnly?'-pdf':''}.json`),JSON.stringify(report,null,2));
+    await fs.writeFile(path.join(output,`live-verification-${model}${pdfOnly?'-pdf':visionOnly?'-vision':''}.json`),JSON.stringify(report,null,2));
     console.log(`Live verification: ${report.passed?'PASS':'INCOMPLETE/FAILED'}; redacted receipt in test-results/live-verification.json.`);
     if(!report.passed)process.exitCode=1;
   }

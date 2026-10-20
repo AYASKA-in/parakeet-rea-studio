@@ -36,6 +36,8 @@ If exposed publicly, replace the key through your provider and review usage; fol
 
 Choose **OpenAI-compatible API**, enter its actual model IDs, key and base URL including `/v1`. Remote endpoints require HTTPS. A local endpoint such as `http://127.0.0.1:1234/v1` is permitted with Local server policy; supply the server's expected token. No local server/model is bundled, and a loopback server can itself call cloud services.
 
+For a no-auth local server, enter a non-secret placeholder such as `local-only` if that server accepts/ignores the Authorization header. The app expects a saved token even when your local service does not require a secret.
+
 For full functionality the server needs streamed `POST /chat/completions` and multipart-WAV `POST /audio/transcriptions`. Screenshot requests need image support. A chat-only server is not automatically compatible with audio/vision. Gemini's dedicated transcription uses its native Live protocol.
 
 | Failure | Check |

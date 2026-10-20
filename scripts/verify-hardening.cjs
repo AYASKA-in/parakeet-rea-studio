@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict');const fs=require('node:fs/promises');const path=require('node:path');const http=require('node:http');const {spawn}=require('node:child_process');const {_electron}=require('playwright');
 const root=path.resolve(__dirname,'..'),output=path.join(root,'test-results');
+const execute=require('node:util').promisify(require('node:child_process').execFile);
 const packaged=process.argv.includes('--packaged');const executable=packaged?path.join(root,'dist/win-unpacked/Parakeet Studio.exe'):require('electron');
 (async()=>{
  await fs.mkdir(output,{recursive:true});const profile=await fs.mkdtemp(path.join(output,'hardening-private-'));
@@ -18,6 +19,28 @@ const packaged=process.argv.includes('--packaged');const executable=packaged?pat
  try{
   app=await _electron.launch({executablePath:executable,args:packaged?[]:[root],env:{...process.env,PARAKEET_USER_DATA:profile},timeout:45000});page=await app.firstWindow();await page.waitForFunction(()=>document.querySelector('#connection-status')?.textContent!=='Checking connection');
   await page.evaluate(async baseUrl=>{const s=await window.copilot.getSettings();await window.copilot.saveSettings({...s,baseUrl,apiKey:'synthetic-key-A',dataPolicy:'local'});},baseUrl);
+  await check('Windows timer policy is scoped to listening and restored on stop',async()=>{
+   const helper=packaged?path.join(root,'dist/win-unpacked/resources/TimerPolicy.exe'):path.join(root,'native/TimerPolicy.exe');
+   const identity=await app.evaluate(()=>({pid:process.pid,executable:process.execPath}));
+   const inspect=async()=>JSON.parse((await execute(helper,['inspect',identity.executable,String(identity.pid)],{windowsHide:true})).stdout)[0];
+   const before=await inspect();assert.equal(before.ok,true,JSON.stringify({identity,before}));
+   await page.evaluate(()=>window.copilot.setOverlay({listening:true}));let active;
+   for(let i=0;i<60;i++){active=await inspect();if((active.control&4)===4&&(active.state&4)===0)break;await new Promise(r=>setTimeout(r,30));}
+   assert.equal(active.control&4,4);assert.equal(active.state&4,0);
+   await page.evaluate(()=>window.copilot.setOverlay({listening:false}));let restored;
+   for(let i=0;i<60;i++){restored=await inspect();if((restored.control&4)===(before.control&4)&&(restored.state&4)===(before.state&4))break;await new Promise(r=>setTimeout(r,30));}
+   assert.equal(restored.control&4,before.control&4);assert.equal(restored.state&4,before.state&4);
+   await page.evaluate(()=>window.copilot.setOverlay({listening:true}));
+   for(let i=0;i<60;i++){active=await inspect();if((active.control&4)===4)break;await new Promise(r=>setTimeout(r,30));}
+   await app.evaluate(({powerMonitor})=>powerMonitor.emit('suspend'));
+   for(let i=0;i<60;i++){restored=await inspect();if((restored.control&4)===(before.control&4))break;await new Promise(r=>setTimeout(r,30));}
+   assert.equal(restored.control&4,before.control&4);
+   await app.evaluate(({powerMonitor})=>powerMonitor.emit('resume'));await page.waitForFunction(async()=>!(await window.copilot.getRuntime()).blocked);
+  });
+  await check('Windows helper rejects a mismatched executable identity without changing policy',async()=>{
+   const helper=packaged?path.join(root,'dist/win-unpacked/resources/TimerPolicy.exe'):path.join(root,'native/TimerPolicy.exe');
+   const pid=await app.evaluate(()=>process.pid);const result=JSON.parse((await execute(helper,['apply',path.join(root,'synthetic-wrong-executable.exe'),String(pid)],{windowsHide:true})).stdout)[0];assert.equal(result.ok,false);assert.equal(result.error,5);
+  });
   await check('legacy settings and history migrate with the key preserved and policy gated',async()=>{
    await app.close();
    const legacy=JSON.parse(await fs.readFile(path.join(profile,'settings.json'),'utf8'));delete legacy.dataPolicy;delete legacy.credentialBinding;

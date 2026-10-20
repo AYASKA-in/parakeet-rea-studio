@@ -6,6 +6,8 @@ meeting recordings, resumes or private transcripts.
 
 Use Windows and Node.js 22.14 or newer:
 
+Native builds use Windows' .NET Framework C# compiler (`Framework64/v4.0.30319/csc.exe`), normally available on Windows 11. `npm run build:native` builds the original timer helper; start/build/native-test hooks run it automatically. Build it first when invoking a native test script directly. Packaged users need no separate SDK.
+
 ```powershell
 npm ci
 npm test
@@ -37,3 +39,5 @@ and local sessions. Keep dependency licenses intact. Contributions are under MIT
 User documentation lives in `docs/` and README. Update it with behavior changes. See `docs/RELEASING.md` for publication gates, `docs/RELIABILITY.md` for finite test scope, and `npm run test:soak -- --minutes=120` for real wall-clock synthetic endurance. A one-minute preflight is not a completed long soak.
 
 Run `npm run test:hardening` for the local safety regressions, or append `-- --packaged` after building. Tests deliberately inject a save failure only in their own profile. Real private material must not be used with an unpaid-cloud test profile; live scripts use synthetic fixtures.
+
+`npm run test:live -- --vision-only` runs one synthetic screenshot stage; `--pdf-only` runs one synthetic PDF stage. Preserve failed receipts before a focused retry and report both attempts. A later successful retry does not erase provider timeouts or establish a general success rate. `node scripts/verify-portable.cjs` checks the actual built EXE in an isolated profile.

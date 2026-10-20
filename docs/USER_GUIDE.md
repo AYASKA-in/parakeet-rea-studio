@@ -74,6 +74,8 @@ Sleep/lock stops capture and requests; stale screenshot/document reviews are dis
 
 If audio processing falls materially behind wall time, capture stops with a saved warning. Check competing workload/audio devices, then restart. This guard detects a substantial slow clock; it does not prove sample-perfect capture or reconstruct missing speech.
 
+While listening, a bundled original Windows helper keeps this app's timer-resolution requests effective when its workspace is hidden. The app restores the prior process policy afterward; it does not change your power plan or other applications. The helper uses Windows' .NET Framework runtime; the portable download needs no separate .NET SDK.
+
 To update, stop listening, wait for saved status, close the old app and run the new checksum-verified EXE. Settings/history stay in the same Windows profile. No automatic updater is bundled. Export important content before updates; a new Windows account/computer may require key re-entry.
 
 To remove the app, close it and delete the EXE. Its data remains at `%APPDATA%\Parakeet Studio`. To remove local data too, export what you need, remove the saved key in Settings, close the app and delete that exact folder through Explorer. This is irreversible and does not remove external exports or provider copies.

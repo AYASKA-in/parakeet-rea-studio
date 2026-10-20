@@ -8,12 +8,19 @@
   "private": true,
   "main": "electron/main.cjs",
   "scripts": {
+    "build:native": "node scripts/build-native.cjs",
+    "prestart": "npm run build:native",
+    "pretest:desktop": "npm run build:native",
+    "pretest:hardening": "npm run build:native",
+    "pretest:soak": "npm run build:native",
+    "pretest:hardware": "npm run build:native",
+    "pretest:live": "npm run build:native",
     "start": "electron .",
     "preview": "node scripts/preview.cjs",
-    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs",
     "test:desktop": "node scripts/verify-desktop.cjs",
-    "build:win": "electron-builder --win portable --x64",
-    "build:dir": "electron-builder --win --x64 --dir",
+    "build:win": "npm run build:native && electron-builder --win portable --x64",
+    "build:dir": "npm run build:native && electron-builder --win --x64 --dir",
     "release:source": "node scripts/release-source.cjs",
     "test:live": "node scripts/verify-live.cjs",
     "test:hardening": "node scripts/verify-hardening.cjs",
@@ -43,6 +50,7 @@
       "THIRD_PARTY_NOTICES.md"
     ],
     "asar": true,
+    "extraResources": [{"from":"native/TimerPolicy.exe","to":"TimerPolicy.exe"}],
     "win": {
       "target": [
         "portable"

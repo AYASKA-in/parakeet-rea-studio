@@ -15,7 +15,7 @@ function collect(relative) {
   else files.push(relative);
 }
 for (const directory of ['electron','renderer','scripts','tests','docs','.github']) collect(directory);
-for (const file of ['package.json','package-lock.json','README.md','LICENSE','CONTRIBUTING.md','SECURITY.md','THIRD_PARTY_NOTICES.md','.gitignore','.gitattributes']) collect(file);
+for (const file of ['package.json','package-lock.json','README.md','LICENSE','CONTRIBUTING.md','SECURITY.md','THIRD_PARTY_NOTICES.md','.gitignore','.gitattributes','native/TimerPolicy.cs']) collect(file);
 const secretPatterns = [/AIza[\w-]{20,}/, /AQ\.[\w-]{30,}/, /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, /(?:apiKey|api_key)\s*[:=]\s*["'][\w.-]{32,}["']/];
 const hashes = {};
 for (const relative of files.sort()) {
@@ -24,10 +24,6 @@ for (const relative of files.sort()) {
   let content = fs.readFileSync(path.join(root, relative), binary ? undefined : 'utf8');
   if(binary && !content.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))throw new Error(`Invalid PNG documentation asset: ${relative}`);
   if (!binary && secretPatterns.some(pattern => pattern.test(content))) throw new Error(`Possible secret detected in ${relative}; source archive was not produced.`);
-  if (relative === 'README.md') {
-    content = content.replace(/## Research and fidelity[\s\S]*?(?=\n## |$)/, '## Independent implementation\n\nThis project is independently written and is not affiliated with ParakeetAI. Vendor artifacts and local research material are excluded from this source release.\n');
-    content = content.replace(/cd 'D:\\prospient sentinel ai\\parakeet-desktop'/g, "cd '<your-checkout>'");
-  }
   const destination = path.join(stage, relative); fs.mkdirSync(path.dirname(destination), { recursive: true }); fs.writeFileSync(destination, content);
   hashes[relative.replaceAll('\\','/')] = crypto.createHash('sha256').update(content).digest('hex');
 }

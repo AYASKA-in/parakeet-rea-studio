@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+<title id="title">Parakeet REA Studio</title><desc id="desc">An independent Windows AI workspace with live audio, screen analysis and a glass overlay.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#18333a"/><stop offset="1" stop-color="#101c25"/></linearGradient></defs>
+<rect width="1200" height="300" rx="22" fill="url(#bg)"/><circle cx="1140" cy="0" r="240" fill="#96d8ca" opacity=".05"/>
+<rect x="48" y="42" width="56" height="56" rx="17" fill="#efbd98"/><g transform="translate(58 49) scale(1.15)" fill="none" stroke="#183038" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 24V12c0-5 4-8 9-8h8v8c0 7-6 12-13 12H8Z"/><path d="M8 24 23 8M15 17h8M15 17v-7"/></g>
+<g font-family="Segoe UI,Arial,sans-serif"><text x="123" y="62" fill="#ffdab8" font-size="12" font-weight="700" letter-spacing="3">INDEPENDENT · OPEN SOURCE</text><text x="123" y="94" fill="#f5f5ed" font-size="28" font-weight="650">Parakeet REA Studio</text>
+<text x="48" y="163" fill="#f5f5ed" font-size="36" font-weight="650">Room to think. Words within reach.</text><text x="50" y="198" fill="#c4d1cf" font-size="18">A Windows workspace for interview practice and permitted meetings.</text>
+<text x="50" y="254" fill="#ffdab8" font-size="12" font-weight="700" letter-spacing="2">LIVE AUDIO  /  SCREEN ANALYSIS  /  GLASS OVERLAY</text>
+<rect x="875" y="81" width="270" height="146" rx="18" fill="#132a33" stroke="#54756d"/><circle cx="899" cy="106" r="4" fill="#92d3bc"/><text x="913" y="111" fill="#dceae4" font-size="13">Your floating copilot</text><path d="M895 128H1125" stroke="#3b555b"/><text x="896" y="158" fill="#f7f9f4" font-size="15">Listen. Review. Respond.</text><text x="896" y="184" fill="#aec5bf" font-size="12">Your model. Your key. Your workspace.</text><text x="896" y="210" fill="#ffdab8" font-size="12" font-family="Consolas,monospace">Ctrl + Shift + O</text></g>
+</svg>

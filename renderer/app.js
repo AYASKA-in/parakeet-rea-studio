@@ -777,6 +777,7 @@ async function init() {
   setView(location.hash.slice(1) || 'workspace', false);
   renderShortcutStatus();
   if(desktop&&bridge.getRuntime){
+    bridge.onAudioTimingStatus?.(value=>{appendTranscript(`Audio timing warning: ${message(value.message)}`,'status');toast(message(value.message),true);});
     bridge.onLifecycle(handleDesktopRuntime);bridge.onShortcutsChanged(renderShortcutStatus);
     const results=await Promise.allSettled([bridge.getRuntime(),bridge.getShortcuts()]);
     if(results[0].status==='fulfilled')handleDesktopRuntime(results[0].value);

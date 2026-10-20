@@ -10,6 +10,7 @@ const { createStorage } = require('./storage.cjs');
 const { fetchWithRetry } = require('./http.cjs');
 const { overlayPosition, fitWindow } = require('./overlay-layout.cjs');
 const { RuntimeGate, ShortcutRegistry } = require('./desktop-runtime.cjs');
+const { windowsTimingLease } = require('./audio-timing.cjs');
 const { extractDocument, PDF_TRANSCRIPTION_PROMPT } = require('./document-import.cjs');
 const { inspectResume } = require('./resume.cjs');
 const { credentialBinding, requireDataPolicy, prepareOutbound, personalDataRemoved } = require('./safety.cjs');
@@ -41,6 +42,7 @@ const captureLease = new CaptureLease();
 let displayRevision = 0;
 const runtime = new RuntimeGate();
 let shortcutRegistry;
+let audioTiming;
 const rendererRoot = path.resolve(__dirname, '../renderer');
 const mainUrl = pathToFileURL(path.join(rendererRoot, 'index.html')).href;
 const overlayUrl = pathToFileURL(path.join(rendererRoot, 'overlay.html')).href;
@@ -95,6 +97,7 @@ function refreshShortcuts(reset=false) {
 function publishRuntime() { safeSend(mainWindow,'app:lifecycle',runtime.snapshot()); }
 function interruptDesktop(reason) {
   if(!runtime.pause(reason)) return;
+  void audioTiming?.stop();
   captureLease.clear();++displayRevision;
   for(const controller of requests.values()) controller.abort();
   for(const controller of transcriptionRequests) controller.abort();
@@ -322,6 +325,7 @@ function registerHandlers() {
   handle('overlay:preferences:get', () => overlayPreferences, true);
   handle('overlay:preferences:set', value => saveOverlayPreferences(value), true);
   handle('overlay:set', value => {
+    void audioTiming?.setActive(Boolean(value?.listening) && !runtime.blocked);
     overlayState = { question: boundedText(value?.question, 12000), answer: boundedText(value?.answer, 200000), pendingQuestion:boundedText(value?.pendingQuestion,4000),pendingStatus:boundedText(value?.pendingStatus,240),pendingCanSend:Boolean(value?.pendingCanSend), listening: Boolean(value?.listening), generating: Boolean(value?.generating), answerIndex: Math.max(0, Math.min(10000, Number(value?.answerIndex) || 0)), answerCount: Math.max(0, Math.min(10000, Number(value?.answerCount) || 0)) };
     safeSend(overlayWindow, 'overlay:state', overlayPayload());
     return { ok: true };
@@ -431,6 +435,7 @@ if(profileLock) app.whenReady().then(async () => {
   validateSettings(settings);
   workspace = sanitizeWorkspace(await readJson('workspace.json', {}));
   overlayPreferences = validateOverlayPreferences(await readJson('overlay.json', {}));
+  audioTiming=windowsTimingLease({app,warn:message=>safeSend(mainWindow,'audio:timing-status',{message})});
   mainWindow = new BrowserWindow({
     width: 1440, height: 940, minWidth: 960, minHeight: 680, title: 'Parakeet Studio',
     backgroundColor: '#f7f8f4', show: false,
@@ -457,7 +462,7 @@ if(profileLock) app.whenReady().then(async () => {
     closeTimer = setTimeout(() => { closeAllowed = true; mainWindow?.close(); }, 8000);
   });
   mainWindow.on('closed', () => { mainWindow = null; app.quit(); });
-  mainWindow.webContents.on('render-process-gone', () => { runtime.invalidate();captureLease.clear();for (const controller of requests.values()) controller.abort(); for (const controller of transcriptionRequests) controller.abort(); liveSession.close(); });
+  mainWindow.webContents.on('render-process-gone', () => { void audioTiming?.stop();runtime.invalidate();captureLease.clear();for (const controller of requests.values()) controller.abort(); for (const controller of transcriptionRequests) controller.abort(); liveSession.close(); });
   await mainWindow.loadFile(path.join(rendererRoot, 'index.html'));
   const entries=[];
   const add=(id,label,accelerator,run)=>entries.push({id,label,accelerator,run});
@@ -484,6 +489,6 @@ app.on('before-quit', event => {
   clearTimeout(positionSaveTimer);
   clearTimeout(displayRecoveryTimer);
   if (overlayPreferences) void writeJson('overlay.json', overlayPreferences).catch(() => {});
-  settingsQueue.catch(()=>{}).then(()=>storage.drain()).catch(() => {}).finally(() => app.quit());
+  settingsQueue.catch(()=>{}).then(()=>audioTiming?.stop()).then(()=>storage.drain()).catch(() => {}).finally(() => app.quit());
 });
 app.on('will-quit', () => { globalShortcut.unregisterAll(); liveSession.close(); for (const controller of requests.values()) controller.abort(); for (const controller of transcriptionRequests) controller.abort(); });

@@ -49,6 +49,8 @@ Normal data is under `%APPDATA%\Parakeet Studio`. A source/test run with `PARAKE
 
 ## After sleep, lock or network loss
 
+If Windows audio timing optimization is unavailable, verify the release checksum and keep the portable app intact. The helper uses Windows' .NET Framework runtime, normally present on Windows 11. On managed computers, ask your administrator about blocked app components; do not disable security or change system-wide timer/power settings to bypass a policy.
+
 An “Audio processing fell behind real time” warning means the audio clock lagged materially behind wall time. Capture stops rather than continuing to report healthy listening. Close unnecessary workload, check audio devices/drivers and restart; some speech may be missing. Report a synthetic reproduction if it repeats.
 
 Recording intentionally stays off after sleep/lock. Wait for desktop recovery, review saved gap notices and explicitly start listening. The reconnect buffer is bounded to eight seconds of new audio; earlier speech may be missing. Repeating an answer request after partial output can duplicate content, so inspect the retained draft first.

@@ -4,7 +4,7 @@ This is experimental software. A successful request does not prove a correct ans
 
 ## Verified scope
 
-The 0.5.7 unit suite has 75 cases. Packaged local-provider desktop integration covers audio, streamed answers, PDF import, export, screen capture exclusion, overlay behavior and browser contrast. The native hardening suite has 22 cases including storage/policy failures, stale operations, power-event overlap, stopped recording after recovery and retained partial answers. These tests use synthetic inputs and do not grade cloud-model semantics.
+The 0.5.7 unit suite has 79 cases. Packaged local-provider desktop integration covers audio, streamed answers, PDF import, export, screen capture exclusion, overlay behavior and browser contrast. The native hardening suite has 24 cases including storage/policy failures, stale operations, power-event overlap, stopped recording after recovery and retained partial answers. These tests use synthetic inputs and do not grade cloud-model semantics.
 
 A genuine Modern Standby sleep/wake check on one ASUS Windows laptop passed on 0.5.6: actual suspend/resume events, stopped capture after wake, retained 100 synthetic sessions, explicit restart/stop. Its test controller disconnected across sleep; reconnecting to the same surviving app and restoring the closed local provider completed the check. No dock/external monitor was available. This is not a claim of exhaustive sleep/driver/hardware coverage.
 
@@ -12,7 +12,13 @@ An initial 0.5.6 microphone-only 60-minute soak passed. Its dual-source run foun
 
 Hidden unregistered WebAudio fixtures also exposed a slow processing clock. Visible and explicit foreground-renderer controls kept pace. The app retains normal renderer priority while hidden and now stops with a saved warning if its audio clock lags materially behind wall time. A silent-output-sink experiment failed acceptance and was reverted. The final harness defaults to Chromium's registered fake microphone for each source; it never captures actual microphone/system content. Both sources receive the same synthetic speech fixture through separate production pipelines. The older WebAudio fixture remains available with `--web-audio-fixture` for reproduction.
 
+Longer controls showed that foreground priority and keeping the display awake were insufficient. A Windows per-process timer-policy diagnostic restored real-time progression after the clock slowed; an integrated eight-minute control then passed. The original `native/TimerPolicy.cs` helper now disables **ignore timer-resolution requests** only for this app's own executable/child processes while listening, periodically checks the policy, preserves original snapshots and restores the timer bit on stop/suspend/crash cleanup/quit. Executable identity and process start-time checks prevent stale restoration to a reused PID. No other app or system power plan is changed. See [Microsoft's timer-policy reference](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation).
+
+The helper uses Windows' .NET Framework runtime, normally included with Windows 11. Original source ships in the repository; the portable EXE bundles the compiled helper. An unavailable optimization produces a saved warning, while the independent clock guard stays active.
+
 Final 0.5.7 uninterrupted 60/120-minute results belong in release notes after real wall-clock completion. Do not interpret a one-minute preflight, simulated clock or partially completed soak as long-session acceptance.
+
+The actual portable EXE passes isolated extraction, app/helper hash equality, local-provider typed answer and synthetic microphone PCM, saved history, capture-protection status and graceful launcher exit. This is separate from testing `win-unpacked`.
 
 ## Endurance harness
 
@@ -21,6 +27,8 @@ Final 0.5.7 uninterrupted 60/120-minute results belong in release notes after re
 Receipts retain duration, frame/payload counts, final transcripts, answer counts, faults/review actions, process working-set/CPU samples and workspace bytes. Assertions require sustained capture, unblocked runtime, 100 retained sessions, every mock-finalized ID saved at normal stop and no unexpected renderer/Live error. Hidden windows and temporary test-only idle-sleep blocking are declared. Two concurrent runs are competing load, not an idle-laptop benchmark. Working-set sums include shared pages; payload bytes exclude base64/WebSocket/TLS overhead.
 
 ## What is not guaranteed
+
+Endurance uses a temporary test-only display-sleep blocker and does not change the system power plan. Electron process CPU counters share measurement intervals with the timer service's discovery calls; checkpoint percentages are diagnostic samples, not exclusive 30-second averages. Prefer the published duration, throughput, final-ID retention and error outcomes for acceptance.
 
 - Perfect recognition of accents, noise, overlapping speakers, numbers, negation or technical identifiers.
 - Perfect routing/completion judgment for every language or indirect question.
@@ -31,6 +39,8 @@ Receipts retain duration, frame/payload counts, final transcripts, answer counts
 Google's [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) are project-wide and actual capacity can vary. Another key in the same project does not create independent availability. More model calls add latency and can share the same mistakes.
 
 ## Optimization roadmap
+
+Bounded real Gemini checks on 20 October 2026 passed synthetic speech (16.905 seconds including capture/drain), a coding response (14.488 seconds, displayed/static checks only) and a scanned fake resume (4.582 seconds). One screenshot request reached its 90-second deadline; one focused retry returned the correct arithmetic result in 8.773 seconds. Both attempts are retained in redacted local receipts, and test credential copies were cleared. These individual stages do not establish typical latency, broad accuracy or a 100% provider success rate.
 
 1. Add content-free timing/outcome counters from question end through final transcript, queue, first text, completion and durable save. Publish p50/p95/errors per mode/network.
 2. Add capped deadline/backoff/jitter/circuit-breaker behavior with provider-specific quota classification, supported Retry-After and no replay after partial answers.

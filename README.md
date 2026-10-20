@@ -1,101 +1,190 @@
+![Parakeet REA Studio — live audio, screen analysis and a readable glass overlay](docs/images/readme-banner.svg)
+
 # Parakeet REA Studio
 
-An independent, MIT-licensed Windows assistant for interview practice and permitted meetings. Listen to microphone/system audio, draft AI answers, review screenshots, and keep readable answers in a movable glass overlay. The Windows app is named **Parakeet Studio**. It is not affiliated with ParakeetAI and includes no vendor binaries or extracted source.
+[![Windows build](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml/badge.svg)](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-e9ae86?style=flat-square)](LICENSE) ![Windows x64](https://img.shields.io/badge/platform-Windows_x64-304c55?style=flat-square) ![Bring your own key](https://img.shields.io/badge/API-bring_your_own_key-304c55?style=flat-square)
 
-**Experimental · Windows x64 · Bring your own API key.** AI output can be wrong. Universal capture invisibility, offline operation and 100% correct answers are not promised.
+An independent Windows assistant for **interview practice and permitted meetings**. Listen to microphone/call audio, draft AI answers, analyze a screenshot, and keep readable words in a movable glass overlay.
 
-[Download Windows EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.7/Parakeet-Studio-0.5.7-portable.exe) · [Release/checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.7) · [User guide](docs/USER_GUIDE.md) · [API-key setup](docs/API_KEYS.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
+**[Download Windows EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.7/Parakeet-Studio-0.5.7-portable.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.7) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
+
+> [!IMPORTANT]
+> **Experimental prerelease.** AI answers can be wrong. Cloud features require internet and provider access. Capture exclusion depends on Windows and the sharing tool; universal invisibility and a 100% success rate are not guaranteed. Use assistance only where allowed.
+
+The desktop app is named **Parakeet Studio**. This independently written, MIT-licensed project is not affiliated with ParakeetAI and includes no vendor binaries or extracted source.
+
+**On this page:** [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source)
 
 ## Download and run
 
-1. Download **`Parakeet-Studio-0.5.7-portable.exe`** above. This is the app; source ZIPs are for developers.
-2. Keep it in a folder you control, such as `Documents\Parakeet Studio`. No Node.js, Python or installer is needed. First launch extracts the runtime and can take longer.
-3. Download the release's `SHA256SUMS.txt` and compare its EXE checksum:
+| You need | Details |
+|---|---|
+| Windows | Windows 11 x64 is tested; ARM64 and other operating systems are not validated |
+| API access | Your own Gemini key, or an explicitly configured compatible server |
+| Internet | Required for cloud AI; no offline model is bundled |
+| Audio access | Working devices/drivers and Windows microphone permissions |
+| Runtime | Portable app includes Electron and its helper; no Node.js, Python or separate .NET SDK needed |
+
+1. Download **[Parakeet-Studio-0.5.7-portable.exe](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.7/Parakeet-Studio-0.5.7-portable.exe)**. This is the application. The source ZIP is for developers.
+2. Keep it in a folder you control, such as `Documents\Parakeet Studio`. Run the EXE directly; there is no installer. First launch extracts the runtime and can take longer.
+3. Compare its hash with `SHA256SUMS.txt` from the [same release](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.7):
 
    ```powershell
    Get-FileHash -Algorithm SHA256 '.\Parakeet-Studio-0.5.7-portable.exe'
    ```
 
-4. Open the EXE. This community build is unsigned and may show an unknown-publisher warning. Verify the source/checksum before deciding to run it; do not disable Windows security.
-5. Configure your own provider key in **Settings**, choose a data-use policy, and save.
+4. This community build is **unsigned** and may show an unknown-publisher warning. Verify the source/checksum before deciding to run it. Do not disable Windows security.
+5. Open Settings, configure your provider and choose a data-use policy. **No shared API key is included.**
 
-Tested on Windows 11 x64. Cloud AI requires internet and model access; audio depends on Windows permissions/drivers. ARM64, other operating systems, legacy S3 sleep and physical dock combinations are not validated. The browser preview demonstrates the interface; use the desktop EXE for AI/audio.
+If the app seems missing, press **Ctrl+Shift+M** or reopen the same EXE. Capture protection hides its taskbar buttons. The browser preview is an interface demo; use the desktop EXE for AI/audio.
 
-## First answer
+## Your first answer
 
-1. [Create a Gemini key](docs/API_KEYS.md) and enter it directly in Settings → **Google Gemini**.
-2. Keep the base URL `https://generativelanguage.googleapis.com/v1beta`, answer model `gemini-3.5-flash-lite`, transcription model `gemini-3.5-transcribe-live`.
-3. For free non-personal practice, choose **Unpaid cloud — non-personal practice only** and use synthetic questions without private resumes/meeting material.
-4. **Save connection**, type “Explain a hash map” in the workspace, then **Draft answer**. “AI provider configured” means settings are saved; the first request tests key/model/quota access.
-5. Choose **Microphone**, **System audio** or **Microphone + system**, then **Start listening**. Stop when finished.
-6. Open the floating copilot with **Ctrl+Shift+O**. **Ctrl+Shift+M** brings back the workspace.
+1. Create your own key at [Google AI Studio](https://aistudio.google.com/apikey). Follow the [complete key guide](docs/API_KEYS.md), including project access and billing checks.
+2. In Settings → **Google Gemini**, enter:
 
-No shared key is bundled. Starting presets are not a claim of best accuracy for every task. Google controls availability, quotas and data terms. A billing-enabled project may incur charges; the app cannot detect billing tier and never silently selects a paid fallback. Check [pricing](https://ai.google.dev/gemini-api/docs/pricing), [limits](https://ai.google.dev/gemini-api/docs/rate-limits) and [terms](https://ai.google.dev/gemini-api/terms).
+   | Setting | Starting value |
+   |---|---|
+   | API base URL | `https://generativelanguage.googleapis.com/v1beta` |
+   | API key | Your complete key, entered directly in the app |
+   | Answer model | `gemini-3.5-flash-lite` |
+   | Transcription model | `gemini-3.5-transcribe-live` |
 
-## Features
+3. For an unpaid account, choose **Unpaid cloud — non-personal practice only** and start with synthetic questions. For zero billing charges, use an eligible free-tier project without billing; the app cannot verify that account state.
+4. Click **Save connection**. Type “Explain a hash map” and click **Draft answer**. A saved-settings message is not an authentication test; the request checks actual key/model/quota access.
+5. Choose **Microphone**, then **Start listening** and ask a short practice question. Test **System audio** separately before using both. Use headphones to reduce feedback.
+6. Open the floating copilot with **Ctrl+Shift+O**. Stop listening when finished and check saved status.
+
+One Gemini key supports answers, transcription and supported screenshot/PDF requests. Model availability and free quotas can change. Check Google's [pricing](https://ai.google.dev/gemini-api/docs/pricing), [limits](https://ai.google.dev/gemini-api/docs/rate-limits) and [terms](https://ai.google.dev/gemini-api/terms). A billing-enabled project may incur charges. There is no automatic paid fallback or key cycling.
+
+<details>
+<summary><strong>Using a local or OpenAI-compatible server?</strong></summary>
+
+Select OpenAI-compatible API and supply its model IDs, token and base URL including `/v1`. Remote endpoints require HTTPS. Local server policy requires a loopback URL such as `http://127.0.0.1:1234/v1`. A no-auth server may accept a non-secret placeholder token such as `local-only`.
+
+Full functionality requires streamed `/chat/completions`, multipart-WAV `/audio/transcriptions`, and image support for screenshots. A chat-only endpoint does not provide every feature. No local server/model is bundled; a local server may itself forward data to cloud services. See [provider setup](docs/API_KEYS.md#openai-compatible-and-local-servers).
+
+</details>
+
+## What you can do
 
 ![Workspace with a synthetic practice question](docs/images/workspace.png)
 
-Screenshots use synthetic local-provider fixtures; displayed timings are not cloud-latency benchmarks.
-
-| Feature | What it does |
+| Capability | How it works |
 |---|---|
-| Live transcription | Separate microphone/call-audio inputs, interim/final text, editable finalized wording |
-| Answer drafts | Concise, STAR, Technical and Coding styles; Fast/Balanced/Careful priorities |
-| Auto draft | Groups finalized question segments and waits for a pause; Send now/Dismiss controls |
-| Glass overlay | Background-only opacity, opaque white text, nine anchors, dragging and click-through |
-| Screen analysis | Explicit capture → monitor preview/crop → editable question → send |
-| Resume context | Local PDF/TXT/Markdown extraction and review; optional explicit AI PDF upload |
-| Sessions | Local transcripts, answers, notes, history search/reopen, export and deletion |
-| Recovery | Bounded reconnect buffer, visible gaps, retained partial answers; capture stays off after sleep |
+| **Live transcription** | Microphone, system audio or both; separate source labels, interim/final text and editable finalized wording |
+| **AI answer drafts** | Concise, STAR, Technical and Coding styles; Fast/Balanced/Careful priorities |
+| **Auto draft** | Groups finalized question segments, waits for a pause and offers Send now/Dismiss |
+| **Readable glass overlay** | Background-only opacity, fully opaque white text, dragging, nine anchors and click-through |
+| **Screen analysis** | Explicit capture → display preview/crop → editable question → Analyze and answer |
+| **Resume context** | Local PDF/TXT/Markdown import and review; optional explicit AI PDF upload |
+| **Local history** | Transcripts, drafts, notes, search/reopen, Markdown/text export and deletion |
+| **Visible recovery** | Bounded reconnect buffer, saved gap notices, retained partial drafts and stopped capture after sleep |
 
-Answer text comes from your configured AI provider. Local code handles capture, routing, context and display. The desktop app does not execute generated code. Review model answers and test proposed solutions.
+Screenshots show synthetic local-provider fixtures. Their displayed timings are not cloud-latency benchmarks.
+
+**All generated answers come from your configured AI provider.** Local code handles capture, question routing, context, display and saving. The app does not execute generated code. Review answers and test proposed solutions.
+
+### Listening and automatic answers
+
+Choose the correct microphone; Refresh updates the device list. System audio can include other applications' playback. You/Call labels identify the audio source, not individual speakers.
+
+Auto draft is initially enabled. It uses finalized wording and a pause; **with both sources, only system/call audio triggers automatic drafts**. Check the pending question, correct critical names/numbers/negations and use **Send now** when needed. Indirect or multilingual requests may be missed. After an interruption, held questions require explicit review/send.
+
+### Screen text, images and coding problems
+
+Open **Answer screenshot** or press **Ctrl+Alt+Enter**. Select the display, inspect the preview/timestamp, crop around the problem and edit the question before sending. Fast/Balanced/Detail use longest-edge limits of 1600/2560/3840 pixels. Enlarge tiny text and crop tightly before increasing quality.
+
+Captures expire after two minutes or a display-configuration change. Ordinary screen-content changes require **Refresh screenshot**. Pixels upload only after review/send; the image is transient and is not saved in session history. Image support depends on your model. No model can recover text absent from the captured pixels.
+
+### Resume and personal context
+
+Import a selectable-text PDF, TXT or Markdown file in **My context**. Local limits: **10 MB, 40 PDF pages, 50,000 applied characters**. Review reading order, dates and claims before applying. Scanned PDFs may need optional AI PDF import, which explicitly uploads the document after confirmation and is disabled in unpaid practice mode.
+
+Personal context follows your selected data policy. Check every claimed qualification, employer and achievement. Clear context, clear transcript and delete session have different effects; see the [user guide](docs/USER_GUIDE.md#history-updates-and-removal).
+
+## Glass overlay and shortcuts
 
 ![Floating copilot with a synthetic coding answer](docs/images/glass-overlay.png)
 
-## Keyboard shortcuts
+Adjust **background opacity** from clear to 95%; white text stays opaque with shadow/glow. Increase the background over bright or busy content. Drag the header, choose an anchor, or move it with the shortcuts below. Click-through lets you interact with the content behind it.
 
 | Shortcut | Action |
 |---|---|
-| Ctrl+Enter | Draft from the question field |
-| Ctrl+Shift+Space | Send the pending question / draft an answer |
-| Ctrl+Shift+L | Start/stop listening |
-| Ctrl+Shift+O | Show/hide copilot |
-| Ctrl+Shift+M | Show workspace |
-| Ctrl+Shift+H | Hide copilot |
-| Ctrl+Shift+P | Toggle click-through / restore mouse input |
-| Ctrl+Shift+← / → / ↑ / ↓ | Move copilot 32 pixels |
-| Ctrl+Shift+Home | Center copilot |
-| Ctrl+Alt+← / → | Previous/next answer |
-| Ctrl+Alt+↑ / ↓ | Scroll floating answer |
-| Ctrl+Alt+Enter | Open screenshot review |
+| **Ctrl+Enter** | Draft from the question field |
+| **Ctrl+Shift+Space** | Send the pending question / draft an answer |
+| **Ctrl+Shift+L** | Start/stop listening |
+| **Ctrl+Shift+O** | Show/hide copilot |
+| **Ctrl+Shift+M** | Show workspace |
+| **Ctrl+Shift+H** | Hide copilot |
+| **Ctrl+Shift+P** | Toggle click-through / restore mouse input |
+| **Ctrl+Shift+← / → / ↑ / ↓** | Move copilot 32 pixels |
+| **Ctrl+Shift+Home** | Center copilot |
+| **Ctrl+Alt+← / →** | Previous/next answer |
+| **Ctrl+Alt+↑ / ↓** | Scroll floating answer |
+| **Ctrl+Alt+Enter** | Open screenshot review |
 
-Settings reports unavailable global shortcuts and offers **Retry global shortcuts**. Reopen the EXE if the workspace shortcut conflicts. Shortcut remapping is not included.
+Settings reports unavailable global shortcuts and offers **Retry global shortcuts**. Close/reconfigure conflicting apps or reopen the EXE to reach the workspace. Shortcut remapping is not included.
 
-## Privacy and screen sharing
+## Privacy and your data
 
-Capture exclusion is enabled by default for workspace/overlay on supported Windows capture paths; taskbar buttons are hidden. Test your actual meeting app's shared-screen preview. OS dialogs, remote tools, alternate capture methods and cameras may behave differently. The process is not hidden. Follow applicable meeting/assessment rules and participant permissions.
+| Data or action | Important behavior |
+|---|---|
+| **API key** | Encrypted with Windows secure storage; bound to provider/server origin. Enter it in Settings, never in issues or source. Leave the field blank to preserve it; use Remove saved API key to clear it |
+| **Audio** | Uploaded while listening. Listening is explicit; sleep/lock stops capture |
+| **Screenshots** | Captured explicitly and sent only after review; other visible apps can appear, so inspect before upload |
+| **Context** | Relevant reviewed content may accompany answers under your selected policy; Review outgoing text previews filtered answer text |
+| **History** | Transcripts, resume context and recovery snapshots are **plain-text local JSON** under `%APPDATA%\Parakeet Studio` |
+| **Exports** | Markdown/text files remain wherever you save them; app deletion does not remove external copies |
+| **Screen sharing** | Capture exclusion is enabled by default on supported Windows paths. Test your actual meeting tool's shared-screen preview |
 
-Choose a data-use mode:
+Capture protection does **not** hide processes, OS dialogs, cameras or all alternate capture methods. Follow meeting/assessment rules and participant permissions.
 
-- **Choose before sending content:** blocks provider sends until selected.
-- **Unpaid cloud — non-personal practice only:** omits saved personal context/prior answers; AI PDF upload and stored-session summaries are disabled. Filtering is best effort, not anonymization.
-- **Provider terms reviewed for this data:** your declaration that the provider/account permits your material; it changes neither billing nor privacy terms.
-- **Local server:** requires a loopback URL. Supply your own server/models; it could itself forward data to cloud services.
+### Choose the right data-use mode
 
-Audio uploads while listening. Relevant reviewed context may accompany answers under the selected policy. Screenshot pixels upload only after review/send. **Review outgoing text** shows filtered answer text before sending.
+- **Choose before sending content:** blocks provider uploads until you select a policy.
+- **Unpaid cloud — non-personal practice only:** omits saved personal context/prior answers and disables AI PDF upload/stored-session summaries. Filtering is best effort, not anonymization; do not supply private material.
+- **Provider terms reviewed for this data:** your declaration that your provider/account permits the material; it does not change provider terms or billing.
+- **Local server:** requires a loopback endpoint; your server's own behavior remains your responsibility.
 
-Keys use Windows encryption. Transcripts, resume context and recovery snapshots are **plain-text local JSON** under `%APPDATA%\Parakeet Studio`. Deleting the EXE does not delete this data. See [SECURITY](SECURITY.md) and the [user guide](docs/USER_GUIDE.md#history-updates-and-removal).
+### Saving, updates and removal
+
+History is bounded to **100 sessions and 16 MB**. Export/delete older records explicitly at capacity; overflow is rejected rather than silently deleting history. If saving fails, keep the app open, resolve the problem and use **Retry saving**.
+
+To update: stop listening, check saved status, close the old app and run the new checksum-verified EXE. Settings/history remain in the same Windows profile. No automatic updater is bundled; export important content first.
+
+To uninstall: close the app and delete the EXE. Local data remains. After exporting what you need, remove the key in Settings, close the app and delete the exact `%APPDATA%\Parakeet Studio` folder through Explorer if you also want to remove local records. This is irreversible and does not delete provider copies or external exports. See [SECURITY](SECURITY.md).
 
 ## Speed and reliability
 
-Start with Standard audio and Balanced answers. Fast reduces pause/reasoning budgets; Careful can help difficult tasks but takes longer. Crop screenshots around the problem. Low-bandwidth mode skips long silence and can miss quiet speech. Both-source Gemini uses two Live connections and more quota/bandwidth.
+Start with **Standard audio + Balanced answers**. Fast shortens pause/reasoning budgets; Careful allows more reasoning. Crop screenshots and keep context relevant. Low-bandwidth audio skips long silence and may miss quiet speech. Both-source Gemini uses two Live connections and more project quota/bandwidth.
 
-Up to eight seconds of **new** audio is buffered during reconnection. Earlier in-flight speech may be lost; saved notices mark interruptions. Review held questions and use Send now. After sleep/lock, start listening explicitly. See [validation and remaining work](docs/RELIABILITY.md). No finite test proves a universal success rate.
+During reconnection, up to **eight seconds of new audio** is buffered. Earlier in-flight speech may be lost; saved notices mark interruptions. Review held questions and send explicitly. After sleep/lock, start listening explicitly. If the audio clock falls materially behind real time, capture stops with a saved warning.
 
-## Build and contribute
+The bundled original Windows helper applies a per-process timer optimization only to this app while listening and restores its prior policy afterward. It does not change your power plan or other apps. See [measured validation results](docs/VALIDATION.md) and [reliability and remaining work](docs/RELIABILITY.md).
 
-Developers need Windows, Git and Node.js 22.14+:
+No finite test proves perfect recognition, correct coding/factual/personal answers, universal capture exclusion or continuous free-tier availability. Real device/network behavior varies. Legacy S3 sleep and physical dock combinations are not validated.
+
+## Quick troubleshooting
+
+| Symptom | First step |
+|---|---|
+| App seems hidden | Ctrl+Shift+M or reopen the EXE |
+| Glass cannot be clicked | Ctrl+Shift+P restores mouse input |
+| No answer | Test a typed synthetic question; check provider, model IDs and data policy |
+| 401/403 or 404 | Check complete key/permissions or model/base URL |
+| 429 or 503 | Check project quota/provider capacity; wait and retry explicitly |
+| No transcript | Test each input separately and check Windows microphone permissions |
+| Auto draft waits after recovery | Review the held question and use Send now |
+| Wrong/stale screenshot | Select the display, refresh, crop and inspect before sending |
+| Resume text is missing | Check selectable text; review extraction or use permitted AI PDF import |
+| Save failed | Resolve storage access and use Retry saving before closing |
+
+**[Full troubleshooting guide](docs/TROUBLESHOOTING.md)** · [API-key guide](docs/API_KEYS.md) · [Complete user guide](docs/USER_GUIDE.md)
+
+## Build from source
+
+Developers need **Windows, Git and Node.js 22.14+**. The native helper builds with Windows' .NET Framework C# compiler, normally included on Windows 11.
 
 ```powershell
 git clone https://github.com/AYASKA-in/parakeet-rea-studio.git
@@ -105,6 +194,21 @@ npm test
 npm start
 ```
 
-`npm run build:win` creates the EXE. `npm run release:source` creates an allowlisted source ZIP/checksums. See [CONTRIBUTING](CONTRIBUTING.md) and [release procedure](docs/RELEASING.md). Local-provider tests need no real API key.
+| Command | Purpose |
+|---|---|
+| `npm run build:win` | Build the portable Windows EXE |
+| `npm run test:desktop -- --packaged` | Native audio/UI/capture/import/export integration |
+| `npm run test:hardening -- --packaged` | Native lifecycle, storage and policy regressions |
+| `node scripts/verify-portable.cjs` | Test the actual extracted portable EXE |
+| `npm run test:soak -- --minutes=120` | Real wall-clock synthetic dual-source endurance |
+| `npm run release:source` | Allowlisted source ZIP, revision manifest and checksums |
 
-Use [Issues](https://github.com/AYASKA-in/parakeet-rea-studio/issues) for reproducible bugs with version, steps and redacted errors. Never attach keys, private screenshots/resumes/recordings or your entire profile. Use [SECURITY](SECURITY.md) for vulnerabilities. Project source: [MIT](LICENSE); dependencies retain their [own licenses](THIRD_PARTY_NOTICES.md).
+Native desktop tests require an interactive Windows session; local-provider checks need no API key. Live Gemini tests are explicit, synthetic and quota-consuming. CI builds/tests without provider secrets. Read [CONTRIBUTING](CONTRIBUTING.md), [release procedure](docs/RELEASING.md) and [validation scope](docs/RELIABILITY.md).
+
+## Contribute and get help
+
+Use [Issues](https://github.com/AYASKA-in/parakeet-rea-studio/issues) for minimal reproducible bugs with app/Windows version, input mode, steps and redacted errors. Never attach keys, private resumes/screenshots/recordings or your complete profile. Report vulnerabilities through [SECURITY](SECURITY.md).
+
+Contributions must be original or compatibly licensed. Quality benchmarks, broader hardware coverage, explicit local-model support and signed releases remain on the [roadmap](docs/RELIABILITY.md#optimization-roadmap).
+
+Project source is [MIT-licensed](LICENSE). Dependencies retain their [own licenses](THIRD_PARTY_NOTICES.md).

@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('copilot', {
   startLive: invoke('live:start'), sendLiveAudio: invoke('live:audio'), endLiveAudio: invoke('live:end-audio'), stopLive: invoke('live:stop'),
   onLiveTranscript: subscribe('live:transcript'), onLiveError: subscribe('live:error'),
   onLiveInterim: subscribe('live:interim'), onLiveStatus: subscribe('live:status'), getStorageStatus: invoke('storage:status'),
+  onAudioTimingStatus:subscribe('audio:timing-status'),
   loadWorkspace: invoke('workspace:get'), saveWorkspace: invoke('workspace:save'),
   previewRequest: invoke('provider:preview'), transcribe: invoke('provider:transcribe'), generate: invoke('provider:generate'), cancel: invoke('provider:cancel'),
   onAnswer: subscribe('answer:delta'), onShortcut: subscribe('shortcut'),

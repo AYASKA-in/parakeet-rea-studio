@@ -1,5 +1,12 @@
 # Security and privacy
 
+The original Windows timer helper changes only the timer-resolution-ignore bit
+for app-discovered processes whose executable identity matches this app. It
+preserves prior policy snapshots, checks process start times on restoration and
+restores the timer bit when recording ends or desktop recovery/shutdown runs.
+It does not install a service, change the system power plan, execute model output
+or accept process identifiers from model text.
+
 Do not put API keys or private meeting material in public issues or screenshots.
 For a vulnerability, use the repository host's private vulnerability reporting
 when available, or request a private reporting channel without disclosing exploit

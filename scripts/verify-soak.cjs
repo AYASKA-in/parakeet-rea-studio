@@ -59,8 +59,8 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
   await page.selectOption('#audio-source',source);await page.check('#auto-answer');
   report.startedMs=Date.now();report.startedAt=new Date(report.startedMs).toISOString();
   await page.click('#capture-button');await page.waitForFunction(()=>document.querySelector('#capture-label').textContent==='Stop listening');
-  blocker=await app.evaluate(({powerSaveBlocker,powerMonitor,BrowserWindow},{hardware,visible})=>{globalThis.hardwareEvents=[];for(const name of ['suspend','resume','lock-screen','unlock-screen'])powerMonitor.on(name,()=>hardwareEvents.push({name,at:new Date().toISOString()}));const id=hardware?null:powerSaveBlocker.start('prevent-app-suspension');if(!visible)for(const win of BrowserWindow.getAllWindows())win.hide();return id;},{hardware,visible});
-  report.idleSuspensionBlockedForTest=!hardware;await persist();console.log(`START ${source} ${minutes} minutes; ${output}`);
+  blocker=await app.evaluate(({powerSaveBlocker,powerMonitor,BrowserWindow},{hardware,visible})=>{globalThis.hardwareEvents=[];for(const name of ['suspend','resume','lock-screen','unlock-screen'])powerMonitor.on(name,()=>hardwareEvents.push({name,at:new Date().toISOString()}));const id=hardware?null:powerSaveBlocker.start('prevent-display-sleep');if(!visible)for(const win of BrowserWindow.getAllWindows())win.hide();return id;},{hardware,visible});
+  report.idleSuspensionBlockedForTest=!hardware;report.displaySleepBlockedForTest=!hardware;await persist();console.log(`START ${source} ${minutes} minutes; ${output}`);
   let nextFault=Number(process.argv.find(x=>x.startsWith('--fault-after-seconds='))?.split('=')[1]||600)*1000,lastCheckpoint=0,reviewAt=Infinity;
   while(Date.now()-report.startedMs<minutes*60000){
    await pause(Math.min(30000,Math.max(1,minutes*60000-(Date.now()-report.startedMs))));
