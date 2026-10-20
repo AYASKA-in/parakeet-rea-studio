@@ -16,7 +16,7 @@ Longer controls showed that foreground priority and keeping the display awake we
 
 The helper uses Windows' .NET Framework runtime, normally included with Windows 11. Original source ships in the repository; the portable EXE bundles the compiled helper. An unavailable optimization produces a saved warning, while the independent clock guard stays active.
 
-Final 0.5.7 uninterrupted 60/120-minute results belong in release notes after real wall-clock completion. Do not interpret a one-minute preflight, simulated clock or partially completed soak as long-session acceptance.
+Final 0.5.7 real wall-clock acceptance passed: microphone 60.040 minutes and dual-source 120.042 minutes. Both retained all mock-finalized IDs, met the declared continuous-PCM threshold and recorded no unexpected errors. See [complete measured results and caveats](VALIDATION.md). These are synthetic processing/storage/recovery checks, not model-accuracy benchmarks.
 
 The actual portable EXE passes isolated extraction, app/helper hash equality, local-provider typed answer and synthetic microphone PCM, saved history, capture-protection status and graceful launcher exit. This is separate from testing `win-unpacked`.
 

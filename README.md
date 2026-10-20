@@ -163,6 +163,8 @@ During reconnection, up to **eight seconds of new audio** is buffered. Earlier i
 
 The bundled original Windows helper applies a per-process timer optimization only to this app while listening and restores its prior policy afterward. It does not change your power plan or other apps. See [measured validation results](docs/VALIDATION.md) and [reliability and remaining work](docs/RELIABILITY.md).
 
+**Release checks:** 79 unit regressions, 24 packaged native hardening checks, desktop/portable integration and real 60.04-minute microphone / 120.04-minute dual-source synthetic endurance passed. See [exact scope and limitations](docs/VALIDATION.md).
+
 No finite test proves perfect recognition, correct coding/factual/personal answers, universal capture exclusion or continuous free-tier availability. Real device/network behavior varies. Legacy S3 sleep and physical dock combinations are not validated.
 
 ## Quick troubleshooting
