@@ -8,7 +8,7 @@
 
 An independent Windows assistant for **interview practice and permitted meetings**. Listen to microphone/call audio, draft AI answers, analyze a screenshot, and keep readable words in a movable glass overlay.
 
-**[Download Windows EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.8/Parakeet-Studio-0.5.8-portable.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.8) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
+**[Download published v0.5.8 EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.5.8/Parakeet-Studio-0.5.8-portable.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.8) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
 
 > [!IMPORTANT]
 > **Experimental prerelease.** AI answers can be wrong. Cloud features require internet and provider access. Capture exclusion depends on Windows and the sharing tool; universal invisibility and a 100% success rate are not guaranteed. Use assistance only where allowed.
@@ -17,7 +17,18 @@ The desktop app is named **Parakeet Studio**. This independently written, MIT-li
 
 **New in 0.5.8:** a slate-and-teal workspace, larger transcript/answer text, listening controls at the top, clearer keyboard hints and more readable glass controls. [Design and accessibility notes](docs/UI_DESIGN.md).
 
-**On this page:** [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source)
+**On this page:** [Release status](#release-status) · [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source) · [Signing](#code-signing-policy) · [Validation](#validation-and-remaining-checks)
+
+
+## Release status
+
+| Channel | What you get |
+|---|---|
+| **Published download: v0.5.8** | The existing **unsigned portable EXE** linked above. It predates the latest hardening and recovery changes. |
+| **Current main source: v0.7.0 candidate** | Direct screenshot answers, recovery feedback, stronger persistence/privacy controls, expanded evaluations and an NSIS installer build. **Experimental and unsigned.** [Build the current source](#build-from-source). |
+| **Public v0.7.0 binaries** | Not released yet. A source update does not replace the published v0.5.8 EXE; no v0.7.0 release download is claimed here. |
+
+The feature descriptions below refer to the current source unless a version is stated. Check your installed version before expecting a newer workflow. See [latest source changes](#latest-source-changes), [recorded validation](#validation-and-remaining-checks) and the [release procedure](docs/RELEASING.md).
 
 ## Download and run
 
@@ -80,7 +91,7 @@ Full functionality requires streamed `/chat/completions`, multipart-WAV `/audio/
 | **AI answer drafts** | Concise, STAR, Technical and Coding styles; Fast/Balanced/Careful priorities |
 | **Auto draft** | Groups finalized question segments, waits for a pause and offers Send now/Dismiss |
 | **Readable glass overlay** | Background-only opacity, fully opaque white text, dragging, nine anchors and click-through |
-| **Screen analysis** | Explicit capture → display preview/crop → editable question → Analyze and answer |
+| **Screen analysis** | In v0.7.0 source, **Answer screenshot** sends the selected display directly; **Review / crop** provides an optional preview and crop. The published v0.5.8 workflow uses review. |
 | **Resume context** | Local PDF/TXT/Markdown import and review; optional explicit AI PDF upload |
 | **Local history** | Transcripts, drafts, notes, search/reopen, Markdown/text export and deletion |
 | **Visible recovery** | Bounded reconnect buffer, saved gap notices, retained partial drafts and stopped capture after sleep |
@@ -203,12 +214,24 @@ npm start
 | Command | Purpose |
 |---|---|
 | `npm run test:ui` | Check layouts, text contrast, keyboard navigation and glass controls |
-| `npm run build:win` | Build the portable Windows EXE |
+| `npm run build:win` | Build unsigned portable and NSIS setup EXEs in `dist/` |
 | `npm run test:desktop -- --packaged` | Native audio/UI/capture/import/export integration |
 | `npm run test:hardening -- --packaged` | Native lifecycle, storage and policy regressions |
 | `node scripts/verify-portable.cjs` | Test the actual extracted portable EXE |
 | `npm run test:soak -- --minutes=120` | Real wall-clock synthetic dual-source endurance |
 | `npm run release:source` | Allowlisted source ZIP, revision manifest and checksums |
+| `npm run test:devices -- --packaged --devices-only --prepare-only` | Verify isolated device-test preparation with recording off |
+| `npm run test:accessibility:prepare` | Open a synthetic fixture for later keyboard/Narrator review |
+| `npm run eval:record` | Open an opt-in local speech recorder; no automatic recording or cloud upload |
+| `npm run build:signed` | Requires an approved identity; verifies pinned publisher signatures and timestamps |
+
+
+After `npm run build:win`, the v0.7.0 source produces:
+
+- `dist/Parakeet-Studio-0.7.0-portable.exe` — run directly without installing.
+- `dist/Parakeet-Studio-0.7.0-setup.exe` — per-user NSIS installer with an uninstaller.
+
+These locally built files are **unsigned**. Close the app and make a [compatible profile backup](docs/QUALITY_AND_RECOVERY.md) before changing versions. Preserve `Local State` with encrypted profiles; protected keys are tied to Windows user/machine safeguards. Uninstalling retains application data by design; it is not a request to erase your transcript history.
 
 Native desktop tests require an interactive Windows session; local-provider checks need no API key. Live Gemini tests are explicit, synthetic and quota-consuming. CI builds/tests without provider secrets. Read [CONTRIBUTING](CONTRIBUTING.md), [release procedure](docs/RELEASING.md) and [validation scope](docs/RELIABILITY.md).
 
@@ -220,23 +243,46 @@ Contributions must be original or compatibly licensed. Quality benchmarks, broad
 
 Project source is [MIT-licensed](LICENSE). Dependencies retain their [own licenses](THIRD_PARTY_NOTICES.md).
 
-Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device watcher](docs/HARDWARE_VALIDATION.md), and [local/offline deployment scope](docs/LOCAL_MODE.md). Version 0.6 source adds bounded diagnostic timings, provider cooldowns, optional workspace encryption and memory-only history; the pinned download above remains the last published release until a new artifact is verified.
+Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device watcher](docs/HARDWARE_VALIDATION.md), and [local/offline deployment scope](docs/LOCAL_MODE.md). Current source includes bounded diagnostic timings, provider cooldowns, optional workspace encryption and memory-only history; use the release-status table above to distinguish source capabilities from the published download.
 
-### Unreleased 0.6.1 screenshot workflow
+## Latest source changes
 
-**Answer screenshot** (Ctrl+Alt+Enter, including the floating assistant) immediately sends the whole selected display to your configured vision provider and streams the answer in the assistant. It does not open a review dialog or restore the workspace. The primary display is used initially; **Review / crop** lets you choose another display for this session, inspect the image, crop it and choose image quality. Quick capture uses native detail up to 3840 pixels on the longest edge. It captures visible content only, not hidden or scrolled-off content. Check the display for private information before pressing the direct action. Image pixels are not saved in history; generated questions and answers follow your history settings. Image understanding and code correctness depend on the model; unreadable text requires a clearer capture. This workflow is not in the public 0.5.8 EXE.
+**Direct screen answers:** in the v0.7.0 source, **Answer screenshot** / **Ctrl+Alt+Enter** captures the selected display and streams the answer in the assistant without opening a review window or restoring the workspace. The primary display is the initial target. **Review / crop** can select another display for the session, inspect/crop the image and choose quality. Quick capture preserves native detail up to 3840 pixels on the longest edge. Only visible content is captured; off-screen text is not scrolled into view. Check for private information before invoking direct capture. Pixels are not saved in history; generated text follows your history settings.
 
-For interviewer audio, choose **System audio** or **Both** and press **Start listening**. System audio captures Windows playback, including call audio; in Both mode, automatic question drafting uses the system stream to avoid treating your own microphone speech as interviewer questions. Enable automatic answers if desired. Headphones help prevent duplicate pickup.
+**Interviewer audio:** choose **System audio** or **Both**, then **Start listening**. System audio captures Windows playback, including call audio. In Both mode, automatic drafting uses the system stream to avoid treating your microphone speech as interviewer questions. Headphones reduce duplicate pickup. New installs use VERBATIM transcription; existing explicit preferences are retained. Corrections and unfinished constraints are preserved for review, and detected source overlap holds automatic drafting.
 
-### Unreleased 0.7.0 quality and recovery candidate
+**Recovery and quality:** the glass overlay shows source activity, provider failures/cooldowns and explicit retry or fresh screenshot capture. Developer tooling includes stage timings, Python/SQLite/screenshot/resume benchmarks in a restricted runner, non-overwriting profile backup/restore, signature gates and a hosted disposable Windows installer lifecycle. Generated code is not executed by the desktop app.
 
-- Expanded coding, SQL, diagram, small-text and ambiguity benchmarks; generated Python/SQLite run only in a separate restricted developer runner.
-- Source activity, provider recovery/cooldown and explicit retry or fresh screenshot capture in the glass overlay.
-- VERBATIM for new installs, original transcript corrections retained, and review when both audio sources overlap.
-- Content-free stage timing exports, per-user installer builds, signature checks and profile backup/restore tools.
+[Quality and recovery details](docs/QUALITY_AND_RECOVERY.md) · [Current validation](docs/VALIDATION.md) · [Production readiness](docs/PRODUCTION_READINESS.md)
 
-See the [quality, recovery and update guide](docs/QUALITY_AND_RECOVERY.md) for results, commands and remaining acceptance checks. This is an unsigned candidate: actual signing, human voice trials and wider device/accessibility/installer testing remain pending. Public download links above still refer to the published 0.5.8 release.
+## Validation and remaining checks
 
-### Code signing policy and hands-on validation
+The latest recorded code validation, at commit `f9ef0a1`, passed [Windows verification and restricted evaluation](https://github.com/AYASKA-in/parakeet-rea-studio/actions/runs/39569655493). It includes **120 deterministic tests** plus packaged UI, production, recovery, latency, restore, portable and source-package checks. This is evidence for the candidate code, not a qualification of the older published EXE or every real-world setup.
 
-Current releases are **unsigned**. Read the [code signing policy](docs/CODE_SIGNING.md) and [voice, Narrator, device and disposable installer acceptance guide](docs/EXTERNAL_ACCEPTANCE.md). Prepared checks are distinct from completed acceptance results.
+| Check | Recorded result / limit |
+|---|---|
+| **Disposable Windows installer** | Install → launch → encrypted context/key save → normal uninstall → retained-profile check → reinstall → local mock answer → second uninstall passed. Full installation-directory removal, HKCU registration and desktop/Start Menu shortcut cleanup were verified on a fresh hosted Windows VM. |
+| **Windows accessibility** | Native UI Automation exposed named workspace controls, the transcript log and save status. Spoken Narrator acceptance remains pending. |
+| **Device-test preparation** | Passed with recording off, no saved raw audio and no cloud requests. Actual voice, routing and device events require the operator's later participation. |
+| **Signing** | Publisher/timestamp gates are implemented; no signing identity/service has been approved. Artifacts remain unsigned. |
+| **Still needed** | Consented human speech/overlap trials; spoken Narrator and real scaling; broader USB/Bluetooth/routing/hotplug checks; manual installer wizard, UAC/multiple-account/installed-upgrade/rollback checks; and signed-download acceptance. |
+
+Earlier physical sleep/wake and 60/120-minute endurance receipts apply to their recorded candidates. They are not automatically fresh v0.7.0 hardware or endurance results. Small synthetic benchmark results do not establish universal transcription, screenshot or answer accuracy.
+
+Follow the [hands-on acceptance guide](docs/EXTERNAL_ACCEPTANCE.md). The recorder starts only after its explicit Start action; cloud evaluation requires separate consent. The installer lifecycle script refuses personal computers and self-hosted runners. Never use the disposable-host flag as a way to test installation in your normal account.
+
+## Code signing policy
+
+**Current builds are unsigned.** The [signing policy and application draft](docs/CODE_SIGNING.md) document the publisher/timestamp gates, build provenance and remaining owner/provider approval. A prepared application or successful build is not a trusted signature.
+
+Alternatives checked on **21 October 2026**; eligibility, availability and prices can change:
+
+| Route | Cost and requirements |
+|---|---|
+| [SignPath Foundation](https://signpath.org/terms.html) | Free for accepted open-source projects. Project review, enrollment and release approval are required; this project has no approval yet. |
+| [Microsoft Store MSIX](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options) | Microsoft signs approved Store MSIX packages free. Requires separate packaging, account/certification and compatibility work. It does not sign the existing GitHub EXE installer. |
+| [Paid individual certificate](https://www.ssl.com/products/software-integrity/code-signing/iv/) | SSL.com lists an individual certificate from **US$129/year**, plus cloud-signing subscription or compliant key-storage costs. Identity validation is required; confirm country eligibility and the full checkout price before buying. |
+| [Azure Artifact Signing](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options) | Approximately US$10/month, subject to identity validation and regional eligibility. Individual enrollment is currently limited to the US and Canada. |
+| [Certum open-source cloud signing](https://shop.certum.eu/open-source-code-signing-on-simplysign.html) | Advertised from €49 but marked out of stock when checked; do not rely on immediate availability. |
+
+Self-signed certificates are for controlled development/testing, not public publisher trust. A publicly trusted signature still does not guarantee immediate SmartScreen reputation. See [Microsoft's signing guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options). No certificate purchase, service enrollment or Store submission is performed by building this repository.
