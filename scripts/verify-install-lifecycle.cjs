@@ -21,7 +21,7 @@ async function main(){
  const entries=()=>powershell("$ErrorActionPreference='Stop';$taskRows=@();foreach($taskHive in @('HKCU','HKLM')){foreach($taskKey in @(Get-ChildItem ($taskHive+':\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall') -ErrorAction SilentlyContinue)){ $taskItem=Get-ItemProperty -LiteralPath $taskKey.PSPath; if($taskItem.DisplayName -like 'Parakeet Studio*'){$taskRows+= [pscustomobject]@{hive=$taskHive;version=$taskItem.DisplayVersion;command=$taskItem.UninstallString;icon=$taskItem.DisplayIcon}}}};ConvertTo-Json -InputObject @($taskRows) -Compress");
  const shortcuts=()=>powershell("$ErrorActionPreference='Stop';$taskShell=New-Object -ComObject WScript.Shell;$taskRows=@();foreach($taskLocation in @('DesktopDirectory','Programs')){$taskFile=Join-Path ([Environment]::GetFolderPath($taskLocation)) 'Parakeet Studio.lnk';$taskExists=Test-Path -LiteralPath $taskFile;$taskTarget=$null;if($taskExists){$taskTarget=$taskShell.CreateShortcut($taskFile).TargetPath};$taskRows+=[pscustomobject]@{location=$taskLocation;exists=$taskExists;target=$taskTarget}};ConvertTo-Json -InputObject @($taskRows) -Compress");
  const install=async()=>{safe();attempted=true;await run(setup,['/S','/currentuser','/D='+target.install],{env,windowsHide:true,timeout:150000});await fs.access(exe);};
- const uninstall=async()=>{safe();const names=await fs.readdir(target.install);const name=names.find(x=>/^Uninstall.*\.exe$/i.test(x));assert.ok(name,'Expected uninstaller missing');await run(path.join(target.install,name),['/S','/currentuser','_?='+target.install],{env,windowsHide:true,timeout:90000});for(let i=0;i<40;i++){try{await fs.access(exe);}catch{return;}await pause(250);}assert.fail('Installed application remains after uninstall');};
+ const uninstall=async()=>{safe();const names=await fs.readdir(target.install);const name=names.find(x=>/^Uninstall.*\.exe$/i.test(x));assert.ok(name,'Expected uninstaller missing');await run(path.join(target.install,name),['/S','/currentuser'],{env,windowsHide:true,timeout:90000});for(let i=0;i<240;i++){try{await fs.access(target.install);}catch(error){if(error.code==='ENOENT')return;throw error;}await pause(250);}assert.fail('Installation directory remains after normal self-copy uninstall');};
  const launch=async()=>{app=await _electron.launch({executablePath:exe,args:[],env,timeout:45000});assert.equal(await app.evaluate(({app})=>app.getVersion()),version);const page=await app.firstWindow();await page.waitForFunction(()=>document.querySelector('#connection-status')?.textContent!=='Checking connection');return page;};
  const close=async()=>{await app?.close();app=null;};
  try{
@@ -41,7 +41,7 @@ async function main(){
   await close();
   const before=await fs.readFile(path.join(profile,'workspace.json'),'utf8');assert.ok(before.includes('parakeet-workspace-dpapi-v1'));assert.ok(!before.includes('SYNTHETIC_INSTALL_RETAINED_CONTEXT'));
   await uninstall();assert.deepEqual(await entries(),[]);assert.ok((await shortcuts()).every(x=>!x.exists));assert.equal(await fs.readFile(path.join(profile,'workspace.json'),'utf8'),before);
-  await fs.access(path.join(profile,'Local State'));await fs.access(path.join(profile,'settings.json'));
+  await fs.access(path.join(profile,'Local State'));await fs.access(path.join(profile,'settings.json'));report.profileRetained=true;
   report.checks.push({name:'Uninstall removes app, registration and shortcuts; retains encrypted profile and Local State',passed:true});
   await install();page=await launch();assert.equal(await app.evaluate(({app})=>app.getPath('userData')),profile);
   assert.equal((await page.evaluate(()=>window.copilot.loadWorkspace())).context.resume,'SYNTHETIC_INSTALL_RETAINED_CONTEXT');
@@ -52,7 +52,7 @@ async function main(){
  finally{
   await close().catch(()=>{});
   if(attempted){try{await fs.access(exe);await uninstall();}catch(error){if(error.code!=='ENOENT'){report.cleanupFailure=error.message;report.passed=false;process.exitCode=1;}}}
-  await new Promise(r=>server.close(r));report.localMockRequests=requests;report.profileRetained=Boolean(profile);report.completedAt=new Date().toISOString();await fs.writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+  await new Promise(r=>server.close(r));report.localMockRequests=requests;report.profileCreated=Boolean(profile);report.completedAt=new Date().toISOString();await fs.writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
  }
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
