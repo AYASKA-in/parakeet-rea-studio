@@ -19,3 +19,6 @@ module.exports.gradeStructured=gradeStructured;
 
 function normalizeNumericGrouping(text) { return String(text).replace(/\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/g,number=>number.replaceAll(',','')); }
 module.exports.normalizeNumericGrouping=normalizeNumericGrouping;
+
+function criticalTokenMissing(tokens,text,{numericGrouping=false}={}){const normalize=value=>{const normalized=String(value).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim();return numericGrouping?normalizeNumericGrouping(normalized):normalized;};const answer=normalize(text),word=char=>Boolean(char)&&/[\p{L}\p{N}_]/u.test(char);return tokens.filter(token=>{const target=normalize(token);let start=0,index;while((index=answer.indexOf(target,start))!==-1){const left=index===0||!word(target[0])||!word(answer[index-1]),right=index+target.length===answer.length||!word(target.at(-1))||!word(answer[index+target.length]);if(left&&right)return false;start=index+1;}return true;});}
+module.exports.criticalTokenMissing=criticalTokenMissing;

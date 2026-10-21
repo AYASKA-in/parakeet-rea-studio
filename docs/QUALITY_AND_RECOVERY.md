@@ -20,7 +20,7 @@ New installations default to VERBATIM to help retain constraints; an explicitly 
 
 Consented human recordings are a separate acceptance step. Run npm run eval:record to open a local recorder with capture off. Only Start begins microphone capture; Stop saves a plaintext WAV and reference manifest under ignored test-results. It makes no cloud calls and does not use the normal profile. Use harmless speech, verify the reference against what was actually spoken, and keep recordings private. The cloud-consent and non-confidential-content declarations must be true before importing. The human-audio loader rejects missing consent, duplicate IDs, path escapes and checksum mismatches.
 
-For a consented manifest, run node scripts/evaluate.cjs --live --kind=asr --audio-manifest=ABSOLUTE_MANIFEST_PATH --allow-human-audio --split=reserved --model=YOUR_TRANSCRIPTION_MODEL --max-calls=1. Raw human transcript text is omitted from reports. Word-error and critical-token results still need numeric-format and identifier adjudication. Accent/overlap labels are self-reported; one speaker cannot establish broad accent coverage. The user deferred the voice check; no human audio was recorded or uploaded in this round.
+For a consented manifest, run node scripts/evaluate.cjs --live --kind=asr --audio-manifest=ABSOLUTE_MANIFEST_PATH --allow-human-audio --split=reserved --model=YOUR_TRANSCRIPTION_MODEL --max-calls=1 --transcription-mode=VERBATIM. Raw human transcript text is omitted from reports. Critical-token matching uses token boundaries, preventing not from matching nothing or 15 from matching 150; decimal punctuation remains significant. A separate numeric-grouping adjudication can equate 100,000 and 100000 without rewriting original receipts. Word-error and critical-token results still need numeric-format and identifier adjudication. Accent/overlap labels are self-reported; one speaker cannot establish broad accent coverage. The user deferred the voice check; no human audio was recorded or uploaded in this round.
 
 ## Latency and recovery
 
@@ -32,7 +32,7 @@ The overlay shows microphone/call energy, quiet/off states, reconnecting or gap 
 
 ## Installer, verified updates and rollback
 
-Builds now include a per-user NSIS installer and portable EXE. Installer uninstall is configured to retain app data. Installer payload checks compare app/helper/ASAR against the tested unpacked build without installing into the user's Windows account. Actual install/uninstall and upgrade acceptance in a disposable Windows account remain required.
+Builds now include a per-user NSIS installer and portable EXE. Build commands explicitly disable publishing; release publication is a separate maintainer action. Installer uninstall is configured to retain app data. Installer payload checks compare app/helper/ASAR against the tested unpacked build without installing into the user's Windows account. Actual install/uninstall and upgrade acceptance in a disposable Windows account remain required.
 
 No automatic downloader/updater is enabled. The verified update policy requires a matching SHA-256 and a valid Authenticode signature from an explicitly pinned publisher certificate. Use scripts/verify-update.ps1 to inspect a file; it never installs or executes it. Obtain the expected hash and publisher pin through a trusted release channel. Unsigned experimental artifacts fail this verified-update gate.
 

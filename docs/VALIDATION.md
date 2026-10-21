@@ -2,7 +2,7 @@
 
 ## Version 0.7.0 candidate — quality, recovery and release tooling
 
-116 deterministic checks pass. Source checks include advanced Python/SQLite reference solutions, wrong-output and infinite-loop rejection, restricted execution probes, consented human-audio manifest validation, failure-inclusive stage diagnostics, source-overlap handling, explicit recovery controls and non-overwriting profile backup tests. Native source/packaged production and hardening checks, local fault/latency scenarios, actual portable launch, installer payload inspection, and Windows signature rejection checks are recorded separately under ignored test-results. Hosted CI validates the final committed candidate; it is not assumed green until its run completes.
+117 deterministic checks pass. Source checks include advanced Python/SQLite reference solutions, wrong-output and infinite-loop rejection, restricted execution probes, consented human-audio manifest validation, failure-inclusive stage diagnostics, source-overlap handling, explicit recovery controls and non-overwriting profile backup tests. Native source/packaged production and hardening checks, local fault/latency scenarios, actual portable launch, installer payload inspection, and Windows signature rejection checks are recorded separately under ignored test-results. Hosted CI validates the final committed candidate; it is not assumed green until its run completes.
 
 The real Windows restore regression caught a missing protected Local State key dependency. Backups now retain that file and reject an encrypted backup missing its key state. A restored isolated profile decrypted its actual workspace and credential and generated against a local mock. Normal user data was not read or changed.
 
