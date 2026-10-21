@@ -65,7 +65,16 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   });
   await page.fill('#question-input','Explain the synthetic screen.');
   await page.click('#screenshot-answer');await page.waitForFunction(()=>document.querySelector('#screenshot-answer').textContent==='Answer screenshot'&&!document.querySelector('#generate-button').hidden);
-  await page.evaluate(()=>window.copilot.exportDiagnostics());diagnostics=JSON.parse(await fs.readFile(path.join(output,'diagnostics.json'),'utf8'));
+  // UI controls become ready before durable save and metric recording finish.
+  // Wait for this attempt's recorded completion rather than reading the previous capture.
+  const metricDeadline=Date.now()+10000;
+  do {
+   await page.evaluate(()=>window.copilot.exportDiagnostics());
+   diagnostics=JSON.parse(await fs.readFile(path.join(output,'diagnostics.json'),'utf8'));
+   if(diagnostics.attempts>=4)break;
+   await delay(50);
+  } while(Date.now()<metricDeadline);
+  assert.equal(diagnostics.attempts,4,'Screenshot completion must be recorded after save');
   row=diagnostics.rows.at(-1);assert.equal(row.kind,'screen');assert.equal(row.outcome,'success');assert.ok(row.captureEndMs>=150);assert.ok(row.requestMs>=row.captureEndMs);assert.ok(row.firstRenderedMs>=row.firstTextMs);assert.ok(row.savedMs>=row.completedMs);
   assert.equal(diagnostics.attempts,4);assert.equal(diagnostics.rows[0].outcome,'cancelled');assert.equal(diagnostics.rows[0].completedMs,null);
   report.checks.push('successful capture included in end-to-end timing','first rendered text measured','cancelled answer not counted complete');

@@ -14,6 +14,7 @@
 - Visible slow-provider and paused-stream feedback with Stop answer. No automatic replay after partial output or continuous cloud health polling.
 - Content-free attempt timings through capture, queueing, text, completion and save; failed/cancelled attempts remain in their denominators.
 - Stronger employment-evidence cues, JavaScript evaluation in a restricted pinned Node container, clearer grounding contracts and stricter numeric/structured grading.
+- The packaged correction/screenshot verifier waits for the recorded save boundary rather than mistaking ready controls for completed diagnostics.
 - A bounded desktop benchmark with synthetic WebAudio input, real transcription/answer services, workspace/overlay DOM measurements and verified disk saves.
 
 ## Evidence and limitations
