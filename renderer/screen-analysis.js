@@ -1,3 +1,13 @@
+// Explicit one-action capture: no dialog, focus change, or persisted pixels.
+export async function captureScreenshotAnswer(bridge, defaultQuestion = '', {signal, displayId = ''} = {}) {
+  if (signal?.aborted) return null;
+  const captured = await bridge.captureScreenshot({displayId});
+  if (signal?.aborted) return null;
+  await bridge.validateScreenshot({captureId:captured.captureId});
+  if (signal?.aborted) return null;
+  return {imageDataUrl:captured.dataUrl, captureId:captured.captureId, screenQuality:'detail', question:defaultQuestion || 'Read the entire visible screenshot from top to bottom and solve its main question. For coding, identify the language, required interface, constraints and examples; provide an efficient complete solution with time and space complexity and check edge cases. If essential text is unreadable or missing, ask for it instead of guessing.'};
+}
+
 // Screen content is transient: captured only after an explicit action and never persisted.
 export async function reviewScreenshot(bridge, defaultQuestion = '', {signal} = {}) {
   const $ = selector => document.querySelector(selector);

@@ -91,3 +91,7 @@ Export diagnostic timings produces a content-free JSON report for up to 500 atte
 For keyboard cropping, focus the screen preview and press Enter to select its center. Arrow keys move the crop; Shift+arrows resize; Escape clears it. Tab reaches the remaining review controls. Resume source anchors locate quoted lines but do not verify qualifications or prove a generated claim.
 
 See [evaluation](EVALUATION.md), [local/offline deployment](LOCAL_MODE.md) and [hardware validation](HARDWARE_VALIDATION.md) for developer acceptance procedures and their limits.
+
+## Unreleased 0.6.1 direct capture
+
+Answer screenshot and Ctrl+Alt+Enter now immediately send the entire visible selected display without opening a dialog or bringing the workspace forward. Review / crop remains available for preview, display selection and cropping. Primary display is the initial selection; a display chosen in Review / crop applies to later quick captures during this app session. Quick capture uses Detail quality, up to 3840 px without upscaling. Only visible content is captured. Ensure the display is appropriate to send to your configured provider. Screenshots remain transient; generated text follows history settings. Coding answers should include the visible interface, constraints, complexity and edge cases; review and test code before using it.

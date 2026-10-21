@@ -45,7 +45,7 @@ function contrastCheck() {
       if(questionText.includes('Implement cache lookup and Do not use recursion. Use O(1) extra space and at most 2 passes.')) groupedConstraintsReceived=true;
       if (payload.contents.some(content => content.parts?.some(part => part.inlineData?.mimeType === 'image/jpeg'))) imageRequests++;
       const coding = payload.systemInstruction.parts[0].text.includes('This is a coding task.');
-      assert.equal(payload.generationConfig.thinkingConfig.thinkingLevel, coding ? 'MEDIUM' : 'LOW');
+      assert.equal(payload.generationConfig.thinkingConfig.thinkingLevel, questionText.includes('Solve this quick screenshot coding problem.') ? 'HIGH' : coding ? 'MEDIUM' : 'LOW');
       assert.ok(payload.systemInstruction.parts[0].text.includes('interview'));
       res.writeHead(200, { 'Content-Type': 'text/event-stream' });
       if (coding) {
@@ -379,21 +379,21 @@ function contrastCheck() {
     const primaryDisplay=await page.evaluate(async()=> (await window.copilot.listDisplays()).find(display=>display.primary));
     const fixtureScale=Math.min(1,primaryDisplay.width/1280,primaryDisplay.height/720);
     assert.deepEqual(receipts,{invalidDisplay:true,stale:true,current:true,width:Math.round(1280*fixtureScale),height:Math.round(720*fixtureScale)});
-    await page.click('#screenshot-answer'); await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
+    await page.click('#review-screenshot'); await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
     await electronApp.evaluate(({screen})=>screen.emit('display-metrics-changed',{},screen.getPrimaryDisplay(),['scaleFactor']));
     await page.waitForFunction(()=>document.querySelector('#screen-send').disabled && document.querySelector('#screen-error').textContent.includes('Display configuration changed'));
     await page.click('#screen-analysis-dialog button[value="cancel"]');
-    await page.click('#screenshot-answer'); await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
+    await page.click('#review-screenshot'); await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
     await page.evaluate(()=>{globalThis.restoreScreenClock=performance.now.bind(performance);performance.now=()=>globalThis.restoreScreenClock()+120001;});
     await page.waitForFunction(()=>document.querySelector('#screen-send').disabled && document.querySelector('#screen-error').textContent.includes('expired'));
     await page.evaluate(()=>{performance.now=globalThis.restoreScreenClock;delete globalThis.restoreScreenClock;});
     await page.click('#screen-analysis-dialog button[value="cancel"]');
     assert.equal(imageRequests,0,'Rejected or expired previews must never upload.');
-    await page.click('#screenshot-answer');
+    await page.click('#review-screenshot');
     await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
     await page.click('#screen-analysis-dialog button[value="cancel"]');
     assert.equal(imageRequests,0,'Cancel must not upload the screenshot.');
-    await page.click('#screenshot-answer');
+    await page.click('#review-screenshot');
     await page.locator('#screen-analysis-dialog').waitFor({state:'visible'});
     const previewBounds=await page.locator('#screen-preview-image').boundingBox();
     await page.mouse.move(previewBounds.x+previewBounds.width*.2,previewBounds.y+previewBounds.height*.2);
@@ -407,6 +407,17 @@ function contrastCheck() {
     await page.waitForFunction(() => !document.querySelector('.answer-question')?.textContent.includes('synthetic test screenshot'));
     await floating.click('#overlay-next');
     await page.waitForFunction(() => document.querySelector('.answer-question')?.textContent.includes('synthetic test screenshot'));
+    // A quick screenshot must work while minimized without opening a review or workspace.
+    await page.fill('#question-input','Solve this quick screenshot coding problem.');
+    await page.evaluate(()=>window.copilot.windowControl('minimize'));
+    const pagesBefore=electronApp.windows().length;
+    await page.evaluate(()=>document.querySelector('#screenshot-answer').click());
+    await page.waitForFunction(()=>document.querySelector('.answer-question')?.textContent.includes('quick screenshot coding problem') && !document.querySelector('#generate-button').hidden);
+    assert.equal(imageRequests,2,'Quick capture must upload exactly one image.');
+    assert.equal(await page.locator('#screen-analysis-dialog').evaluate(dialog=>dialog.open),false);
+    assert.equal(electronApp.windows().length,pagesBefore,'Quick capture must not create a window.');
+    assert.equal(await electronApp.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().includes('index.html')).isMinimized()),true,'Quick capture must not restore the workspace.');
+    await page.evaluate(()=>window.copilot.windowControl('show'));
     const beforeClear = await page.evaluate(() => window.copilot.loadWorkspace());
     await page.click('#clear-transcript');
     await page.click('#clear-transcript-dialog button[value="confirm"]');

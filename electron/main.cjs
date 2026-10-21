@@ -48,7 +48,7 @@ let displayRevision = 0;
 const runtime = new RuntimeGate();
 let shortcutRegistry;
 let audioTiming;
-const rendererRoot = path.resolve(__dirname, '../renderer');
+const rendererRoot = require('node:fs').realpathSync.native(path.resolve(__dirname, '../renderer'));
 const mainUrl = pathToFileURL(path.join(rendererRoot, 'index.html')).href;
 const overlayUrl = pathToFileURL(path.join(rendererRoot, 'overlay.html')).href;
 const matchesPage = (actual, expected) => typeof actual === 'string' && actual.split('#')[0] === expected;

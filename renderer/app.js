@@ -1,5 +1,5 @@
 import { renderAnswerText } from './answer-format.js';
-import { reviewScreenshot } from './screen-analysis.js';
+import { reviewScreenshot, captureScreenshotAnswer } from './screen-analysis.js';
 import { QuestionQueue, acceptQuestionSource } from './question-queue.js';
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -122,13 +122,14 @@ function browseAnswer(direction) {
   state.currentQuestion = exchanges[state.answerIndex].question; state.currentAnswer = exchanges[state.answerIndex].answer; state.answerError = exchanges[state.answerIndex].error || (exchanges[state.answerIndex].status === 'streaming' ? 'This draft was interrupted before completion.' : '');
   renderAnswer(); syncOverlay();
 }
-async function screenshotAnswer() {
+async function screenshotAnswer(review = false) {
   if (state.requestId || state.screenshotPending || !requireAI()) return;
   if (!bridge.captureScreenshot) { toast('Screen capture is unavailable in this app version.', true); return; }
   state.screenshotPending = true; renderAnswer(); syncOverlay();
   const controller=new AbortController();state.screenAbort=controller;
   try {
-    const image = await reviewScreenshot(bridge, $('#question-input').value.trim(),{signal:controller.signal});
+    const capture = review ? reviewScreenshot : captureScreenshotAnswer;
+    const image = await capture(bridge, $('#question-input').value.trim(),{signal:controller.signal,displayId:$('#screen-display').value});
     state.screenshotPending = false;
     if (image) await generateAnswer(image);
   } catch (error) { state.answerError = `Screenshot failed: ${message(error)}`; toast(state.answerError, true); }
@@ -657,6 +658,7 @@ function bindEvents() {
   $('#previous-answer').addEventListener('click', () => browseAnswer(-1));
   $('#next-answer').addEventListener('click', () => browseAnswer(1));
   $('#screenshot-answer').addEventListener('click', () => void screenshotAnswer());
+  $('#review-screenshot').addEventListener('click', () => void screenshotAnswer(true));
   $('#clear-transcript').addEventListener('click', () => void clearTranscript());
   $('#overlay-opacity').addEventListener('input', event => { $('#overlay-opacity-value').textContent = `${event.target.value}%`; });
   $('#overlay-opacity').addEventListener('change', event => void saveOverlayPreferences({ opacity: Number(event.target.value) / 100 }));

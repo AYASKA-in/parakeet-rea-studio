@@ -23,3 +23,8 @@ test('screen grading preserves negation instead of treating retry-401 text as a 
 test('ASR numeric adjudication removes thousands grouping without changing decimal commas or identifiers',()=>{
  const {normalizeNumericGrouping}=require('../evals/grade.cjs');assert.equal(normalizeNumericGrouping('100,000 and 12,5 and foo_bar 1,234.50'),'100000 and 12,5 and foo_bar 1234.50');assert.equal(normalizeNumericGrouping('do not use 50'),'do not use 50');
 });
+
+
+test('coding evaluation enforces declared input preservation in addition to output',()=>{
+ const {gradeCodeResults}=require('../evals/sandbox.cjs');const cases=[{input:[3,1],expected:[1,3],preserveInput:true}];assert.equal(gradeCodeResults([{output:[1,3],after:[1,3]}],cases),false);assert.equal(gradeCodeResults([{output:[1,3],after:[3,1]}],cases),true);assert.equal(gradeCodeResults([{output:[1,3],after:[1,3]}],[{...cases[0],preserveInput:false}]),true);
+});

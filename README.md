@@ -221,3 +221,9 @@ Contributions must be original or compatibly licensed. Quality benchmarks, broad
 Project source is [MIT-licensed](LICENSE). Dependencies retain their [own licenses](THIRD_PARTY_NOTICES.md).
 
 Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device watcher](docs/HARDWARE_VALIDATION.md), and [local/offline deployment scope](docs/LOCAL_MODE.md). Version 0.6 source adds bounded diagnostic timings, provider cooldowns, optional workspace encryption and memory-only history; the pinned download above remains the last published release until a new artifact is verified.
+
+### Unreleased 0.6.1 screenshot workflow
+
+**Answer screenshot** (Ctrl+Alt+Enter, including the floating assistant) immediately sends the whole selected display to your configured vision provider and streams the answer in the assistant. It does not open a review dialog or restore the workspace. The primary display is used initially; **Review / crop** lets you choose another display for this session, inspect the image, crop it and choose image quality. Quick capture uses native detail up to 3840 pixels on the longest edge. It captures visible content only, not hidden or scrolled-off content. Check the display for private information before pressing the direct action. Image pixels are not saved in history; generated questions and answers follow your history settings. Image understanding and code correctness depend on the model; unreadable text requires a clearer capture. This workflow is not in the public 0.5.8 EXE.
+
+For interviewer audio, choose **System audio** or **Both** and press **Start listening**. System audio captures Windows playback, including call audio; in Both mode, automatic question drafting uses the system stream to avoid treating your own microphone speech as interviewer questions. Enable automatic answers if desired. Headphones help prevent duplicate pickup.
