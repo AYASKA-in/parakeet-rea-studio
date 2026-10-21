@@ -74,3 +74,50 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node -e "require('node:child_process').execFileSync('docker',['pull',require('./evals/sandbox-image.json').image],{stdio:'inherit'})"
       - run: npm run test:eval-sandbox
+
+  publish-verified-070:
+    name: Publish verified v0.7.0 artifacts
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'AYASKA-in/parakeet-rea-studio' && github.ref == 'refs/heads/codex/release-0.7.0'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 8054f1330a013a423edd6fb7edb5d3c0e456bf70
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+      - name: Verify exact successful build and publish matching unsigned artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          @'
+          (function publishVerifiedRelease(){
+           const fs=require('node:fs'),crypto=require('node:crypto'),{execFileSync}=require('node:child_process'),assert=require('node:assert/strict');
+           const revision='8054f1330a013a423edd6fb7edb5d3c0e456bf70',runId='39582619004',repo='AYASKA-in/parakeet-rea-studio',tag='v0.7.0';
+           const gh=args=>execFileSync('gh',args,{encoding:'utf8',maxBuffer:4*1024*1024,stdio:['ignore','pipe','pipe']});
+           assert.equal(process.env.GITHUB_REPOSITORY,repo);
+           const run=JSON.parse(gh(['run','view',runId,'--repo',repo,'--json','headSha,conclusion']));
+           assert.equal(run.headSha,revision);assert.equal(run.conclusion,'success');assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),revision);
+           gh(['run','download',runId,'--repo',repo,'--name','windows-and-source','--dir','dist']);
+           execFileSync(process.execPath,['scripts/check-release.cjs'],{stdio:'inherit',windowsHide:true});
+           const names=['Parakeet-Studio-0.7.0-portable.exe','Parakeet-Studio-0.7.0-setup.exe','Parakeet-Studio-0.7.0-source.zip','SHA256SUMS.txt','release-manifest.json','dependency-inventory.json'];
+           const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+           const hashes=Object.fromEntries(names.map(name=>[name,{digest:'sha256:'+hash('dist/'+name),size:fs.statSync('dist/'+name).size}]));
+           let notes=fs.readFileSync('docs/RELEASE_NOTES_0.7.0.md','utf8').replace(/\]\(([A-Z_]+\.md)\)/g,(_,file)=>'](https://github.com/'+repo+'/blob/'+tag+'/docs/'+file+')');
+           notes+='\n## Build provenance\n\nBuilt from commit `'+revision+'`. [Release CI](https://github.com/'+repo+'/actions/runs/'+runId+') passed Windows verification and restricted evaluation, including 120 deterministic tests and the disposable Windows installer lifecycle. These portable/setup EXEs are **unsigned**. No shared API key is included.\n';
+           const notesFile=process.env.RUNNER_TEMP+'/parakeet-0.7.0-notes.md';fs.writeFileSync(notesFile,notes);
+           gh(['release','create',tag,'--repo',repo,'--target',revision,'--title','Parakeet Studio 0.7.0 — Experimental Windows (unsigned)','--notes-file',notesFile,'--draft','--prerelease',...names.map(name=>'dist/'+name)]);
+           const draft=JSON.parse(gh(['api','repos/'+repo+'/releases/tags/'+tag]));
+           assert.equal(draft.draft,true);assert.equal(draft.prerelease,true);assert.equal(draft.assets.length,names.length);
+           for(const name of names){const asset=draft.assets.find(x=>x.name===name);assert.ok(asset,'Missing uploaded asset: '+name);assert.equal(asset.size,hashes[name].size);assert.equal(asset.digest,hashes[name].digest,'Uploaded digest differs: '+name);}
+           gh(['release','edit',tag,'--repo',repo,'--draft=false','--prerelease']);
+           const published=JSON.parse(gh(['api','repos/'+repo+'/releases/tags/'+tag]));assert.equal(published.draft,false);assert.equal(published.prerelease,true);
+           const ref=JSON.parse(gh(['api','repos/'+repo+'/git/ref/tags/'+tag]));assert.equal(ref.object.type,'commit');assert.equal(ref.object.sha,revision);
+           console.log(JSON.stringify({release:published.html_url,sourceRevision:revision,unsigned:true,uploadedDigestsVerified:true,assets:published.assets.map(a=>({name:a.name,size:a.size,digest:a.digest,url:a.browser_download_url}))},null,2));
+          })();
+          '@ | node
