@@ -78,3 +78,11 @@ Schema 3 receipts separate provider, grading and total duration, plus ASR end-of
 Structured JSON grading now requires the declared fields, rejects extra guessed fields by default and accepts a complete JSON fence. Arbitrary prose around JSON fails that exact-output contract. Human audio manifests may set criticalCaseSensitive=true for identifier-sensitive clips; legacy word matching remains case insensitive. This flag does not establish reliable recognition of spoken identifier casing.
 
 See [the small live development sample](V0_8_SMOKE_2026_10_22.md) for scope and timing limitations.
+
+## Endpoint timing and the 22 October baseline
+
+[The 50-request study](V0_8_BASELINE_2026_10_22.md) separates its 46-case baseline from four unsuccessful prompt follow-ups. Its original source hashes and grades are frozen; subsequent rubric and timing fixes are not new provider evidence.
+
+New Gemini ASR receipts use `asrEndpointTimingVersion: last-frame-submitted-v1`. `asrEndToFinalMs` measures monotonic last-frame submission through drain acknowledgement, including final replay pacing. It is not acoustic speech-end or first-transcript latency. Unversioned endpoint samples are reported separately as `unversionedAsrEndMs`, never mixed into the corrected quantiles. The earlier replay loop started its timer after the final 200 ms pacing wait.
+
+Numeric critical-token grading rejects signed/decimal/grouped/exponent fragments. Grounding fixtures explicitly define positive-claim support, absent/conflicting evidence and explicit denial. Current totals: 64 coding, 62 screen, 63 grounding cases; 100 synthetic ASR clips and 100 routing sequences. The realtime suite includes all 22 development cases when its explicit request cap permits. New grounding contracts and corrected ASR endpoint measurements still require fresh live validation.

@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "scope": "Finite public developer cases; family variants and repeated runs are correlated. Not a blinded holdout, correctness guarantee or production SLO.",
+  "timingNotes": "Provider intervals exclude code execution/grading; ASR provider intervals include clip replay. No first-token, question-end or semantic useful-answer latency is inferred. Only last-frame-submitted-v1 receipts contribute to asrEndToFinalMs; unversioned endpoint values stay separate as unversionedAsrEndMs. Historical receipts without stage timings remain unknown.",
+  "groups": [
+    {
+      "group": "coding/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 14,
+      "attempted": 14,
+      "passed": 14,
+      "failed": 0,
+      "planned": 14,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 14,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 14,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 14,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 14,
+          "p50": 5718,
+          "p95": 6634
+        },
+        "providerMs": {
+          "samples": 14,
+          "p50": 4508,
+          "p95": 5470
+        },
+        "gradingMs": {
+          "samples": 14,
+          "p50": 1171,
+          "p95": 1631
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "unversionedAsrEndMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "screens/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 12,
+      "attempted": 12,
+      "passed": 12,
+      "failed": 0,
+      "planned": 12,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 12,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 12,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 12,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 12,
+          "p50": 3055,
+          "p95": 7314
+        },
+        "providerMs": {
+          "samples": 12,
+          "p50": 2588,
+          "p95": 6151
+        },
+        "gradingMs": {
+          "samples": 12,
+          "p50": 1,
+          "p95": 1969
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "unversionedAsrEndMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "resumes/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 10,
+      "attempted": 10,
+      "passed": 9,
+      "failed": 1,
+      "planned": 10,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 0.9,
+      "distinctFamilies": 10,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 10,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 9,
+        "incorrect": 1,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 10,
+          "p50": 1293,
+          "p95": 1658
+        },
+        "providerMs": {
+          "samples": 10,
+          "p50": 1292,
+          "p95": 1656
+        },
+        "gradingMs": {
+          "samples": 10,
+          "p50": 1,
+          "p95": 1
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "unversionedAsrEndMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "asr/gemini/gemini-3.5-transcribe-live/VERBATIM",
+      "receipts": 5,
+      "attempted": 5,
+      "passed": 5,
+      "failed": 0,
+      "planned": 5,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 5,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 5,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 5,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 5,
+          "p50": 3539,
+          "p95": 4197
+        },
+        "providerMs": {
+          "samples": 5,
+          "p50": 3517,
+          "p95": 4178
+        },
+        "gradingMs": {
+          "samples": 5,
+          "p50": 2,
+          "p95": 2
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "unversionedAsrEndMs": {
+          "samples": 5,
+          "p50": 268,
+          "p95": 274
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "asr/gemini/gemini-3.5-transcribe-live/SMART",
+      "receipts": 5,
+      "attempted": 5,
+      "passed": 4,
+      "failed": 1,
+      "planned": 5,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 0.8,
+      "distinctFamilies": 5,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 5,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 4,
+        "incorrect": 1,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 5,
+          "p50": 3525,
+          "p95": 4302
+        },
+        "providerMs": {
+          "samples": 5,
+          "p50": 3505,
+          "p95": 4280
+        },
+        "gradingMs": {
+          "samples": 5,
+          "p50": 1,
+          "p95": 2
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "unversionedAsrEndMs": {
+          "samples": 5,
+          "p50": 278,
+          "p95": 316
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    }
+  ],
+  "clientDate": "2026-10-22",
+  "phase": "baseline",
+  "sourceCommitAtStart": "9a37cbc818e9f6f513fc535a6bcf3e33c3a2d5d4",
+  "authorizedAdditionalRequests": 50,
+  "requestsInPhase": 46,
+  "contentFree": true,
+  "sourceHashes": {
+    "scripts/evaluate.cjs": "a39e4d3ac90ae3bbc813d6eb80aced1707416427d18ba6b05282ecceb3d7c486",
+    "evals/corpus.cjs": "3d3f899b5528b0b24f1cd580a7c5b2b1d405e592c8b5d00358fc670bb0c00acd",
+    "evals/advanced.cjs": "2509374ef663aac3f017bbf255324d0d84a8f4df944a87177a89621fc169e8ff",
+    "evals/v08.cjs": "e97e45c08fcfa4cc7184fd96b8a6e63a6defc8bce98a41942f259d61ede1f0b9",
+    "evals/contracts.cjs": "8d224bdad1eab4fb53b6843eb222ce650964ff6732507c69c775dedc0faec419",
+    "evals/sandbox-image.json": "fa9766fda1235c0462951fa1eed5a202a1b76e4ae9356b66aed58fbd95144e02",
+    "evals/node-sandbox-image.json": "d7b333e9572cc9c23932fd4206593f90029d762c737d054a1f1c5b05c0dea98e",
+    "evals/grade.cjs": "ca0fddeaed0541b3723af4d01ad9db0cebdc3c7dabfef44744022541b7d4ec23",
+    "evals/sandbox.cjs": "22f3101c4d0752cfe6132e79feb133e6a0a118f6bddebd6ade43b2f365b00194",
+    "electron/core.cjs": "051fcc449e229d9b9bbed14d82fd665fe10938d95ce68cb45b378dd69e93a9f8",
+    "electron/grounding.cjs": "8e23184e40c5cd847761d980a28fcbd7a41b84089b4fd46d4f1a28a12e5911d7",
+    "evals/human-audio.cjs": "7749186ea3adaee4c6e92651846ece02cbfc8d134dc29a885a12a7de2fbd9df7",
+    "electron/gemini-live.cjs": "e76be6f3b7bc4b996e154efa93b736cdc61d84bf3ff351bb094913d26775f6d5"
+  },
+  "aggregationSourceHash": "cad1d665ec816596d1690e73108f4c462cec83b12d9afd824867f8cac48124c4",
+  "measurementNote": "Original unversioned ASR endpoint values were measured after the final pacing wait. They remain separate from corrected last-frame measurements; no provider rerun or first-token latency is inferred."
+}

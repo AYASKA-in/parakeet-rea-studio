@@ -12,7 +12,7 @@ const STORAGE_KEY = 'parakeet-studio-workspace-v1';
 const emptyContext = () => ({ role: '', company: '', resume: '', jobDescription: '', notes: '' });
 const state = {
   context: emptyContext(), sessions: [], active: null, view: 'workspace', style: 'concise',
-  settings: { provider: 'gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash-lite', transcriptionModel: 'gemini-3.5-transcribe-live', captureProtection: true, hasApiKey: false },
+  settings: { provider: 'gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash-lite', transcriptionModel: 'gemini-3.5-transcribe-live', transcriptionMode: 'VERBATIM', captureProtection: true, hasApiKey: false },
   listening: false, starting: false, capture: null, pendingTranscriptions: 0, requestId: null, notesRequestId: null,
   answerIndex: -1, screenshotPending: false, overlayPreferences: { opacity: 0.35, clickThrough: false, position: 'right' }, currentAnswer: '', currentQuestion: '', answerError: '', overlay: false, listeningStartedAt: 0, liveCleanup: [], livePCMPending: 0, stopping: false,
   interims: {}, liveStates: {}, levels:{}, providerStatus:{},
@@ -808,7 +808,7 @@ async function init() {
   for (const [name, value] of Object.entries(state.context)) { const input = $(`[name="${name}"]`, $('#context-form')); if (input) input.value = value; }
   $('#provider-url').value = state.settings.baseUrl; $('#answer-model').value = state.settings.model; $('#transcription-model').value = state.settings.transcriptionModel;
   $('#provider-type').value = state.settings.provider; $('#capture-protection').checked = state.settings.captureProtection !== false;
-  for (const [id, key, fallback] of [['data-policy','dataPolicy','unknown'],['answer-mode','answerMode','balanced'],['network-mode','networkMode','standard'],['coding-language','codingLanguage','auto'],['transcription-language','transcriptionLanguage',''],['transcription-mode','transcriptionMode','SMART']]) $(`#${id}`).value = state.settings[key] ?? fallback;
+  for (const [id, key, fallback] of [['data-policy','dataPolicy','unknown'],['answer-mode','answerMode','balanced'],['network-mode','networkMode','standard'],['coding-language','codingLanguage','auto'],['transcription-language','transcriptionLanguage',''],['transcription-mode','transcriptionMode','VERBATIM']]) $(`#${id}`).value = state.settings[key] ?? fallback;
   $('#history-mode').value=state.settings.historyMode || 'persist';$('#retention-days').value=String(state.settings.retentionDays || 0);$('#encrypt-workspace').checked=state.settings.encryptWorkspace===true;
   $('#transcription-vocabulary').value = (state.settings.transcriptionVocabulary || []).join(', ');
   try { const saved = localStorage.getItem('parakeet-auto-draft'); if (saved !== null) $('#auto-answer').checked = saved === 'true'; } catch {}

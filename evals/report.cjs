@@ -22,12 +22,12 @@ function qualitySummary(reports){
    seen.add(row.id);if(typeof row.family==='string')g.families.add(row.family);
    const outcome=outcomes.includes(row.outcome)?row.outcome:row.passed?'pass':row.error?'unclassified-error':'incorrect';
    if((outcome==='pass')!==row.passed)throw new Error('Receipt outcome contradicts the grade.');
-   g.rows.push({passed:row.passed,outcome,elapsedMs:row.elapsedMs,providerMs:row.providerMs,gradingMs:row.gradingMs,asrEndToFinalMs:row.asrEndToFinalMs});
+   g.rows.push({passed:row.passed,outcome,elapsedMs:row.elapsedMs,providerMs:row.providerMs,gradingMs:row.gradingMs,asrEndToFinalMs:report.kind==='asr'&&report.asrEndpointTimingVersion==='last-frame-submitted-v1'?row.asrEndToFinalMs:null,unversionedAsrEndMs:report.kind==='asr'&&report.asrEndpointTimingVersion!=='last-frame-submitted-v1'?row.asrEndToFinalMs:null});
   }
  }
  return {
   schemaVersion:1,scope:'Finite public developer cases; family variants and repeated runs are correlated. Not a blinded holdout, correctness guarantee or production SLO.',
-  timingNotes:'Provider intervals exclude code execution/grading; ASR provider intervals include clip replay. No first-token, question-end or semantic useful-answer latency is inferred. Historical receipts without stage timings remain unknown.',
+  timingNotes:'Provider intervals exclude code execution/grading; ASR provider intervals include clip replay. No first-token, question-end or semantic useful-answer latency is inferred. Only last-frame-submitted-v1 receipts contribute to asrEndToFinalMs; unversioned endpoint values stay separate as unversionedAsrEndMs. Historical receipts without stage timings remain unknown.',
   groups:[...groups.values()].map(g=>({
    group:g.group,receipts:g.receipts,attempted:g.attempted,passed:g.rows.filter(r=>r.passed).length,failed:g.rows.filter(r=>!r.passed).length,
    planned:g.unknownPlans?null:g.planned,unattempted:g.unknownPlans?null:g.planned-g.attempted,receiptsWithoutPlan:g.unknownPlans,
@@ -35,7 +35,7 @@ function qualitySummary(reports){
    distinctFamilies:g.families.size,sourceRevisions:g.sources.size,mixedSourceRevisions:g.sources.size>1,
    syntheticReceipts:g.syntheticReceipts,humanConsentedReceipts:g.humanReceipts,
    outcomes:Object.fromEntries(outcomes.map(o=>[o,g.rows.filter(r=>r.outcome===o).length])),
-   durations:Object.fromEntries(['elapsedMs','providerMs','gradingMs','asrEndToFinalMs'].map(name=>[name,summary(g.rows.map(r=>r[name]))])),
+   durations:Object.fromEntries(['elapsedMs','providerMs','gradingMs','asrEndToFinalMs','unversionedAsrEndMs'].map(name=>[name,summary(g.rows.map(r=>r[name]))])),
    evidenceSufficientForProductionClaim:false
   }))
  };

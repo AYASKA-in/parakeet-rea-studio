@@ -20,5 +20,19 @@ module.exports.gradeStructured=gradeStructured;
 function normalizeNumericGrouping(text) { return String(text).replace(/\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/g,number=>number.replaceAll(',','')); }
 module.exports.normalizeNumericGrouping=normalizeNumericGrouping;
 
-function criticalTokenMissing(tokens,text,{numericGrouping=false,caseSensitive=false}={}){const normalize=value=>{const normalized=(caseSensitive?String(value).normalize('NFKC'):String(value).normalize('NFKC').toLowerCase()).replace(/\s+/g,' ').trim();return numericGrouping?normalizeNumericGrouping(normalized):normalized;};const answer=normalize(text),word=char=>Boolean(char)&&/[\p{L}\p{N}_]/u.test(char);return tokens.filter(token=>{const target=normalize(token);let start=0,index;while((index=answer.indexOf(target,start))!==-1){const left=index===0||!word(target[0])||!word(answer[index-1]),right=index+target.length===answer.length||!word(target.at(-1))||!word(answer[index+target.length]);if(left&&right)return false;start=index+1;}return true;});}
+function criticalTokenMissing(tokens,text,{numericGrouping=false,caseSensitive=false}={}){
+ const normalize=value=>{const normalized=(caseSensitive?String(value).normalize('NFKC'):String(value).normalize('NFKC').toLowerCase()).replace(/\s+/g,' ').trim();return numericGrouping?normalizeNumericGrouping(normalized):normalized;};
+ const answer=normalize(text),word=char=>Boolean(char)&&/[\p{L}\p{N}_]/u.test(char);
+ return tokens.filter(token=>{
+  const target=normalize(token),numeric=/^[+\-]?\d+(?:\.\d+)?(?:e[+\-]?\d+)?$/iu.test(target);let start=0,index;
+  while((index=answer.indexOf(target,start))!==-1){
+   const before=answer[index-1]||'',after=answer.slice(index+target.length);
+   let left=index===0||!word(target[0])||!word(before),right=!after||!word(target.at(-1))||!word(after[0]);
+   // Exact numeric constraints must not pass as part of a signed value, decimal or grouped number.
+   if(numeric){left=left&&!word(before)&&!/[.+\-\u2212]/u.test(before)&&!(before===','&&/\d/.test(answer[index-2]||'')&&/^\d{3}(?:[.,e]|$)/iu.test(target));right=right&&!/^\.\d/u.test(after)&&!/^,\d{3}(?!\d)/u.test(after);}
+   if(left&&right)return false;start=index+1;
+  }
+  return true;
+ });
+}
 module.exports.criticalTokenMissing=criticalTokenMissing;

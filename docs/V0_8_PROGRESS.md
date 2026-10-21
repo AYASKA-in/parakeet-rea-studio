@@ -1,6 +1,6 @@
 # v0.8.0 development progress
 
-Status: source changes only, 21 October 2026. Published v0.7.0 EXEs do not contain this work. Runtime package version remains 0.7.0 until a release candidate is prepared.
+Status: source changes only, updated 22 October 2026. Published v0.7.0 EXEs do not contain this work. Runtime package version remains 0.7.0 until a release candidate is prepared.
 
 ## First implementation slice
 
@@ -37,9 +37,19 @@ CI is configured to run the new desktop scenarios against the packaged app and r
 - Six real Gemini smoke cases passed their finite rubrics. See [dated evidence](V0_8_SMOKE_2026_10_22.md) for the small sample and latency limits. This does not qualify the larger holdout.
 - Added visible slow-response/paused-stream states and Stop answer in the overlay, with two new cancellation/fault scenarios. No automatic replay or provider-health polling was introduced.
 
+## Third implementation slice — bounded live baseline
+
+- Completed the newly authorized 50 synthetic Gemini requests: 46 baseline attempts and four targeted follow-ups. Coding 14/14, screens 12/12, grounding 9/10; paired ASR literal-preservation grades VERBATIM 5/5 and SMART 4/5. These are finite developer-rubric results, not general accuracy claims.
+- A prompt experiment passed only 1/4 follow-ups and was reverted. Three new grounding fixtures now accompany explicit field definitions; this revised contract still needs a fresh live run. Grounding corpus total is now 63; coding/screens remain 64/62.
+- Fixed numeric critical-token false positives and ASR endpoint timing that omitted the final pacing wait. Legacy endpoint samples remain separate from corrected intervals. Added fake-clock, failure, loopback ASR and mixed-version reporting regressions.
+- Aligned renderer fallback with the existing VERBATIM default; explicit preferences remain intact.
+- 150 deterministic tests, local CLI pipeline and UI validation passed. Published EXEs remain unchanged; no cloud allowance remains.
+
+See [the full baseline and unsuccessful experiment](V0_8_BASELINE_2026_10_22.md), including measured provider intervals, frozen aggregates and remaining gates.
+
 ## Remaining work, in order
 
-1. Broaden the initial six-case live baseline; author a fresh independent private holdout and expand language/vision coverage. Scoring/input-contract validation and the first content-free baseline are now implemented.
+1. Validate the clarified grounding contract, author a fresh independent private holdout and expand language/vision coverage. Scoring/input-contract validation and the first content-free baseline are now implemented.
 2. Validate endpoint/correction behavior on consented real speech, including accents, long pauses and overlap. Current quiet windows are retained until evidence supports shortening them.
 3. Expand semantic screen contract extraction and resume claim/date/metric grounding beyond employment cues.
 4. Measure network bottlenecks and choose task/model/image optimizations using accuracy and end-to-end latency together. No unapproved parallel requests, paid fallback or new cloud benchmark budget is introduced here.

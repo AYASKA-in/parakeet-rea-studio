@@ -32,7 +32,7 @@ test('language-specific fenced extraction cannot accidentally execute a differen
  assert.throws(()=>extractSolution('```python\ndef solve(x): return x\n```','javascript'),/fenced/);
 });
 test('expanded public development corpus has unique families and declared execution contracts',()=>{
- const c=require('../evals/v08.cjs');assert.equal(c.coding.length,6);assert.equal(c.screens.length,5);assert.equal(c.grounding.length,8);
+ const c=require('../evals/v08.cjs');assert.equal(c.coding.length,6);assert.equal(c.screens.length,5);assert.equal(c.grounding.length,11);
  const all=[...c.coding,...c.screens,...c.grounding];assert.equal(new Set(all.map(r=>r.id)).size,all.length);for(const row of all)assert.equal(row.split,'development');
  for(const [kind,rows]of Object.entries(require('../evals/corpus.cjs')))if(kind!=='routing')for(const row of rows)validateCase(row,kind);
 });
@@ -52,4 +52,31 @@ test('critical identifier grading can preserve case without changing legacy word
 
 test('employment preflight never promotes a document instruction into employment evidence',()=>{
  const row=require('../evals/v08.cjs').grounding.find(row=>row.id==='v08-grounding-source-injection');const assessment=require('../electron/grounding.cjs').groundingAssessment(row.question,row.resume);assert.equal(assessment.missingEmployer,'Google');assert.notEqual(assessment.status,'supported');
+});
+
+test('PCM endpoint timestamp precedes the final pacing wait and preserves every frame',async()=>{
+ const {replayPcm}=require('../evals/audio-replay.cjs');let clock=100;const input=Buffer.alloc(15000,7),frames=[],waits=[];
+ const result=await replayPcm(input,{send:frame=>frames.push(Buffer.from(frame)),now:()=>clock,wait:async ms=>{waits.push(ms);clock+=ms;}});
+ assert.deepEqual(Buffer.concat(frames),input);assert.deepEqual(frames.map(x=>x.length),[6400,6400,2200]);assert.deepEqual(waits,[200,200,200]);assert.equal(result.lastFrameSentAt,500);assert.equal(clock,700);
+ clock+=50;assert.equal(clock-result.lastFrameSentAt,250,'Drain latency must include the final pacing wait');
+});
+
+test('PCM replay rejects invalid samples before sending and stops after provider failure',async()=>{
+ const {replayPcm}=require('../evals/audio-replay.cjs');let sent=0;
+ for(const bytes of [Buffer.alloc(0),Buffer.alloc(1),'invalid'])await assert.rejects(replayPcm(bytes,{send:()=>sent++}),/PCM/);
+ assert.equal(sent,0);let checks=0;await assert.rejects(replayPcm(Buffer.alloc(12800),{send:()=>sent++,wait:async()=>{},assertHealthy:()=>{if(++checks===2)throw Error('quota');}}),/quota/);assert.equal(sent,1);
+});
+
+test('unversioned ASR endpoint intervals never enter corrected last-frame latency quantiles',()=>{
+ const old=receipt([{id:'old',passed:true,asrEndToFinalMs:270}],{kind:'asr',transcriptionMode:'VERBATIM'}),fresh=receipt([{id:'new',passed:true,asrEndToFinalMs:490}],{kind:'asr',transcriptionMode:'VERBATIM',asrEndpointTimingVersion:'last-frame-submitted-v1'});
+ const g=qualitySummary([old,fresh]).groups[0];assert.equal(g.attempted,2);assert.equal(g.durations.asrEndToFinalMs.samples,1);assert.equal(g.durations.asrEndToFinalMs.p50,490);assert.equal(g.durations.unversionedAsrEndMs.samples,1);assert.equal(g.durations.unversionedAsrEndMs.p50,270);
+});
+
+test('loopback ASR replay includes the final pacing wait before drain acknowledgement',async()=>{
+ const {WebSocketServer}=require('ws'),{GeminiLive}=require('../electron/gemini-live.cjs'),{replayPcm}=require('../evals/audio-replay.cjs');
+ const server=new WebSocketServer({port:0,host:'127.0.0.1'});await new Promise(resolve=>server.once('listening',resolve));let frames=0;const transcripts=[];
+ server.on('connection',socket=>socket.on('message',raw=>{const p=JSON.parse(raw);if(p.setup)socket.send(JSON.stringify({setupComplete:{}}));if(p.realtimeInput?.audio)frames++;if(p.realtimeInput?.audioStreamEnd)socket.send(JSON.stringify({serverContent:{inputTranscription:{text:'Return -1.',finished:true}}}));}));
+ const live=new GeminiLive({settings:{baseUrl:'http://127.0.0.1:'+server.address().port,transcriptionModel:'synthetic-only'},key:'local-only',onTranscript:x=>transcripts.push(x.text),onError:message=>{throw Error(message);}});
+ try{await live.start();const {lastFrameSentAt}=await replayPcm(Buffer.alloc(6400,8),{send:chunk=>live.send(chunk.buffer.slice(chunk.byteOffset,chunk.byteOffset+chunk.byteLength))});const drained=await live.stop();assert.equal(drained.complete,true);assert.equal(frames,1);assert.deepEqual(transcripts,['Return -1.']);assert.ok(performance.now()-lastFrameSentAt>=180,'Final replay pacing must remain inside the endpoint interval');}
+ finally{live.close();for(const socket of server.clients)socket.terminate();await new Promise(resolve=>server.close(resolve));}
 });
