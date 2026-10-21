@@ -1,5 +1,7 @@
 # Quality, recovery and release checks
 
+For unreleased v0.8 work, see [development progress](V0_8_PROGRESS.md) and [the implementation plan](V0_8_REALTIME_PLAN.md). Published v0.7.0 binaries do not include those changes.
+
 Version 0.7.0 is an unsigned experimental candidate. These changes improve measurement and safeguards; they do not certify perfect answers or production availability.
 
 ## Coding and screenshot evaluation

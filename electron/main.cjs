@@ -365,7 +365,7 @@ function registerHandlers() {
   handle('overlay:preferences:set', value => saveOverlayPreferences(value), true);
   handle('overlay:set', value => {
     void audioTiming?.setActive(Boolean(value?.listening) && !runtime.blocked);
-    overlayState = { recovery: {retryLabel:value?.recovery?.retryLabel==='Capture again'?'Capture again':'Retry answer',status:boundedText(value?.recovery?.status,140),wait:Math.min(300,Math.max(0,Number(value?.recovery?.wait)||0)),retry:Boolean(value?.recovery?.retry),needsSettings:Boolean(value?.recovery?.needsSettings),hasError:Boolean(value?.recovery?.hasError),sources:Array.isArray(value?.recovery?.sources)?value.recovery.sources.slice(0,2).map(source=>({label:source?.name==='system'?'Call audio':'Microphone',state:['off','active','quiet','reconnecting','review'].includes(source?.state)?source.state:'off'})):[]}, question: boundedText(value?.question, 12000), answer: boundedText(value?.answer, 200000), pendingQuestion:boundedText(value?.pendingQuestion,4000),pendingStatus:boundedText(value?.pendingStatus,240),pendingCanSend:Boolean(value?.pendingCanSend), listening: Boolean(value?.listening), generating: Boolean(value?.generating), answerIndex: Math.max(0, Math.min(10000, Number(value?.answerIndex) || 0)), answerCount: Math.max(0, Math.min(10000, Number(value?.answerCount) || 0)) };
+    overlayState = { recovery: {retryLabel:value?.recovery?.retryLabel==='Capture again'?'Capture again':'Retry answer',status:boundedText(value?.recovery?.status,140),wait:Math.min(300,Math.max(0,Number(value?.recovery?.wait)||0)),retry:Boolean(value?.recovery?.retry),needsSettings:Boolean(value?.recovery?.needsSettings),hasError:Boolean(value?.recovery?.hasError),sources:Array.isArray(value?.recovery?.sources)?value.recovery.sources.slice(0,2).map(source=>({label:source?.name==='system'?'Call audio':'Microphone',state:['off','active','quiet','reconnecting','review'].includes(source?.state)?source.state:'off'})):[]}, question: boundedText(value?.question, 12000), answer: boundedText(value?.answer, 200000), pendingQuestion:boundedText(value?.pendingQuestion,4000),pendingStatus:boundedText(value?.pendingStatus,240),pendingCanSend:Boolean(value?.pendingCanSend),pendingHeld:Boolean(value?.pendingHeld), listening: Boolean(value?.listening), generating: Boolean(value?.generating), answerIndex: Math.max(0, Math.min(10000, Number(value?.answerIndex) || 0)), answerCount: Math.max(0, Math.min(10000, Number(value?.answerCount) || 0)) };
     safeSend(overlayWindow, 'overlay:state', overlayPayload());
     return { ok: true };
   });
@@ -374,7 +374,7 @@ function registerHandlers() {
     if (action === 'close-overlay') overlayWindow?.close();
     else if (action === 'hide-overlay') hideOverlay();
     else if (['scroll-up', 'scroll-down'].includes(action)) safeSend(overlayWindow, 'overlay:command', action);
-    else if (['answer', 'dismiss-question', 'toggle-listening', 'previous-answer', 'next-answer', 'screenshot-answer', 'retry-answer', 'open-settings'].includes(action)) sendAction(action);
+    else if (['answer', 'dismiss-question', 'hold-question', 'toggle-listening', 'previous-answer', 'next-answer', 'screenshot-answer', 'retry-answer', 'open-settings'].includes(action)) sendAction(action);
     return { ok: true };
   }, true);
   handle('screen:list', () => screen.getAllDisplays().map((display, index) => ({ id: String(display.id), name: display.label || `Display ${index + 1}`, primary: display.id === screen.getPrimaryDisplay().id, ...captureSize(display), scaleFactor: display.scaleFactor })));

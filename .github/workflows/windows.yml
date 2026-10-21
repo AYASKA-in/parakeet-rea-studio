@@ -26,6 +26,7 @@ jobs:
       - run: npm run build:win
       - run: npm run test:production -- --packaged
       - run: npm run test:latency -- --packaged
+      - run: node scripts/verify-realtime.cjs --packaged
       - run: node scripts/verify-profile-restore.cjs --packaged
       - run: npm run test:hardening -- --packaged
       - run: npm run test:desktop -- --packaged
@@ -56,6 +57,8 @@ jobs:
             test-results/hardening-packaged.json
             test-results/ui-*/report.json
             test-results/latency-*/report.json
+            test-results/realtime-*/report.json
+            test-results/realtime-*/diagnostics.json
             test-results/profile-restore-*/report.json
             test-results/installer-*/report.json
             test-results/install-lifecycle-*/report.json

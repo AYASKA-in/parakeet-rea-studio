@@ -17,7 +17,7 @@
     "pretest:live": "npm run build:native",
     "start": "electron .",
     "preview": "node scripts/preview.cjs",
-    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs tests/production.test.cjs tests/eval.test.cjs tests/install-lifecycle.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs tests/production.test.cjs tests/eval.test.cjs tests/install-lifecycle.test.cjs tests/realtime.test.cjs",
     "test:desktop": "node scripts/verify-desktop.cjs",
     "build:win": "npm run build:native && npm run build:icon && electron-builder --win portable nsis --x64 --publish never",
     "build:dir": "npm run build:native && npm run build:icon && electron-builder --win --x64 --dir --publish never",
@@ -43,7 +43,9 @@
     "eval:record": "node scripts/record-human-audio.cjs",
     "eval:quality": "node scripts/benchmark-quality.cjs",
     "test:install-lifecycle": "node scripts/verify-install-lifecycle.cjs",
-    "test:accessibility:prepare": "node scripts/prepare-accessibility.cjs"
+    "test:accessibility:prepare": "node scripts/prepare-accessibility.cjs",
+    "test:realtime": "node --test tests/realtime.test.cjs",
+    "test:realtime:desktop": "npm run build:native && node scripts/verify-realtime.cjs"
   },
   "dependencies": {
     "pdf-parse": "2.4.5"

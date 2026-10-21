@@ -10,6 +10,7 @@ function render(data = {}) {
   const pending = String(data.pendingQuestion || '');
   $('#overlay-pending').hidden = !pending;
   $('#overlay-pending-text').textContent = pending;
+  $('#overlay-hold-question').textContent=data.pendingHeld?'Resume auto draft':'Hold';
   $('#overlay-pending-status').textContent = String(data.pendingStatus || '');
   $('#overlay-generate-label').textContent = pending ? 'Send pending' : 'Draft answer';
   $('#overlay-question').textContent = question; $('#overlay-question').hidden = !question;
@@ -42,6 +43,7 @@ $('#close-overlay').addEventListener('click', () => action('close-overlay'));
 $('#overlay-listen').addEventListener('click', () => action('toggle-listening'));
 $('#overlay-generate').addEventListener('click', () => action('answer'));
 $('#overlay-dismiss-question').addEventListener('click',()=>action('dismiss-question'));
+$('#overlay-hold-question').addEventListener('click',()=>action('hold-question'));
 if (bridge?.onOverlay) bridge.onOverlay(render);
 if (bridge?.getOverlay) bridge.getOverlay().then(render).catch(() => render());
 else render();
