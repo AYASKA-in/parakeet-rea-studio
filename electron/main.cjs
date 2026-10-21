@@ -7,7 +7,7 @@ const { ReliableLive } = require('./reliable-live.cjs');
 const { LiveSession } = require('./live-session.cjs');
 const { captureSize, CaptureLease } = require('./screen-capture.cjs');
 const { createStorage } = require('./storage.cjs');
-const { fetchWithRetry } = require('./http.cjs');
+const { fetchWithRetry, retryAfterMs } = require('./http.cjs');
 const { overlayPosition, fitWindow } = require('./overlay-layout.cjs');
 const { RuntimeGate, ShortcutRegistry } = require('./desktop-runtime.cjs');
 const { windowsTimingLease } = require('./audio-timing.cjs');
@@ -20,6 +20,7 @@ const { checkLocalProvider } = require('./local-provider.cjs');
 const { retainedWorkspace, encodeWorkspace, decodeWorkspace } = require('./workspace-privacy.cjs');
 const { createDiagnostics } = require('./diagnostics.cjs');
 const diagnostics = createDiagnostics();
+const {failureStatus,sanitizeProviderStatus}=require('./provider-status.cjs');
 let workspaceQueue = Promise.resolve();
 
 // Audio processing must retain normal renderer priority when the workspace is
@@ -36,7 +37,7 @@ let mainWindow, overlayWindow;
 let overlayRequestedVisible=false,overlayReady=false;
 let closeRequested = false, closeAllowed = false, closeTimer;
 let positionSaveTimer, displayRecoveryTimer, recoveringWindows=false;
-let overlayState = { question: '', answer: '', listening: false };
+let overlayState = {recovery:{sources:[]},question:'',answer:'',listening:false};
 let settings, workspace, overlayPreferences;
 let settingsQueue = Promise.resolve();
 const liveSession = new LiveSession();
@@ -330,11 +331,12 @@ function registerHandlers() {
         contents: [{ role: 'user', parts: [{ text: messages[1].content }, ...(screenshotPart ? [screenshotPart] : [])] }],
         generationConfig: { maxOutputTokens: policy.maxOutputTokens, ...(/^gemini-[3-9]/.test(providerSettings.model) ? { thinkingConfig: { thinkingLevel: policy.thinkingLevel } } : {}) },
       } : { model: providerSettings.model, messages: screenshotPart ? [messages[0], { role: 'user', content: [{ type: 'text', text: messages[1].content }, screenshotPart] }] : messages, stream: true };
+      safeSend(mainWindow,'provider:status',{requestId,state:'requesting',retryAfterMs:0});
       const response = await fetchWithRetry(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json', ...(gemini ? { 'x-goog-api-key': key } : { Authorization: `Bearer ${key}` }) },
         body: JSON.stringify(body), signal: controller.signal, redirect: 'error',
-      }, { onRetry: () => { retries++; } });
-      if (!response.ok) throw await providerError(response, key);
+      }, { onRetry: ({delayMs}) => { retries++;safeSend(mainWindow,'provider:status',{requestId,...sanitizeProviderStatus({state:'retrying',retryAfterMs:delayMs})}); } });
+      if (!response.ok){const error=await providerError(response,key);if(response.status===429)error.retryAfterMs=Math.min(300000,retryAfterMs(response.headers.get('retry-after'))??30000);throw error;}
       let text;
       if (response.headers.get('content-type')?.includes('text/event-stream')) {
         text = await readAnswerStream(response.body, emit, providerSettings.provider);
@@ -343,8 +345,9 @@ function registerHandlers() {
       }
       if (!text?.trim()) throw new Error('The provider returned an empty answer. Check that the model supports text chat.');
       runtime.assert(operation);
+      safeSend(mainWindow,'provider:status',{requestId,state:'complete',retryAfterMs:0});
       return { text, metrics: { firstTokenMs, totalMs: Date.now() - startedAt, retries, thinkingLevel: policy.thinkingLevel } };
-    } catch(error) { throw redactProviderFailure(error,key); } finally { clearTimeout(timeout); requests.delete(requestId); }
+    } catch(error) {safeSend(mainWindow,'provider:status',{requestId,...failureStatus(error)});throw redactProviderFailure(error,key); } finally { clearTimeout(timeout); requests.delete(requestId); }
   });
   handle('provider:local-check',async()=>{
     const operation=runtime.begin(),profile=Object.freeze({...settings});requireDataPolicy(profile);
@@ -362,7 +365,7 @@ function registerHandlers() {
   handle('overlay:preferences:set', value => saveOverlayPreferences(value), true);
   handle('overlay:set', value => {
     void audioTiming?.setActive(Boolean(value?.listening) && !runtime.blocked);
-    overlayState = { question: boundedText(value?.question, 12000), answer: boundedText(value?.answer, 200000), pendingQuestion:boundedText(value?.pendingQuestion,4000),pendingStatus:boundedText(value?.pendingStatus,240),pendingCanSend:Boolean(value?.pendingCanSend), listening: Boolean(value?.listening), generating: Boolean(value?.generating), answerIndex: Math.max(0, Math.min(10000, Number(value?.answerIndex) || 0)), answerCount: Math.max(0, Math.min(10000, Number(value?.answerCount) || 0)) };
+    overlayState = { recovery: {retryLabel:value?.recovery?.retryLabel==='Capture again'?'Capture again':'Retry answer',status:boundedText(value?.recovery?.status,140),wait:Math.min(300,Math.max(0,Number(value?.recovery?.wait)||0)),retry:Boolean(value?.recovery?.retry),needsSettings:Boolean(value?.recovery?.needsSettings),hasError:Boolean(value?.recovery?.hasError),sources:Array.isArray(value?.recovery?.sources)?value.recovery.sources.slice(0,2).map(source=>({label:source?.name==='system'?'Call audio':'Microphone',state:['off','active','quiet','reconnecting','review'].includes(source?.state)?source.state:'off'})):[]}, question: boundedText(value?.question, 12000), answer: boundedText(value?.answer, 200000), pendingQuestion:boundedText(value?.pendingQuestion,4000),pendingStatus:boundedText(value?.pendingStatus,240),pendingCanSend:Boolean(value?.pendingCanSend), listening: Boolean(value?.listening), generating: Boolean(value?.generating), answerIndex: Math.max(0, Math.min(10000, Number(value?.answerIndex) || 0)), answerCount: Math.max(0, Math.min(10000, Number(value?.answerCount) || 0)) };
     safeSend(overlayWindow, 'overlay:state', overlayPayload());
     return { ok: true };
   });
@@ -371,7 +374,7 @@ function registerHandlers() {
     if (action === 'close-overlay') overlayWindow?.close();
     else if (action === 'hide-overlay') hideOverlay();
     else if (['scroll-up', 'scroll-down'].includes(action)) safeSend(overlayWindow, 'overlay:command', action);
-    else if (['answer', 'dismiss-question', 'toggle-listening', 'previous-answer', 'next-answer', 'screenshot-answer'].includes(action)) sendAction(action);
+    else if (['answer', 'dismiss-question', 'toggle-listening', 'previous-answer', 'next-answer', 'screenshot-answer', 'retry-answer', 'open-settings'].includes(action)) sendAction(action);
     return { ok: true };
   }, true);
   handle('screen:list', () => screen.getAllDisplays().map((display, index) => ({ id: String(display.id), name: display.label || `Display ${index + 1}`, primary: display.id === screen.getPrimaryDisplay().id, ...captureSize(display), scaleFactor: display.scaleFactor })));

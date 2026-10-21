@@ -12,8 +12,8 @@ module.exports={wordErrorRate,gradeText};
 
 function gradeStructured(item,text,kind) {
  let value;try { const match=String(text).match(/\{[\s\S]*\}/);value=JSON.parse(match?match[0]:text); }catch{return {passed:false,reason:'Invalid structured answer'};}
- const expected=kind==='screens'?{token:item.token,retryLimit:item.retry,retry401:false}:{company:'ExampleCo '+item.id.split('-').at(-1),latencyImprovementPercent:10+Number(item.id.split('-').at(-1)),unlistedEmploymentConfirmed:false};
- const mismatched=Object.keys(expected).filter(key=>value?.[key]!==expected[key]);return {passed:!mismatched.length,mismatched,observed:Object.fromEntries(Object.keys(expected).map(key=>[key,typeof value?.[key]==='string'?value[key].slice(0,300):typeof value?.[key]==='number'||typeof value?.[key]==='boolean'?value[key]:null])),scope:'Structured extraction fields only; not a general semantic or conversational-quality grade.'};
+ const expected=item.expected || (kind==='screens'?{token:item.token,retryLimit:item.retry,retry401:false}:{company:'ExampleCo '+item.id.split('-').at(-1),latencyImprovementPercent:10+Number(item.id.split('-').at(-1)),unlistedEmploymentConfirmed:false});
+ const mismatched=Object.keys(expected).filter(key=>value?.[key]!==expected[key]);for(const [key,terms]of Object.entries(item.textChecks||{})){const text=String(value?.[key]||'').toLowerCase();if(!terms.some(term=>text.includes(term)))mismatched.push(key);}return {passed:!mismatched.length,mismatched,observed:Object.fromEntries([...Object.keys(expected),...Object.keys(item.textChecks||{})].map(key=>[key,typeof value?.[key]==='string'?value[key].slice(0,300):typeof value?.[key]==='number'||typeof value?.[key]==='boolean'?value[key]:null])),scope:'Structured extraction fields only; not a general semantic or conversational-quality grade.'};
 }
 module.exports.gradeStructured=gradeStructured;
 

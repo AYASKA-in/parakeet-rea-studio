@@ -1,7 +1,7 @@
 {
   "name": "parakeet-studio",
   "productName": "Parakeet Studio",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Independent Windows interview copilot reconstruction",
   "author": "Rohit and contributors",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "preview": "node scripts/preview.cjs",
     "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs tests/production.test.cjs tests/eval.test.cjs",
     "test:desktop": "node scripts/verify-desktop.cjs",
-    "build:win": "npm run build:native && npm run build:icon && electron-builder --win portable --x64",
+    "build:win": "npm run build:native && npm run build:icon && electron-builder --win portable nsis --x64",
     "build:dir": "npm run build:native && npm run build:icon && electron-builder --win --x64 --dir",
     "release:source": "node scripts/release-source.cjs",
     "test:live": "node scripts/verify-live.cjs",
@@ -38,7 +38,10 @@
     "eval:desktop": "node scripts/evaluate-desktop.cjs",
     "test:devices": "node scripts/verify-devices.cjs",
     "pretest:devices": "npm run build:native",
-    "build:icon": "node scripts/build-icon.cjs"
+    "build:icon": "node scripts/build-icon.cjs",
+    "test:latency": "node scripts/verify-latency.cjs",
+    "eval:record": "node scripts/record-human-audio.cjs",
+    "eval:quality": "node scripts/benchmark-quality.cjs"
   },
   "dependencies": {
     "pdf-parse": "2.4.5"
@@ -81,6 +84,14 @@
     "portable": {
       "artifactName": "Parakeet-Studio-${version}-portable.${ext}",
       "requestExecutionLevel": "user"
+    },
+    "nsis": {
+      "artifactName": "Parakeet-Studio-${version}-setup.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true
     }
   }
 }

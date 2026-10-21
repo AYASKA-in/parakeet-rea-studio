@@ -1,5 +1,16 @@
 # Validation
 
+## Version 0.7.0 candidate — quality, recovery and release tooling
+
+116 deterministic checks pass. Source checks include advanced Python/SQLite reference solutions, wrong-output and infinite-loop rejection, restricted execution probes, consented human-audio manifest validation, failure-inclusive stage diagnostics, source-overlap handling, explicit recovery controls and non-overwriting profile backup tests. Native source/packaged production and hardening checks, local fault/latency scenarios, actual portable launch, installer payload inspection, and Windows signature rejection checks are recorded separately under ignored test-results. Hosted CI validates the final committed candidate; it is not assumed green until its run completes.
+
+The real Windows restore regression caught a missing protected Local State key dependency. Backups now retain that file and reject an encrypted backup missing its key state. A restored isolated profile decrypted its actual workspace and credential and generated against a local mock. Normal user data was not read or changed.
+
+UI coverage includes 16 view/viewport combinations, four overlays with recovery feedback, a 640x450 CSS-pixel / DPR 2 reflow case and forced-colors rendering. This is not a Narrator or physical browser/OS zoom acceptance test.
+
+43 additional Gemini requests were used, including six targeted retests after failures. Original receipts remain retained. See [quality and recovery](QUALITY_AND_RECOVERY.md) for task-level results and rubric corrections; these are not broad accuracy rates. The human voice check was deferred by the user; no human speech was recorded or uploaded. Actual signing, broader hardware, human quality/accessibility and install/uninstall acceptance remain open. Builds are unsigned, and public downloads remain 0.5.8.
+
+
 ## Version 0.6.1 candidate — direct screenshot answers
 
 105 unit checks, ten source and packaged native production scenarios, all 24 packaged hardening checks, source and packaged desktop end-to-end checks, and 16 workspace / four overlay layout checks passed. The quick-capture integration uploads exactly one synthetic JPEG, keeps the workspace minimized, creates no new window and opens no review dialog. Review/crop expiry, display-change invalidation and cancellation checks still pass. No cloud calls were made for this change; these checks do not grade real screenshot interpretation or code correctness.

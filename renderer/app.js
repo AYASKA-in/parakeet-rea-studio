@@ -1,3 +1,5 @@
+import {AudioActivity} from './audio-activity.js';
+import {hasUsefulText,recoveryView} from './recovery-state.js';
 import { renderAnswerText } from './answer-format.js';
 import { reviewScreenshot, captureScreenshotAnswer } from './screen-analysis.js';
 import { QuestionQueue, acceptQuestionSource } from './question-queue.js';
@@ -12,7 +14,7 @@ const state = {
   settings: { provider: 'gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash-lite', transcriptionModel: 'gemini-3.5-transcribe-live', captureProtection: true, hasApiKey: false },
   listening: false, starting: false, capture: null, pendingTranscriptions: 0, requestId: null, notesRequestId: null,
   answerIndex: -1, screenshotPending: false, overlayPreferences: { opacity: 0.35, clickThrough: false, position: 'right' }, currentAnswer: '', currentQuestion: '', answerError: '', overlay: false, listeningStartedAt: 0, liveCleanup: [], livePCMPending: 0, stopping: false,
-  interims: {}, liveStates: {},
+  interims: {}, liveStates: {}, levels:{}, providerStatus:{},
   desktopPaused:false,desktopEpoch:0,screenAbort:null,
 };
 const paths = {
@@ -51,6 +53,7 @@ let toastTimer, contextTimer, answerPaintTimer, overlaySyncTimer, pendingWorkspa
 let autoAnswerTimer, lastAnswerStartedAt = -Infinity;
 let captureStopPromise, desktopStopSequence=Promise.resolve(), handledLifecycleEpoch=-1, audioEpoch=0;
 const questionQueue = new QuestionQueue();
+const audioActivity=new AudioActivity();
 const sourceLabel = source => ({ microphone: 'You', system: 'Call audio', sample: 'Sample question', manual: 'Your question', status: 'Connection event' }[source] || 'Conversation');
 function transcriptText(session) { return session.transcript.map(segment => `${sourceLabel(segment.source)}: ${segment.text}`).join('\n'); }
 function clearAutoAnswer() { clearTimeout(autoAnswerTimer); questionQueue.clear(); renderPendingQuestion(); }
@@ -86,7 +89,7 @@ function sendPendingQuestion() {
   const status=questionQueue.status({sessionId:state.active?.id});
   if (['empty','overflow','interim'].includes(status.reason)) { toast('Wait for finalized speech, or use a shorter question from the transcript.'); return true; }
   const pending=questionQueue.take(); clearTimeout(autoAnswerTimer); renderPendingQuestion();
-  void generateAnswer({question:pending.text,automatic:true});
+  void generateAnswer({question:pending.text,automatic:true,timing:pending});
   return true;
 }
 async function refreshMicrophones() {
@@ -125,14 +128,14 @@ function browseAnswer(direction) {
 async function screenshotAnswer(review = false) {
   if (state.requestId || state.screenshotPending || !requireAI()) return;
   if (!bridge.captureScreenshot) { toast('Screen capture is unavailable in this app version.', true); return; }
-  state.screenshotPending = true; renderAnswer(); syncOverlay();
+  state.lastRequestKind='screen';state.screenshotPending = true; renderAnswer(); syncOverlay();
   const controller=new AbortController();state.screenAbort=controller;
   try {
     const capture = review ? reviewScreenshot : captureScreenshotAnswer;
     const image = await capture(bridge, $('#question-input').value.trim(),{signal:controller.signal,displayId:$('#screen-display').value});
     state.screenshotPending = false;
     if (image) await generateAnswer(image);
-  } catch (error) { state.answerError = `Screenshot failed: ${message(error)}`; toast(state.answerError, true); }
+  } catch (error) { state.providerStatus={state:'error'};state.answerError = `Screenshot failed: ${message(error)}`; toast(state.answerError, true); }
   finally { if(state.screenAbort===controller)state.screenAbort=null;state.screenshotPending = false; renderAnswer(); syncOverlay(); runPendingAutoAnswer(); }
 }
 async function clearTranscript() {
@@ -372,7 +375,7 @@ function renderAnswer() {
 }
 function syncOverlay() {
   if (!desktop || !bridge.setOverlay || overlaySyncTimer) return;
-  overlaySyncTimer = setTimeout(() => { overlaySyncTimer = null; const pending=questionQueue.pending?.sessionId===state.active?.id ? questionQueue.pending : null; void bridge.setOverlay({ question: state.currentQuestion, answer: state.currentAnswer, pendingQuestion:pending?.text || '',pendingStatus:pending ? $('#pending-question-status').textContent : '',pendingCanSend:Boolean(pending&&!$('#pending-question-send').disabled), listening: state.listening, answerIndex: state.answerIndex < 0 ? (state.active?.exchanges.length || 0) - 1 : state.answerIndex, answerCount: state.active?.exchanges.length || 0, generating: Boolean(state.requestId) || state.screenshotPending }).catch(() => {}); }, 100);
+  overlaySyncTimer = setTimeout(() => { overlaySyncTimer = null; const pending=questionQueue.pending?.sessionId===state.active?.id ? questionQueue.pending : null; void bridge.setOverlay({ recovery:{...recoveryView({provider:state.providerStatus,liveStates:state.liveStates,levels:state.levels,listening:state.listening,starting:state.starting,source:$('#audio-source').value,online:navigator.onLine,error:state.answerError,hasQuestion:Boolean(state.currentQuestion||state.lastRequestKind==='screen')}),retryLabel:state.lastRequestKind==='screen'?'Capture again':'Retry answer'}, question: state.currentQuestion, answer: state.currentAnswer, pendingQuestion:pending?.text || '',pendingStatus:pending ? $('#pending-question-status').textContent : '',pendingCanSend:Boolean(pending&&!$('#pending-question-send').disabled), listening: state.listening, answerIndex: state.answerIndex < 0 ? (state.active?.exchanges.length || 0) - 1 : state.answerIndex, answerCount: state.active?.exchanges.length || 0, generating: Boolean(state.requestId) || state.screenshotPending }).catch(() => {}); }, 100);
 }
 function requireAI() {
   if(state.desktopPaused){toast('Desktop recovery is in progress. Wait before starting again.',true);return false;}
@@ -394,14 +397,14 @@ async function generateAnswer(options = {}) {
   if (!question) { toast('Type a question or add a transcript segment first.'); $('#question-input').focus(); return; }
   if (!requireAI()) return;
   const session = ensureSession();
-  if(!session) return;
+  if(!session) return;state.lastRequestKind=options.imageDataUrl?'screen':'text';
   if (!options.automatic && !options.imageDataUrl && typed && segments.at(-1)?.text !== typed) appendTranscript(typed, 'manual');
   if (!options.automatic) clearAutoAnswer();
   lastAnswerStartedAt = performance.now(); questionQueue.markSent(question,session.id); state.answerIndex = -1;
   const requestId = uid();
   const clockStart=performance.now(), speech=Number.isFinite(options.timing?.speechEndedAt)?options.timing.speechEndedAt:null;
   const baseline=speech ?? clockStart;
-  const metric={mode:state.settings.answerMode,network:state.settings.networkMode,kind:options.imageDataUrl?'screen':options.automatic?'audio':'typed',speechEndMs:speech===null?null:0,finalTranscriptMs:Number.isFinite(options.timing?.finalAt)?Math.max(0,options.timing.finalAt-baseline):null,requestMs:clockStart-baseline,firstTextMs:null,outcome:'error',save:'failed'};
+  const metric={mode:state.settings.answerMode,network:state.settings.networkMode,kind:options.imageDataUrl?'screen':options.automatic?'audio':'typed',speechEndMs:speech===null?null:0,finalTranscriptMs:Number.isFinite(options.timing?.finalAt)?Math.max(0,options.timing.finalAt-baseline):null,requestMs:clockStart-baseline,firstTextMs:null,firstUsefulTextMs:null,failureCategory:'none',outcome:'error',save:'failed'};
   state.attemptMetric=metric;
   const previousAnswers = session.exchanges.slice(-3);
   const exchange = { id: uid(), question, answer: '', style: state.style, status: 'streaming', screenshotUsed: Boolean(options.imageDataUrl), createdAt: new Date().toISOString() };
@@ -412,6 +415,7 @@ async function generateAnswer(options = {}) {
     if (event.requestId !== requestId || state.requestId !== requestId) return;
     if(metric.firstTextMs===null && event.delta)metric.firstTextMs=performance.now()-baseline;
     state.currentAnswer += event.delta || '';
+    if(metric.firstUsefulTextMs===null&&hasUsefulText(state.currentAnswer))metric.firstUsefulTextMs=performance.now()-baseline;
     exchange.answer = state.currentAnswer;
     if (!answerPaintTimer) answerPaintTimer = setTimeout(() => {
       answerPaintTimer = null; const text = $('#answer-text');
@@ -427,7 +431,7 @@ async function generateAnswer(options = {}) {
     exchange.metrics = result.metrics; exchange.status = 'complete';metric.outcome='success';
   } catch (error) {
     if (state.requestId === requestId) state.answerError = message(error);
-    exchange.error = message(error); exchange.status = state.currentAnswer ? 'partial' : 'failed';
+    metric.failureCategory=state.providerStatus.state||'error';exchange.error = message(error); exchange.status = state.currentAnswer ? 'partial' : 'failed';
     if(metric.outcome!=='cancelled')metric.outcome=state.currentAnswer?'partial':'error';
   } finally {
     stopStreaming?.();
@@ -464,7 +468,7 @@ async function toggleListening() {
     if (live) {
       state.liveCleanup = cleanup = [
         bridge.onLiveTranscript(value => { appendTranscript(value.text, value.source || 'audio'); scheduleAutoAnswer(value.text, value.source); }),
-        bridge.onLiveError(value => { toast(value.message, true); void stopListening(); }),
+        bridge.onLiveError(value => { state.answerError=message(value.message);state.providerStatus={state:'connection'};syncOverlay();toast(value.message, true); void stopListening(); }),
         bridge.onLiveInterim(value => { state.interims[value.source] = value.text; renderInterims(); if ($('#auto-answer').checked && !state.stopping && acceptQuestionSource($('#audio-source').value,value.source)) { questionQueue.interim(value.text,value.source,state.active?.id); runPendingAutoAnswer(); } }),
         bridge.onLiveStatus(value => {
           const previous = state.liveStates[value.source]; state.liveStates[value.source] = value.state;
@@ -494,7 +498,7 @@ async function toggleListening() {
         } catch (error) { questionQueue.interim('',source,state.active?.id); questionQueue.hold(source,state.active?.id); runPendingAutoAnswer(); appendTranscript(`Transcription failed for ${source || 'audio'}: ${message(error)}. This segment may be missing.`, 'status'); toast(`Transcription failed: ${message(error)}`, true); }
         finally { state.pendingTranscriptions--; audioStatus(); }
       },
-      onLevel: (level,source) => { $('#audio-level').style.width = `${Math.min(100, Math.max(0, level * 100))}%`; if (level > .048 && !state.stopping && acceptQuestionSource($('#audio-source').value,source)) questionQueue.activity(source,state.active?.id); },
+      onLevel: (level,source) => {state.levels[source]=level;if(audioActivity.update(source,level)&&$('#audio-source').value==='both'&&$('#auto-answer').checked&&!state.stopping){questionQueue.hold('system',state.active?.id);appendTranscript('Both audio sources were active together. Review the question for overlap, echo or missing constraints before sending.','status');runPendingAutoAnswer();}syncOverlay(); $('#audio-level').style.width = `${Math.min(100, Math.max(0, level * 100))}%`; if (level > .048 && !state.stopping && acceptQuestionSource($('#audio-source').value,source)) questionQueue.activity(source,state.active?.id); },
       onWarning: warning => {
         const text = message(warning);
         if (/skipped|cannot keep up|unavailable|muted|missing|flush/i.test(text) && (state.lastAudioWarning !== text || Date.now() - (state.lastAudioWarningAt || 0) > 5000)) {
@@ -535,7 +539,7 @@ async function stopCapture() {
     for (const cleanup of state.liveCleanup) cleanup(); state.liveCleanup = [];
   }
   state.stopping = false;
-  state.interims = {}; state.liveStates = {}; renderInterims();
+  state.interims = {}; state.liveStates = {};state.levels={};audioActivity.reset(); renderInterims();
   audioStatus(); storeSession();
 }
 async function newSession() {
@@ -757,7 +761,7 @@ function bindEvents() {
   });
   $('#minimize-window').addEventListener('click', () => bridge?.windowControl('minimize'));
   $('#close-window').addEventListener('click', () => bridge?.windowControl('close'));
-  if (desktop) bridge.onShortcut(action => { if (action === 'answer') { location.hash = 'workspace'; if(!sendPendingQuestion()) void generateAnswer(); } else if (action === 'dismiss-question') clearAutoAnswer(); else if (action === 'toggle-listening') void toggleListening(); else if (action === 'previous-answer') browseAnswer(-1); else if (action === 'next-answer') browseAnswer(1); else if (action === 'screenshot-answer') void screenshotAnswer(); else if (action === 'clear-transcript') void clearTranscript(); else if (action === 'scroll-up' || action === 'scroll-down') $('#answer-content').scrollBy({ top: action === 'scroll-up' ? -220 : 220, behavior: 'smooth' }); });
+  if (desktop) bridge.onShortcut(action => { if (action === 'answer') { location.hash = 'workspace'; if(!sendPendingQuestion()) void generateAnswer(); } else if(action==='retry-answer'){if(!state.requestId&&!state.screenshotPending){if(state.lastRequestKind==='screen')void screenshotAnswer();else if(state.currentQuestion)void generateAnswer({question:state.currentQuestion});}}else if(action==='open-settings'){location.hash='settings';void bridge.windowControl('show');}else if (action === 'dismiss-question') clearAutoAnswer(); else if (action === 'toggle-listening') void toggleListening(); else if (action === 'previous-answer') browseAnswer(-1); else if (action === 'next-answer') browseAnswer(1); else if (action === 'screenshot-answer') void screenshotAnswer(); else if (action === 'clear-transcript') void clearTranscript(); else if (action === 'scroll-up' || action === 'scroll-down') $('#answer-content').scrollBy({ top: action === 'scroll-up' ? -220 : 220, behavior: 'smooth' }); });
 }
 async function init() {
   hydrateIcons(); bindEvents();
@@ -796,6 +800,9 @@ async function init() {
   setView(location.hash.slice(1) || 'workspace', false);
   renderShortcutStatus();
   if(desktop&&bridge.getRuntime){
+    bridge.onProviderStatus?.(value=>{if(value.requestId===state.requestId){state.providerStatus={state:value.state,until:Date.now()+Math.min(300000,Math.max(0,value.retryAfterMs||0))};syncOverlay();}});
+    setInterval(()=>{if(state.overlay||state.listening)syncOverlay();},1000);
+    window.addEventListener('online',syncOverlay);window.addEventListener('offline',syncOverlay);
     bridge.onAudioTimingStatus?.(value=>{appendTranscript(`Audio timing warning: ${message(value.message)}`,'status');toast(message(value.message),true);});
     bridge.onLifecycle(handleDesktopRuntime);bridge.onShortcutsChanged(renderShortcutStatus);
     const results=await Promise.allSettled([bridge.getRuntime(),bridge.getShortcuts()]);

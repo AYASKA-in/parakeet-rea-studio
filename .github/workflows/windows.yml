@@ -25,9 +25,13 @@ jobs:
       - run: npm run test:ui
       - run: npm run build:win
       - run: npm run test:production -- --packaged
+      - run: npm run test:latency -- --packaged
+      - run: node scripts/verify-profile-restore.cjs --packaged
       - run: npm run test:hardening -- --packaged
       - run: npm run test:desktop -- --packaged
       - run: node scripts/verify-portable.cjs
+      - run: node scripts/verify-installer.cjs
+      - run: node scripts/verify-release-safety.cjs
       - run: npm run release:source
       - run: node scripts/check-release.cjs
       - run: npm run release:inventory
@@ -36,6 +40,7 @@ jobs:
           name: windows-and-source
           path: |
             dist/*-portable.exe
+            dist/*-setup.exe
             dist/*-source.zip
             dist/SHA256SUMS.txt
             dist/release-manifest.json
@@ -49,4 +54,21 @@ jobs:
             test-results/production-*/report.json
             test-results/hardening-packaged.json
             test-results/ui-*/report.json
+            test-results/latency-*/report.json
+            test-results/profile-restore-*/report.json
+            test-results/installer-*/report.json
+            test-results/portable-*/report.json
           if-no-files-found: ignore
+
+  restricted-evaluation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node -e "require('node:child_process').execFileSync('docker',['pull',require('./evals/sandbox-image.json').image],{stdio:'inherit'})"
+      - run: npm run test:eval-sandbox

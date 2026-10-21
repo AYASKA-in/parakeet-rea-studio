@@ -20,3 +20,10 @@ function gradeCodeResults(actual,tests) {
  return Array.isArray(actual)&&actual.length===tests.length&&tests.every((test,index)=>equal(actual[index]?.output,test.expected)&&(!test.preserveInput||equal(actual[index]?.after,test.input)));
 }
 module.exports={evaluatePython,gradeCodeResults};
+
+async function evaluateSql(query,tests,options={}) {
+ if(typeof query!=='string'||query.length>100000||!/^\s*(?:SELECT|WITH)\b/i.test(query))return {passed:false,scope:'Only one read-only SQLite SELECT/WITH query is accepted.'};
+ const code='import sqlite3\ndef solve(x):\n c=sqlite3.connect(":memory:")\n c.executescript(x["setup"])\n if x.get("rows"):\n  c.executemany("INSERT INTO employees VALUES (?,?)",x["rows"])\n c.execute("PRAGMA query_only=ON")\n c.set_progress_handler(lambda: 1,1000000)\n try:\n  return [list(row) for row in c.execute('+JSON.stringify(query)+').fetchall()]\n finally:\n  c.close()';
+ return evaluatePython(code,tests.map(test=>({input:{setup:test.setup,rows:test.rows||[]},expected:test.expected})),options);
+}
+module.exports.evaluateSql=evaluateSql;

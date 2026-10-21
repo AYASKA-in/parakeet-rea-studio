@@ -40,7 +40,7 @@ test('recent context and follow-up answers are retained within request budgets',
 test('transcription hints are bounded and transcript exports retain source, time and corrections', () => {
   const settings = validateSettings({ ...DEFAULT_SETTINGS, transcriptionLanguage: 'en-IN', transcriptionVocabulary: 'Redis, PostgreSQL,Redis\nOAuth' });
   assert.deepEqual(settings.transcriptionVocabulary, ['Redis', 'PostgreSQL', 'OAuth']);
-  assert.equal(settings.transcriptionMode, 'SMART');
+  assert.equal(settings.transcriptionMode, 'VERBATIM');assert.equal(validateSettings({...DEFAULT_SETTINGS,transcriptionMode:'SMART'}).transcriptionMode,'SMART');
   assert.throws(() => validateSettings({ ...DEFAULT_SETTINGS, transcriptionLanguage: '../../bad' }));
   const exported = transcriptText({ transcript: [{ time: '2026-10-19T12:00:00Z', source: 'system', text: 'Use a cache', originalText: 'Use a cash' }] });
   assert.match(exported, /Call audio: Use a cache/); assert.match(exported, /12:00:00Z/); assert.match(exported, /original: Use a cash/);

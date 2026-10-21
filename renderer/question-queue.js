@@ -2,7 +2,7 @@
 const normalize = text => text.replace(/\s+/gu, ' ').trim();
 const paused = /^(?:hold on|wait(?: a second| a moment)?|one moment)[.!]?$/iu;
 const cancelled = /^(?:never mind|nevermind|cancel (?:that|the question)|ignore (?:that|the last question))[.!]?$/iu;
-const unfinished = text => /(?:[,;:\-–]|\b(?:and|or|but|with|without|using|including|because|such as|for example|also)|और|లేదా)\s*[.!?]?$/iu.test(text);
+const unfinished = text => /(?:\b(?:at most|at least|less than|greater than|equal to|no more than|maximum of|minimum of)|[=<>])\s*[.!?]?$/iu.test(text) || /(?:[,;:\-–]|\b(?:and|or|but|with|without|using|including|because|such as|for example|also)|और|లేదా)\s*[.!?]?$/iu.test(text);
 
 export const acceptQuestionSource = (selected, source) => selected === 'both' ? source === 'system' : selected === source;
 

@@ -292,7 +292,7 @@ function contrastCheck() {
     await page.click('#capture-button');await page.waitForFunction(()=>document.querySelector('#capture-label')?.textContent==='Stop listening');
     await page.click('#capture-button');await page.waitForFunction(()=>document.querySelector('#capture-label')?.textContent==='Start listening');
     assert.ok(liveFrames > 0, 'Actual renderer PCM should reach the Gemini Live mock.');
-    assert.ok(liveConfigs.some(config => config.languageCodes[0] === 'en-IN' && config.mode === 'SMART' && config.customVocabulary.includes('SentinelAPI')));
+    assert.ok(liveConfigs.some(config => config.languageCodes[0] === 'en-IN' && config.mode === 'VERBATIM' && config.customVocabulary.includes('SentinelAPI')));
     await page.uncheck('#auto-answer');
     await page.click('[data-edit-segment="0"]');
     await page.fill('#edit-transcript-text', 'How would you design a resilient API with a cache?');

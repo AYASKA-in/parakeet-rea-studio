@@ -64,3 +64,8 @@ html, body { margin: 0; width: 100%; height: 100%; background: transparent; }
   :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
   .floating-answer, .floating-question, .floating-footer, .field-help { color: CanvasText; text-shadow: none; }
 }
+
+.overlay-recovery { padding: 4px 14px; color: #fff; font-size: 12px; background: rgba(12,20,32,.9); }
+#overlay-sources { display:flex;gap:12px;flex-wrap:wrap; }
+.overlay-recovery p { margin:4px 0; }
+.overlay-recovery button { color:#fff;background:#254775;border:1px solid #8ab4e8;border-radius:6px;padding:5px 9px;margin:4px; }

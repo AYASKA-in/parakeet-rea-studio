@@ -1,0 +1,2 @@
+function groundingAssessment(question,resume){const match=String(question||'').match(/\b(?:did I work at|have I worked (?:at|for)|my (?:employment|experience) at)\s+([^?!.\n]{1,100})/i);if(!match)return {missingEmployer:null};const employer=match[1].replace(/["']/g,'').trim();const normalized=String(resume||'').normalize('NFKC').toLowerCase();return {missingEmployer:normalized.includes(employer.normalize('NFKC').toLowerCase())?null:employer};}
+module.exports={groundingAssessment};

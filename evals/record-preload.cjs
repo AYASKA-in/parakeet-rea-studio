@@ -1,0 +1,1 @@
+const {contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('recorder',{begin:value=>ipcRenderer.invoke('record:begin',value),frame:audio=>ipcRenderer.invoke('record:frame',audio),finish:()=>ipcRenderer.invoke('record:finish')});

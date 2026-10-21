@@ -72,3 +72,5 @@ test('duplicate suppression preserves case-sensitive identifiers and punctuation
   assert.match(f.queue.pending.text,/userID/);assert.match(f.queue.pending.text,/userId/);
   assert.match(f.queue.pending.text,/1\.5/);assert.match(f.queue.pending.text,/1\.6/);
 });
+
+test('unfinished comparator waits for its number and preserves explicit correction',()=>{const f=fixture();f.push('Implement a retry strategy with at most');f.advance(6000);assert.equal(f.status().reason,'unfinished');f.push('15 attempts, not 50.');f.advance(6000);assert.equal(f.status().reason,'ready');assert.match(f.queue.take().text,/15 attempts, not 50/);});

@@ -1,5 +1,9 @@
 # Production readiness and next patches
 
+## Latest: 0.7.0 candidate, 21 October 2026
+
+The six requested workstreams now have expanded source implementation and targeted validation: advanced Python/SQLite/vision fixtures, opt-in human-audio tooling, constraint/overlap handling, derived latency measurements, recovery overlay controls and installer/update/backup support. See [current quality and recovery report](QUALITY_AND_RECOVERY.md). The previous frozen 0.6.0 60/120-minute encrypted runs and hosted 0.6.1 CI passed; their earlier pending labels below are historical. No signing identity is available and the user deferred human voice validation. Those, wider hardware/accessibility and actual installer acceptance remain open gates, not completed work.
+
 Review date: 20 October 2026. Baseline: experimental 0.5.8, plus the source changes described below. **Not yet a production reliability claim.** This review inspected response parsing, request deadlines/retries, persistence, CI configuration, and existing validation evidence. It is not an independent penetration test or exhaustive review of every dependency or hardware path.
 
 ## First patch: response integrity
