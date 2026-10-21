@@ -49,6 +49,8 @@ html, body { margin: 0; width: 100%; height: 100%; background: transparent; }
 #overlay-pending-text { margin: 8px 0; max-height: 100px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 #overlay-pending-status { font-size: 12px; margin: 8px 0; }
 #overlay-dismiss-question { min-height: 34px; padding: 6px 10px; background: #294354; border: 1px solid #678495; color: #fff; font-size: 13px; }
+#overlay-hold-question { min-height: 34px; margin: 0 6px 6px 0; padding: 6px 12px; background: #165d53; color: #fff; border: 1px solid #8ecdbb; font-size: 13px; font-weight: 650; text-shadow: none; }
+#overlay-hold-question:hover:enabled { background: #247266; }
 @media (max-width: 420px) { .floating-brand b { display: none; } .floating-footer kbd { display: none; } .floating-heading { padding-inline: 12px; } .floating-navigation { gap: 4px; padding-inline: 8px; } .floating-navigation button { font-size: 11px; padding-inline: 6px; } .floating-content { padding: 16px; } .floating-answer { font-size: 17px; } .floating-footer button { padding-inline: 8px; } }
 @media (prefers-reduced-motion: reduce) { .overlay-body *, .overlay-body *::before, .overlay-body *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
