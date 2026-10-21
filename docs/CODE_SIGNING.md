@@ -19,7 +19,7 @@ No application has been submitted, no sponsorship has been granted, and no requi
 - **Project:** Parakeet Studio.
 - **Repository:** https://github.com/AYASKA-in/parakeet-rea-studio
 - **License:** MIT; dependency inventory and third-party notices are included. Request a licensing review rather than asserting that an inventory is legal certification.
-- **Existing public release:** v0.5.8. The 0.7.0 changes are under review in PR #1 and are experimental.
+- **Existing public release:** v0.7.0 experimental unsigned prerelease; earlier v0.5.8 is retained. Main includes the changes previously tracked in merged PR #1.
 - **Platform:** Windows x64; Electron application, original C# owned-process timer helper, NSIS installer and portable package.
 - **Functionality:** User-controlled microphone and Windows playback transcription, AI answer drafting, explicit screenshot analysis, resume/context assistance, saved transcripts and a movable glass overlay. Optional Windows capture exclusion is exposed; it is platform/capture-method dependent and no universal invisibility guarantee is made.
 - **Data flow:** Requests go to the provider configured by the user when the user invokes relevant features. Cloud providers process sent audio, text or images under their policies. Screenshot and outgoing-text review options are available. Local transcript/history storage and optional Windows-bound encryption are documented. No user keys, recordings, resumes or reverse-engineering artifacts are included in source releases.
