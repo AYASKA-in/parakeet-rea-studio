@@ -1,6 +1,6 @@
 # Signing and hands-on Windows acceptance
 
-Status: preparation in progress on 21 October 2026. An automated pass is not a signing approval, spoken Narrator acceptance, or a physical device test.
+Status: signing and hands-on checks remain deferred; the initial hosted silent installer lifecycle passed on 21 October 2026. An automated pass is not a signing approval, spoken Narrator acceptance, or a physical device test.
 
 ## What is ready
 
@@ -62,7 +62,9 @@ Inventory on this laptop found Realtek microphone/speakers, ASUS noise-cancellin
 npm run test:devices -- --packaged --devices-only
 ```
 
-The watcher starts with recording off and prints an ignored `devices-.../progress.json` directory containing its `controlFile` path. In that test window, expand Microphone options and choose the intended device. Only when free of calls, set `startDevices` to `true` in that control JSON. It then captures 12 seconds of microphone audio and 12 seconds of Windows playback including a quiet four-second test tone. It sends PCM only to its in-process loopback mock, saves no raw audio and makes no cloud requests. Say a harmless phrase during the microphone phase. Without `--devices-only`, it additionally waits for a separate explicit sleep-start instruction.
+To verify setup without opening capture, add `--prepare-only`; it opens/closes an isolated fixture, verifies recording is off and writes a prepared report, not a hardware pass.
+
+The watcher creates its control JSON with all flags off, starts with recording off and prints an ignored `devices-.../progress.json` directory containing its `controlFile` path. In that test window, expand Microphone options and choose the intended device. Only when free of calls, set `startDevices` to `true` in that control JSON. It then captures 12 seconds of microphone audio and 12 seconds of Windows playback including a quiet four-second test tone. It sends PCM only to its in-process loopback mock, saves no raw audio and makes no cloud requests. Say a harmless phrase during the microphone phase. Without `--devices-only`, it additionally waits for a separate explicit sleep-start instruction. Close the test window or set `cancel` to `true` to cancel a pending operator step.
 
 Repeat for each available endpoint, with a consenting operator:
 
@@ -86,6 +88,8 @@ CI command (refuses personal computers):
 ```powershell
 npm run test:install-lifecycle -- --disposable-host
 ```
+
+The initial per-user lifecycle passed in [hosted run 39567793764](https://github.com/AYASKA-in/parakeet-rea-studio/actions/runs/39567793764), with one local mock request and no cloud requests. The stricter version additionally waits for the entire installation directory to disappear during normal self-copy uninstallation.
 
 The workflow runs on `windows-latest`. Check the completed run and `install-lifecycle-*/report.json` for its actual result. Source presence is not a completed installer acceptance test.
 
