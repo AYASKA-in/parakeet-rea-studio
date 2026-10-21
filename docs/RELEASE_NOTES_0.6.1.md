@@ -6,7 +6,7 @@ Screen prompts ask for visible constraints, language/interface, sample and edge-
 
 Windows portable app paths are resolved before constructing trusted renderer URLs to handle temporary-directory short paths. IPC sender/frame/page restrictions remain intact.
 
-Validation: 105 unit checks, ten native production scenarios, desktop end-to-end local mock (including minimized one-action screenshot and explicit review/crop), and 16 workspace / four overlay layout checks pass in source. Packaged and hosted checks are tracked separately. No new cloud calls were made.
+Validation: 105 unit checks, ten native production scenarios, desktop end-to-end local mock (including minimized one-action screenshot and explicit review/crop), and 16 workspace / four overlay layout checks pass in source. The same ten packaged native scenarios, all 24 packaged hardening checks, packaged desktop end-to-end, actual portable launcher and source ZIP/checksum verification also passed locally. Hosted Windows push CI also passed at runtime commit e206cb0 (run 39556917695). No new cloud calls were made.
 
 Frozen 0.6.0 encrypted endurance finished: 120-minute dual source and 60-minute microphone, zero unexpected errors or missing finalized mock transcript IDs. This evidence belongs to 0.6.0, not the changed 0.6.1 runtime. Physical microphone, loopback and sleep checks were completed on the earlier candidate; no dock was available.
 

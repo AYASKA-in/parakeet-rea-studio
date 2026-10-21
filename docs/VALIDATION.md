@@ -1,8 +1,16 @@
 # Validation
 
+## Version 0.6.1 candidate — direct screenshot answers
+
+105 unit checks, ten source and packaged native production scenarios, all 24 packaged hardening checks, source and packaged desktop end-to-end checks, and 16 workspace / four overlay layout checks passed. The quick-capture integration uploads exactly one synthetic JPEG, keeps the workspace minimized, creates no new window and opens no review dialog. Review/crop expiry, display-change invalidation and cancellation checks still pass. No cloud calls were made for this change; these checks do not grade real screenshot interpretation or code correctness.
+
+The actual portable launcher passed on 21 October 2026 with isolated synthetic audio/provider/history, matching extracted ASAR/helper hashes and graceful exit code zero. ASAR SHA-256: `88d1cf5d714d158dc95f69f2f119e224b51b926c778b2ddfc4db2368b07b1fde`. Portable SHA-256: `4ad7173d0e294d4c7aab21f6f710e9e15538b763049e574150cea4daeff76be0`. Source ZIP verification covered 100 allowlisted file digests and the embedded manifest at runtime commit e206cb0. Hosted Windows push CI passed at runtime commit e206cb0: https://github.com/AYASKA-in/parakeet-rea-studio/actions/runs/39556917695 (including portable launch, source verification and dependency inventory).
+
+The original frozen 0.6.0 endurance summary remains retained locally with artifact identities; its archived portable is kept separately. The results below are not a long-session qualification of 0.6.1.
+
 ## Version 0.6.0 candidate — production hardening
 
-Status: experimental, unsigned. Final candidate packaged/portable checks passed; fresh long-session runs and hosted CI are still pending.
+Status: experimental, unsigned. Final candidate packaged/portable and encrypted 60/120-minute endurance checks passed. Earlier hosted runs failed in display-fixture assumptions and portable trusted-path matching; fixes and current hosted status are tracked under 0.6.1.
 
 - 102 deterministic tests pass, including stream bounds, retry/cooldown, encryption/retention, strict diagnostic allowlists, routing corpus and evaluator checks.
 - Source and final packaged native production checks pass ten scenarios, including the newly reproduced request-admission race, actual Windows encryption/restart, low-disk rollback, forced termination, no-history disk copies, retention, timing export and keyboard cropping.
