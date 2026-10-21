@@ -8,16 +8,16 @@
 
 An independent Windows assistant for **interview practice and permitted meetings**. Listen to microphone/call audio, draft AI answers, analyze a screenshot, and keep readable words in a movable glass overlay.
 
-**[Download v0.7.0 portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.7.0/Parakeet-Studio-0.7.0-portable.exe)** · **[Download v0.7.0 installer](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.7.0/Parakeet-Studio-0.7.0-setup.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.7.0) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
+**[Download v0.8.0 portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-portable.exe)** · **[Download v0.8.0 installer](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-setup.exe)** · [Release & checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.0) · [Full user guide](docs/USER_GUIDE.md) · [Get an API key](docs/API_KEYS.md)
 
 > [!IMPORTANT]
 > **Experimental prerelease.** AI answers can be wrong. Cloud features require internet and provider access. Capture exclusion depends on Windows and the sharing tool; universal invisibility and a 100% success rate are not guaranteed. Use assistance only where allowed.
 
 The desktop app is named **Parakeet Studio**. This independently written, MIT-licensed project is not affiliated with ParakeetAI and includes no vendor binaries or extracted source.
 
-**New in 0.7.0:** direct screenshot answers, visible recovery and source activity, stronger local-data controls, expanded quality checks and a per-user Windows installer. [Design and accessibility notes](docs/UI_DESIGN.md).
+**New in 0.8.0:** readable Hold/Resume controls, late spoken-correction review, richer timing and slow-response feedback. Includes the 0.7 features: direct screenshot answers, visible recovery and source activity, stronger local-data controls, expanded quality checks and a per-user Windows installer. [Design and accessibility notes](docs/UI_DESIGN.md).
 
-**v0.8 development, source only:** [The 50-request synthetic baseline](docs/V0_8_BASELINE_2026_10_22.md) records coding/screens results, transcription preservation and unresolved grounding gaps. An unsuccessful prompt experiment was reverted. [Actual desktop timing](docs/V0_8_DESKTOP_SPEED_2026_10_22.md) now covers nine real-provider flows through visible text and verified disk save; observed speech first text was 7.2–7.8 seconds on the current connection. This work has not updated the downloadable EXEs or qualified the proposed real-time targets.
+**v0.8 evidence and limitations:** [The 50-request synthetic baseline](docs/V0_8_BASELINE_2026_10_22.md) records coding/screens results, transcription preservation and unresolved grounding gaps. An unsuccessful prompt experiment was reverted. [Actual desktop timing](docs/V0_8_DESKTOP_SPEED_2026_10_22.md) now covers nine real-provider flows through visible text and verified disk save; observed speech first text was 7.2–7.8 seconds on the current connection. The v0.8.0 downloads include the source changes and contrast fix. The proposed real-time speed targets remain unqualified.
 
 **On this page:** [Release status](#release-status) · [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source) · [Signing](#code-signing-policy) · [Validation](#validation-and-remaining-checks)
 
@@ -26,11 +26,12 @@ The desktop app is named **Parakeet Studio**. This independently written, MIT-li
 
 | Channel | What you get |
 |---|---|
-| **Published v0.7.0 prerelease** | Current **unsigned portable EXE and NSIS setup**, with the latest hardening and recovery changes. [Downloads and checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.7.0). |
-| **Current main source: v0.7.0** | Experimental source for the current release. [Build locally](#build-from-source); use the release manifest for the exact shipping revision. |
+| **v0.8.0 experimental prerelease** | Updated **unsigned portable EXE and NSIS setup**, including Hold/Resume contrast, correction controls and timing/recovery changes. [Downloads and checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.0). |
+| **Previous v0.7.0** | Previous unsigned experimental release. [Historical downloads](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.7.0). |
+| **Current main source: v0.8.0** | Experimental source for the current release. [Build locally](#build-from-source); use the release manifest for the exact shipping revision. |
 | **Older v0.5.8** | Retained for historical reference on its [release page](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.5.8); it predates the latest fixes. |
 
-The feature descriptions below cover v0.7.0 unless another version is stated. See [latest changes](#latest-source-changes), [recorded validation](#validation-and-remaining-checks) and the [release procedure](docs/RELEASING.md).
+The feature descriptions below cover v0.8.0 unless another version is stated. See [latest changes](#latest-source-changes), [recorded validation](#validation-and-remaining-checks) and the [release procedure](docs/RELEASING.md).
 
 ## Download and run
 
@@ -42,12 +43,12 @@ The feature descriptions below cover v0.7.0 unless another version is stated. Se
 | Audio access | Working devices/drivers and Windows microphone permissions |
 | Runtime | Portable app includes Electron and its helper; no Node.js, Python or separate .NET SDK needed |
 
-1. Choose **[portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.7.0/Parakeet-Studio-0.7.0-portable.exe)** to run directly, or **[setup EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.7.0/Parakeet-Studio-0.7.0-setup.exe)** for a per-user installation. The source ZIP is for developers.
+1. Choose **[portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-portable.exe)** to run directly, or **[setup EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-setup.exe)** for a per-user installation. The source ZIP is for developers.
 2. Close other copies and [back up an existing profile](docs/QUALITY_AND_RECOVERY.md) before upgrading. **Portable:** keep the file in a folder you control and run it; first launch extracts its runtime and can take longer. **Installer:** run the setup wizard, choose the installation directory and launch Parakeet Studio. Uninstall retains local application data. See the [user guide](docs/USER_GUIDE.md).
-3. Compare its hash with `SHA256SUMS.txt` from the [same release](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.7.0):
+3. Compare its hash with `SHA256SUMS.txt` from the [same release](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.0):
 
    ```powershell
-   Get-FileHash -Algorithm SHA256 '.\Parakeet-Studio-0.7.0-portable.exe'
+   Get-FileHash -Algorithm SHA256 '.\Parakeet-Studio-0.8.0-portable.exe'
    ```
 
 4. This community build is **unsigned** and may show an unknown-publisher warning. Verify the source/checksum before deciding to run it. Do not disable Windows security.
@@ -228,10 +229,10 @@ npm start
 | `npm run build:signed` | Requires an approved identity; verifies pinned publisher signatures and timestamps |
 
 
-After `npm run build:win`, the v0.7.0 source produces:
+After `npm run build:win`, the v0.8.0 source produces:
 
-- `dist/Parakeet-Studio-0.7.0-portable.exe` — run directly without installing.
-- `dist/Parakeet-Studio-0.7.0-setup.exe` — per-user NSIS installer with an uninstaller.
+- `dist/Parakeet-Studio-0.8.0-portable.exe` — run directly without installing.
+- `dist/Parakeet-Studio-0.8.0-setup.exe` — per-user NSIS installer with an uninstaller.
 
 These locally built files are **unsigned**. Close the app and make a [compatible profile backup](docs/QUALITY_AND_RECOVERY.md) before changing versions. Preserve `Local State` with encrypted profiles; protected keys are tied to Windows user/machine safeguards. Uninstalling retains application data by design; it is not a request to erase your transcript history.
 
@@ -249,7 +250,7 @@ Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device w
 
 ## Latest source changes
 
-**Direct screen answers:** in v0.7.0, **Answer screenshot** / **Ctrl+Alt+Enter** captures the selected display and streams the answer in the assistant without opening a review window or restoring the workspace. The primary display is the initial target. **Review / crop** can select another display for the session, inspect/crop the image and choose quality. Quick capture preserves native detail up to 3840 pixels on the longest edge. Only visible content is captured; off-screen text is not scrolled into view. Check for private information before invoking direct capture. Pixels are not saved in history; generated text follows your history settings.
+**Direct screen answers:** in v0.8.0, **Answer screenshot** / **Ctrl+Alt+Enter** captures the selected display and streams the answer in the assistant without opening a review window or restoring the workspace. The primary display is the initial target. **Review / crop** can select another display for the session, inspect/crop the image and choose quality. Quick capture preserves native detail up to 3840 pixels on the longest edge. Only visible content is captured; off-screen text is not scrolled into view. Check for private information before invoking direct capture. Pixels are not saved in history; generated text follows your history settings.
 
 **Interviewer audio:** choose **System audio** or **Both**, then **Start listening**. System audio captures Windows playback, including call audio. In Both mode, automatic drafting uses the system stream to avoid treating your microphone speech as interviewer questions. Headphones reduce duplicate pickup. New installs use VERBATIM transcription; existing explicit preferences are retained. Corrections and unfinished constraints are preserved for review, and detected source overlap holds automatic drafting.
 
@@ -259,7 +260,9 @@ Developer quality checks: [evaluation suite](docs/EVALUATION.md), [real-device w
 
 ## Validation and remaining checks
 
-The v0.7.0 code-validation baseline, at commit `f9ef0a1`, passed [Windows verification and restricted evaluation](https://github.com/AYASKA-in/parakeet-rea-studio/actions/runs/39569655493). It includes **120 deterministic tests** plus packaged UI, production, recovery, latency, restore, portable and source-package checks. The release page records the exact shipping build revision and its CI run. These checks do not qualify every real-world setup.
+The v0.8.0 release includes **154 deterministic tests** and packaged desktop, recovery, timing, restore, portable and installer-payload checks. See the [release page](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.0) for the exact shipping revision, CI run and validation scope. The model studies above were measured on their recorded development revisions.
+
+The historical v0.7.0 code-validation baseline, at commit `f9ef0a1`, passed [Windows verification and restricted evaluation](https://github.com/AYASKA-in/parakeet-rea-studio/actions/runs/39569655493). It includes **120 deterministic tests** plus packaged UI, production, recovery, latency, restore, portable and source-package checks. The release page records the exact shipping build revision and its CI run. These checks do not qualify every real-world setup.
 
 | Check | Recorded result / limit |
 |---|---|
@@ -269,7 +272,7 @@ The v0.7.0 code-validation baseline, at commit `f9ef0a1`, passed [Windows verifi
 | **Signing** | Publisher/timestamp gates are implemented; no signing identity/service has been approved. Artifacts remain unsigned. |
 | **Still needed** | Consented human speech/overlap trials; spoken Narrator and real scaling; broader USB/Bluetooth/routing/hotplug checks; manual installer wizard, UAC/multiple-account/installed-upgrade/rollback checks; and signed-download acceptance. |
 
-Earlier physical sleep/wake and 60/120-minute endurance receipts apply to their recorded candidates. They are not automatically fresh v0.7.0 hardware or endurance results. Small synthetic benchmark results do not establish universal transcription, screenshot or answer accuracy.
+Earlier physical sleep/wake and 60/120-minute endurance receipts apply to their recorded candidates. They are not automatically fresh v0.8.0 hardware or endurance results. Small synthetic benchmark results do not establish universal transcription, screenshot or answer accuracy.
 
 Follow the [hands-on acceptance guide](docs/EXTERNAL_ACCEPTANCE.md). The recorder starts only after its explicit Start action; cloud evaluation requires separate consent. The installer lifecycle script refuses personal computers and self-hosted runners. Never use the disposable-host flag as a way to test installation in your normal account.
 

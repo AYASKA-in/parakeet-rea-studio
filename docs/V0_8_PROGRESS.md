@@ -1,6 +1,6 @@
 # v0.8.0 development progress
 
-Status: source changes only, updated 22 October 2026. Published v0.7.0 EXEs do not contain this work. Runtime package version remains 0.7.0 until a release candidate is prepared.
+Status: included in the v0.8.0 experimental unsigned release, updated 22 October 2026. See [release notes](RELEASE_NOTES_0.8.0.md) for shipping scope. The implementation slices below are historical receipts: their references to unchanged binaries describe the state when those checks ran, before packaging v0.8.0.
 
 ## First implementation slice
 
