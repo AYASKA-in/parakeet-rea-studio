@@ -111,12 +111,13 @@ jobs:
            let notes=fs.readFileSync('docs/RELEASE_NOTES_0.7.0.md','utf8').replace(/\]\(([A-Z_]+\.md)\)/g,(_,file)=>'](https://github.com/'+repo+'/blob/'+tag+'/docs/'+file+')');
            notes+='\n## Build provenance\n\nBuilt from commit `'+revision+'`. [Release CI](https://github.com/'+repo+'/actions/runs/'+runId+') passed Windows verification and restricted evaluation, including 120 deterministic tests and the disposable Windows installer lifecycle. These portable/setup EXEs are **unsigned**. No shared API key is included.\n';
            const notesFile=process.env.RUNNER_TEMP+'/parakeet-0.7.0-notes.md';fs.writeFileSync(notesFile,notes);
-           gh(['release','create',tag,'--repo',repo,'--target',revision,'--title','Parakeet Studio 0.7.0 — Experimental Windows (unsigned)','--notes-file',notesFile,'--draft','--prerelease',...names.map(name=>'dist/'+name)]);
-           const draft=JSON.parse(gh(['api','repos/'+repo+'/releases/tags/'+tag]));
-           assert.equal(draft.draft,true);assert.equal(draft.prerelease,true);assert.equal(draft.assets.length,names.length);
+           const releasesEndpoint='repos/'+repo+'/releases';
+           let draft=JSON.parse(gh(['api',releasesEndpoint+'?per_page=100'])).find(row=>row.tag_name===tag);
+           if(!draft){gh(['release','create',tag,'--repo',repo,'--target',revision,'--title','Parakeet Studio 0.7.0 — Experimental Windows (unsigned)','--notes-file',notesFile,'--draft','--prerelease',...names.map(name=>'dist/'+name)]);draft=JSON.parse(gh(['api',releasesEndpoint+'?per_page=100'])).find(row=>row.tag_name===tag);}
+           assert.ok(draft,'Release draft not found');assert.equal(draft.target_commitish,revision);assert.equal(draft.prerelease,true);assert.equal(draft.assets.length,names.length);
            for(const name of names){const asset=draft.assets.find(x=>x.name===name);assert.ok(asset,'Missing uploaded asset: '+name);assert.equal(asset.size,hashes[name].size);assert.equal(asset.digest,hashes[name].digest,'Uploaded digest differs: '+name);}
-           gh(['release','edit',tag,'--repo',repo,'--draft=false','--prerelease']);
-           const published=JSON.parse(gh(['api','repos/'+repo+'/releases/tags/'+tag]));assert.equal(published.draft,false);assert.equal(published.prerelease,true);
+           if(draft.draft)gh(['api',releasesEndpoint+'/'+draft.id,'--method','PATCH','-F','draft=false','-F','prerelease=true']);
+           const published=JSON.parse(gh(['api',releasesEndpoint+'/'+draft.id]));assert.equal(published.draft,false);assert.equal(published.prerelease,true);
            const ref=JSON.parse(gh(['api','repos/'+repo+'/git/ref/tags/'+tag]));assert.equal(ref.object.type,'commit');assert.equal(ref.object.sha,revision);
            console.log(JSON.stringify({release:published.html_url,sourceRevision:revision,unsigned:true,uploadedDigestsVerified:true,assets:published.assets.map(a=>({name:a.name,size:a.size,digest:a.digest,url:a.browser_download_url}))},null,2));
           })();
