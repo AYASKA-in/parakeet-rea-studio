@@ -19,6 +19,7 @@ const root=path.resolve(__dirname,'..'),packaged=process.argv.includes('--packag
    if(source==='system')await page.evaluate(()=>{const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.frequency.value=440;g.gain.value=.04;o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+4);setTimeout(()=>void c.close(),4500);});
    await pause(12000);await stop();assert.ok(frames>40,'Too few real '+source+' frames');if(source==='system')assert.ok(peak>.005,'Loopback did not contain the audible test tone');report.checks.push({source,frames,peak,passed:true});await persist();
   }
+  if(process.argv.includes('--devices-only')){report.phase='complete';report.passed=true;report.sleepWakeTested=false;report.deviceScope='Selected microphone and default Windows playback at one moment; no hotplug, routing-change or ASR accuracy claim.';await persist();return;}
   report.phase='awaiting-sleep-start';await persist();console.log('Real device checks passed. Waiting for startSleep control before starting the sleep interruption capture.');await command('startSleep');
   await start('microphone');report.phase='sleep-now';await persist();console.log('Sleep watcher active. Use Windows Sleep, wait 30 seconds, wake and sign in.');
   const deadline=Date.now()+10*60000;let events=[];

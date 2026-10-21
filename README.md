@@ -236,3 +236,7 @@ For interviewer audio, choose **System audio** or **Both** and press **Start lis
 - Content-free stage timing exports, per-user installer builds, signature checks and profile backup/restore tools.
 
 See the [quality, recovery and update guide](docs/QUALITY_AND_RECOVERY.md) for results, commands and remaining acceptance checks. This is an unsigned candidate: actual signing, human voice trials and wider device/accessibility/installer testing remain pending. Public download links above still refer to the published 0.5.8 release.
+
+### Code signing policy and hands-on validation
+
+Current releases are **unsigned**. Read the [code signing policy](docs/CODE_SIGNING.md) and [voice, Narrator, device and disposable installer acceptance guide](docs/EXTERNAL_ACCEPTANCE.md). Prepared checks are distinct from completed acceptance results.
