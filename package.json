@@ -17,7 +17,7 @@
     "pretest:live": "npm run build:native",
     "start": "electron .",
     "preview": "node scripts/preview.cjs",
-    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs tests/production.test.cjs tests/eval.test.cjs tests/install-lifecycle.test.cjs tests/realtime.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/audio.test.mjs tests/reliability.test.cjs tests/resume.test.cjs tests/safety.test.cjs tests/question-queue.test.mjs tests/desktop-runtime.test.cjs tests/audio-timing.test.cjs tests/production.test.cjs tests/eval.test.cjs tests/install-lifecycle.test.cjs tests/realtime.test.cjs tests/benchmark.test.cjs",
     "test:desktop": "node scripts/verify-desktop.cjs",
     "build:win": "npm run build:native && npm run build:icon && electron-builder --win portable nsis --x64 --publish never",
     "build:dir": "npm run build:native && npm run build:icon && electron-builder --win --x64 --dir --publish never",
@@ -31,7 +31,7 @@
     "pretest:production": "npm run build:native",
     "build:signed": "npm run build:native && npm run build:icon && node scripts/build-signed.cjs",
     "release:inventory": "node scripts/dependency-inventory.cjs",
-    "test:eval": "node --test tests/eval.test.cjs",
+    "test:eval": "node --test tests/eval.test.cjs tests/benchmark.test.cjs",
     "test:eval-sandbox": "node scripts/verify-eval-sandbox.cjs",
     "eval:prepare": "node scripts/prepare-eval.cjs",
     "eval:run": "node scripts/evaluate.cjs",
@@ -45,7 +45,9 @@
     "test:install-lifecycle": "node scripts/verify-install-lifecycle.cjs",
     "test:accessibility:prepare": "node scripts/prepare-accessibility.cjs",
     "test:realtime": "node --test tests/realtime.test.cjs",
-    "test:realtime:desktop": "npm run build:native && node scripts/verify-realtime.cjs"
+    "test:realtime:desktop": "npm run build:native && node scripts/verify-realtime.cjs",
+    "eval:report": "node scripts/report-quality.cjs",
+    "test:eval-pipeline": "node scripts/verify-quality-pipeline.cjs"
   },
   "dependencies": {
     "pdf-parse": "2.4.5"

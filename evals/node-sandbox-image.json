@@ -1,0 +1,5 @@
+{
+  "image": "node@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d",
+  "resolvedAt": "2026-10-21",
+  "source": "Docker Official Image node:22-slim"
+}

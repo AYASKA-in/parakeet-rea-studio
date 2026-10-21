@@ -390,7 +390,7 @@ function renderAnswer() {
 }
 function syncOverlay() {
   if (!desktop || !bridge.setOverlay || overlaySyncTimer) return;
-  overlaySyncTimer = setTimeout(() => { overlaySyncTimer = null; const pending=questionQueue.pending?.sessionId===state.active?.id ? questionQueue.pending : null; void bridge.setOverlay({ recovery:{...recoveryView({provider:state.providerStatus,liveStates:state.liveStates,levels:state.levels,listening:state.listening,starting:state.starting,source:$('#audio-source').value,online:navigator.onLine,error:state.answerError,hasQuestion:Boolean(state.currentQuestion||state.lastRequestKind==='screen')}),retryLabel:state.lastRequestKind==='screen'?'Capture again':'Retry answer'}, question: state.currentQuestion, answer: state.currentAnswer, pendingQuestion:pending?.text || '',pendingStatus:pending ? $('#pending-question-status').textContent : '',pendingCanSend:Boolean(pending&&!$('#pending-question-send').disabled),pendingHeld:Boolean(pending?.userHeld), listening: state.listening, answerIndex: state.answerIndex < 0 ? (state.active?.exchanges.length || 0) - 1 : state.answerIndex, answerCount: state.active?.exchanges.length || 0, generating: Boolean(state.requestId) || state.screenshotPending }).catch(() => {}); }, 100);
+  overlaySyncTimer = setTimeout(() => { overlaySyncTimer = null; const pending=questionQueue.pending?.sessionId===state.active?.id ? questionQueue.pending : null; void bridge.setOverlay({ recovery:{...recoveryView({provider:state.providerStatus,liveStates:state.liveStates,levels:state.levels,listening:state.listening,starting:state.starting,source:$('#audio-source').value,online:navigator.onLine,error:state.answerError,hasQuestion:Boolean(state.currentQuestion||state.lastRequestKind==='screen'),progress:{active:Boolean(state.requestId),elapsedMs:performance.now()-(state.answerStartedAt||0),silentMs:performance.now()-(state.lastAnswerDeltaAt||0),hasText:Boolean(state.currentAnswer)}}),retryLabel:state.lastRequestKind==='screen'?'Capture again':'Retry answer'}, question: state.currentQuestion, answer: state.currentAnswer, pendingQuestion:pending?.text || '',pendingStatus:pending ? $('#pending-question-status').textContent : '',pendingCanSend:Boolean(pending&&!$('#pending-question-send').disabled),pendingHeld:Boolean(pending?.userHeld), listening: state.listening, answerIndex: state.answerIndex < 0 ? (state.active?.exchanges.length || 0) - 1 : state.answerIndex, answerCount: state.active?.exchanges.length || 0, generating: Boolean(state.requestId) || state.screenshotPending }).catch(() => {}); }, 100);
 }
 function requireAI() {
   if(state.desktopPaused){toast('Desktop recovery is in progress. Wait before starting again.',true);return false;}
@@ -423,11 +423,12 @@ async function generateAnswer(options = {}) {
   const previousAnswers = session.exchanges.slice(-3);
   const exchange = { id: uid(), question, answer: '', style: state.style, status: 'streaming', screenshotUsed: Boolean(options.imageDataUrl), createdAt: new Date().toISOString() };
   session.exchanges.push(exchange); let lastCheckpoint = Date.now();
-  state.requestId = requestId; state.currentAnswer = ''; state.currentQuestion = question; state.answerError = '';
+  state.requestId = requestId;state.answerStartedAt=performance.now();state.lastAnswerDeltaAt=state.answerStartedAt;state.providerStatus={state:'requesting',until:0}; state.currentAnswer = ''; state.currentQuestion = question; state.answerError = '';
   renderAnswer(); syncOverlay(); storeSession();
   const stopStreaming = bridge.onAnswer(event => {
     if (event.requestId !== requestId || state.requestId !== requestId) return;
     if(event.delta)attempt.mark('firstTextMs');
+    if(event.delta)state.lastAnswerDeltaAt=performance.now();
     state.currentAnswer += event.delta || '';
     if(hasUsefulText(state.currentAnswer))attempt.mark('firstUsefulTextMs');
     exchange.answer = state.currentAnswer;
@@ -784,7 +785,7 @@ function bindEvents() {
   });
   $('#minimize-window').addEventListener('click', () => bridge?.windowControl('minimize'));
   $('#close-window').addEventListener('click', () => bridge?.windowControl('close'));
-  if (desktop) bridge.onShortcut(action => { if (action === 'answer') { location.hash = 'workspace'; if(!sendPendingQuestion()) void generateAnswer(); } else if(action==='retry-answer'){if(!state.requestId&&!state.screenshotPending){if(state.lastRequestKind==='screen')void screenshotAnswer();else if(state.currentQuestion)void generateAnswer({question:state.currentQuestion});}}else if(action==='open-settings'){location.hash='settings';void bridge.windowControl('show');}else if (action === 'hold-question') togglePendingHold(); else if (action === 'dismiss-question') clearAutoAnswer(); else if (action === 'toggle-listening') void toggleListening(); else if (action === 'previous-answer') browseAnswer(-1); else if (action === 'next-answer') browseAnswer(1); else if (action === 'screenshot-answer') void screenshotAnswer(); else if (action === 'clear-transcript') void clearTranscript(); else if (action === 'scroll-up' || action === 'scroll-down') $('#answer-content').scrollBy({ top: action === 'scroll-up' ? -220 : 220, behavior: 'smooth' }); });
+  if (desktop) bridge.onShortcut(action => { if (action === 'answer') { location.hash = 'workspace'; if(!sendPendingQuestion()) void generateAnswer(); } else if(action==='retry-answer'){if(!state.requestId&&!state.screenshotPending){if(state.lastRequestKind==='screen')void screenshotAnswer();else if(state.currentQuestion)void generateAnswer({question:state.currentQuestion});}}else if(action==='open-settings'){location.hash='settings';void bridge.windowControl('show');}else if (action === 'cancel-answer') void cancelGeneration(); else if (action === 'hold-question') togglePendingHold(); else if (action === 'dismiss-question') clearAutoAnswer(); else if (action === 'toggle-listening') void toggleListening(); else if (action === 'previous-answer') browseAnswer(-1); else if (action === 'next-answer') browseAnswer(1); else if (action === 'screenshot-answer') void screenshotAnswer(); else if (action === 'clear-transcript') void clearTranscript(); else if (action === 'scroll-up' || action === 'scroll-down') $('#answer-content').scrollBy({ top: action === 'scroll-up' ? -220 : 220, behavior: 'smooth' }); });
 }
 async function init() {
   hydrateIcons(); bindEvents();
@@ -824,7 +825,7 @@ async function init() {
   renderShortcutStatus();
   if(desktop&&bridge.getRuntime){
     bridge.onProviderStatus?.(value=>{if(value.requestId===state.requestId){state.providerStatus={state:value.state,until:Date.now()+Math.min(300000,Math.max(0,value.retryAfterMs||0))};syncOverlay();}});
-    setInterval(()=>{if(state.overlay||state.listening)syncOverlay();},1000);
+    setInterval(()=>{if(state.overlay||state.listening||state.requestId)syncOverlay();},1000);
     window.addEventListener('online',syncOverlay);window.addEventListener('offline',syncOverlay);
     bridge.onAudioTimingStatus?.(value=>{appendTranscript(`Audio timing warning: ${message(value.message)}`,'status');toast(message(value.message),true);});
     bridge.onLifecycle(handleDesktopRuntime);bridge.onShortcutsChanged(renderShortcutStatus);

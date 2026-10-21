@@ -43,3 +43,38 @@ Reports remain in ignored test-results and include exact evaluator source hashes
 The initial 12-case smoke passed three finite coding cases, three screen token/limit checks and three structured resume checks. Three ASR cases failed the original raw lexical rubric. Those failures remain recorded; they must not be relabeled as passes or erased by a later rerun. A broader user-authorized batch is evaluated separately. See VALIDATION.md for final recorded results.
 
 The optional developer evaluation sandbox uses the Docker Official Image for Python, pinned by digest in evals/sandbox-image.json. Python and the image OS components retain their upstream licenses. This image is downloaded separately for testing and is not bundled in the desktop EXE/source ZIP. The application icon is an original rendering of this repository’s own vector mark.
+
+
+## v0.8 development benchmark suite
+
+The public corpus now contains 64 coding, 62 screen and 60 grounding cases, with 100 synthetic ASR clips and 100 routing sequences. These are developer fixtures, not a blinded holdout. The new realtime suite adds JavaScript numeric sorting, Unicode, negative windows, first-match binary search, case-sensitive identifiers, LRU, small screen code, unreadable content, SQL NULLs and unsupported personal claims.
+
+Both pinned images in evals/sandbox-image.json and evals/node-sandbox-image.json are required for the restricted runner. Fetch those exact digests; do not run provider-generated code on the host. Then run:
+
+~~~powershell
+npm run test:eval
+npm run test:eval-sandbox
+npm run test:eval-pipeline
+npm run eval:prepare
+~~~
+
+Explicitly budgeted live evaluation, when authorized, can select the new development suite:
+
+~~~powershell
+npm run eval:run -- --live --kind=coding --provider=gemini --model=YOUR_MODEL --suite=realtime --split=development --max-calls=6
+npm run eval:quality -- --live --suite=realtime --max-calls=19
+~~~
+
+The second command uses the configured default model identifiers and covers six coding, five screen and eight grounding cases. A lower ceiling stops earlier; it does not establish coverage of the unrun cases. No human audio is included. Authentication/quota/cooldown conditions stop later batches. None of these commands determine project billing eligibility.
+
+Generate a local content-free aggregate from existing evaluation receipts:
+
+~~~powershell
+npm run eval:report -- --input="ABSOLUTE_PATH_TO_REPORT_JSON" --input="ANOTHER_REPORT_JSON"
+~~~
+
+Schema 3 receipts separate provider, grading and total duration, plus ASR end-of-audio-to-final time where available. Summary reports retain provider/execution/format/rubric failures and planned-but-unrun cases, separate models/modes and flag mixed source hashes. Historical total elapsed time is never presented as provider or first-token latency. Family variants and repeated runs remain correlated. Raw observed answers, error strings, clip IDs and credentials are omitted from the aggregate.
+
+Structured JSON grading now requires the declared fields, rejects extra guessed fields by default and accepts a complete JSON fence. Arbitrary prose around JSON fails that exact-output contract. Human audio manifests may set criticalCaseSensitive=true for identifier-sensitive clips; legacy word matching remains case insensitive. This flag does not establish reliable recognition of spoken identifier casing.
+
+See [the small live development sample](V0_8_SMOKE_2026_10_22.md) for scope and timing limitations.

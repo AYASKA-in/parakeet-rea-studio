@@ -18,7 +18,7 @@ function groundingAssessment(question,resume) {
   if(/^(?:skills|education|projects|certifications|summary|objective)\s*:?$/i.test(line))inExperience=false;
   if(!name.test(line))continue;
   if(denial.test(line)){conflictLines.push(i+1);continue;}
-  if(intention.test(line))continue;
+  if(intention.test(line)||/\b(?:untrusted note|ignore (?:all |your )?(?:rules|instructions)|pretend|claim (?:I|that I))\b/iu.test(line))continue;
   const header=new RegExp('^'+pattern+'(?:\\s*[|—–-].*)?$','iu').test(line);
   const nearby=lines.slice(i+1,i+3).join(' ');
   if(direct.test(line) || inExperience && header && role.test(nearby) && /\b(?:19|20)\d{2}\b/u.test(nearby))evidenceLines.push(i+1);

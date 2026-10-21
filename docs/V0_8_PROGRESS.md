@@ -16,7 +16,7 @@ Status: source changes only, 21 October 2026. Published v0.7.0 EXEs do not conta
 - Fourteen new deterministic regression tests cover late corrections, source isolation, persistent Hold, capture timing/failure, first-stage immutability, known/unknown endpoints, diagnostic retention and employment evidence.
 - The isolated synthetic desktop runner exercises Hold/resume, cancellation after a correction, no automatic replacement, explicit revised requests, failed/successful capture accounting and first rendered text. Its fake microphone, loopback provider and synthetic desktop thumbnail do not record a real microphone, capture real screen pixels or contact a cloud provider. Production screenshot lease validation is retained.
 - Existing seven local latency/fault scenarios and source desktop integration were run. UI validation covers 16 view/viewport combinations, four overlay layouts, text contrast and keyboard navigation.
-- These tests establish local behavior, not internet latency targets, model quality, broad accent/device coverage or production availability.
+- These local checks establish behavior, not internet latency targets, model quality, broad accent/device coverage or production availability. The later six-case live sample is documented separately below.
 
 Commands:
 - npm test
@@ -28,9 +28,18 @@ Commands:
 
 CI is configured to run the new desktop scenarios against the packaged app and retain their synthetic summary and content-free diagnostics. Hosted results are not yet claimed for this source change.
 
+## Second implementation slice — 22 October 2026
+
+- Added six JavaScript coding, five screen and eight grounding development fixtures. Corpus totals are 64 coding, 62 screen and 60 grounding cases; the ASR/routing counts remain 100 each.
+- Added a pinned restricted Node runner and executable fixture validation. Reference solutions, wrong code/syntax, input mutation, execution/output limits and container controls are exercised locally. Expected outputs stay outside provider requests.
+- Added strict structured grading, optional case-sensitive critical-token scoring and a content-free report CLI that preserves failure/unrun denominators and source provenance.
+- Evaluator schema 3 separates provider, grading and total duration. Historical metrics remain unknown rather than invented.
+- Six real Gemini smoke cases passed their finite rubrics. See [dated evidence](V0_8_SMOKE_2026_10_22.md) for the small sample and latency limits. This does not qualify the larger holdout.
+- Added visible slow-response/paused-stream states and Stop answer in the overlay, with two new cancellation/fault scenarios. No automatic replay or provider-health polling was introduced.
+
 ## Remaining work, in order
 
-1. Freeze a representative baseline and validate benchmark scoring/input contracts; author a fresh independent private holdout and expand multi-language/vision cases.
+1. Broaden the initial six-case live baseline; author a fresh independent private holdout and expand language/vision coverage. Scoring/input-contract validation and the first content-free baseline are now implemented.
 2. Validate endpoint/correction behavior on consented real speech, including accents, long pauses and overlap. Current quiet windows are retained until evidence supports shortening them.
 3. Expand semantic screen contract extraction and resume claim/date/metric grounding beyond employment cues.
 4. Measure network bottlenecks and choose task/model/image optimizations using accuracy and end-to-end latency together. No unapproved parallel requests, paid fallback or new cloud benchmark budget is introduced here.

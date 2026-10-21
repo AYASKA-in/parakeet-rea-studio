@@ -25,7 +25,7 @@ function render(data = {}) {
   $('#overlay-next').disabled = Boolean(data.generating) || index >= count - 1;
   $('#overlay-generate').disabled = Boolean(data.generating) || Boolean(pending&&!data.pendingCanSend);
   $('#overlay-screenshot').disabled = Boolean(data.generating);
-  const recovery=data.recovery||{};$('#overlay-sources').replaceChildren(...(recovery.sources||[]).map(source=>{const span=document.createElement('span');span.textContent=source.label+': '+source.state;return span;}));
+  const recovery=data.recovery||{};$('#overlay-cancel-answer').hidden=!recovery.canCancel;$('#overlay-sources').replaceChildren(...(recovery.sources||[]).map(source=>{const span=document.createElement('span');span.textContent=source.label+': '+source.state;return span;}));
   $('#overlay-connection').textContent=(recovery.status||'')+(recovery.wait?' · '+recovery.wait+'s':'');$('#overlay-retry').textContent=recovery.retryLabel||'Retry answer';$('#overlay-retry').hidden=!recovery.retry||Boolean(data.generating);$('#overlay-settings').hidden=!recovery.needsSettings;$('#overlay-error').hidden=!recovery.hasError;
   const preferences = data.preferences || data;
   if (Number.isFinite(preferences.opacity)) {
@@ -51,6 +51,7 @@ else render();
 $('#overlay-previous').addEventListener('click', () => action('previous-answer'));
 $('#overlay-next').addEventListener('click', () => action('next-answer'));
 $('#overlay-screenshot').addEventListener('click', () => action('screenshot-answer'));
+$('#overlay-cancel-answer').addEventListener('click',()=>action('cancel-answer'));
 $('#overlay-retry').addEventListener('click',()=>action('retry-answer'));$('#overlay-settings').addEventListener('click',()=>action('open-settings'));
 $('#overlay-hide').addEventListener('click', () => action('hide-overlay'));
 async function savePreferences(change) {

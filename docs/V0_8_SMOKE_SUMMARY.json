@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "scope": "Finite public developer cases; family variants and repeated runs are correlated. Not a blinded holdout, correctness guarantee or production SLO.",
+  "timingNotes": "Provider intervals exclude code execution/grading; ASR provider intervals include clip replay. No first-token, question-end or semantic useful-answer latency is inferred. Historical receipts without stage timings remain unknown.",
+  "groups": [
+    {
+      "group": "coding/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 3,
+      "attempted": 3,
+      "passed": 3,
+      "failed": 0,
+      "planned": 3,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 3,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 3,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 3,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 3,
+          "p50": 6271,
+          "p95": 7311
+        },
+        "providerMs": {
+          "samples": 3,
+          "p50": 5087,
+          "p95": 6161
+        },
+        "gradingMs": {
+          "samples": 3,
+          "p50": 1183,
+          "p95": 1240
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "screens/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 2,
+      "attempted": 2,
+      "passed": 2,
+      "failed": 0,
+      "planned": 2,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 2,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 2,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 2,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 2,
+          "p50": 2169,
+          "p95": 4978
+        },
+        "providerMs": {
+          "samples": 2,
+          "p50": 2165,
+          "p95": 3821
+        },
+        "gradingMs": {
+          "samples": 2,
+          "p50": 0,
+          "p95": 1155
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    },
+    {
+      "group": "resumes/gemini/gemini-3.5-flash-lite/n/a",
+      "receipts": 1,
+      "attempted": 1,
+      "passed": 1,
+      "failed": 0,
+      "planned": 1,
+      "unattempted": 0,
+      "receiptsWithoutPlan": 0,
+      "passRateOnAttempts": 1,
+      "distinctFamilies": 1,
+      "sourceRevisions": 1,
+      "mixedSourceRevisions": false,
+      "syntheticReceipts": 1,
+      "humanConsentedReceipts": 0,
+      "outcomes": {
+        "pass": 1,
+        "incorrect": 0,
+        "provider-error": 0,
+        "execution-timeout": 0,
+        "execution-error": 0,
+        "evaluation-error": 0,
+        "unclassified-error": 0
+      },
+      "durations": {
+        "elapsedMs": {
+          "samples": 1,
+          "p50": 1694,
+          "p95": 1694
+        },
+        "providerMs": {
+          "samples": 1,
+          "p50": 1690,
+          "p95": 1690
+        },
+        "gradingMs": {
+          "samples": 1,
+          "p50": 0,
+          "p95": 0
+        },
+        "asrEndToFinalMs": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        }
+      },
+      "evidenceSufficientForProductionClaim": false
+    }
+  ],
+  "createdAt": "2026-10-21T18:34:40.684Z"
+}

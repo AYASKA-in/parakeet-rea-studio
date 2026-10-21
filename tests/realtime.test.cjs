@@ -87,3 +87,15 @@ test('corrections remain attached during a slow active answer even with question
 test('negated job titles and contractions do not confirm employment',()=>{
  const {groundingAssessment:g}=require('../electron/grounding.cjs');for(const resume of ["I wasn't employed by Google.",'I was not an engineer at Google.'])assert.equal(g('Did I work at Google?',resume).status,'unsupported');
 });
+
+test('overlay distinguishes slow first response from a stalled partial stream and permits cancellation',async()=>{
+ const {recoveryView}=await load('recovery-state.js');
+ const waiting=recoveryView({provider:{state:'requesting'},progress:{active:true,elapsedMs:6000,silentMs:6000,hasText:false}});
+ assert.match(waiting.status,/Still waiting/);assert.equal(waiting.canCancel,true);assert.equal(waiting.retry,false);
+ const paused=recoveryView({provider:{state:'requesting'},progress:{active:true,elapsedMs:8000,silentMs:5500,hasText:true}});
+ assert.match(paused.status,/paused/);assert.equal(paused.canCancel,true);
+ assert.match(recoveryView({provider:{state:'requesting'},progress:{active:true,elapsedMs:8000,silentMs:50,hasText:true}}).status,/Receiving/);
+ assert.match(recoveryView({provider:{state:'quota'},progress:{active:true,elapsedMs:8000}}).status,/quota/);
+ assert.equal(recoveryView({provider:{state:'error'},progress:{active:true}}).retry,false);
+ assert.equal(recoveryView({provider:{state:'complete'}}).canCancel,false);
+});

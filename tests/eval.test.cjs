@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');const {pathToFileURL}=require('node:url'),path=require('node:path');
 const corpus=require('../evals/corpus.cjs');const {wordErrorRate,gradeText}=require('../evals/grade.cjs');
 test('synthetic corpus declares family-separated reserved groups and exact sizes',()=>{
- for(const [kind,count]of Object.entries({asr:100,routing:100,coding:58,screens:57,resumes:52})){assert.equal(corpus[kind].length,count);assert.equal(new Set(corpus[kind].map(x=>x.id)).size,count);const families=new Map();for(const row of corpus[kind]){if(families.has(row.family))assert.equal(families.get(row.family),row.split);families.set(row.family,row.split);}assert.ok(corpus[kind].some(x=>x.split==='reserved'));}
+ for(const [kind,count]of Object.entries({asr:100,routing:100,coding:64,screens:62,resumes:60})){assert.equal(corpus[kind].length,count);assert.equal(new Set(corpus[kind].map(x=>x.id)).size,count);const families=new Map();for(const row of corpus[kind]){if(families.has(row.family))assert.equal(families.get(row.family),row.split);families.set(row.family,row.split);}assert.ok(corpus[kind].some(x=>x.split==='reserved'));}
 });
 test('routing corpus exercises actual queue decisions and preserves follow-up constraints',async()=>{
  const {QuestionQueue}=await import(pathToFileURL(path.resolve(__dirname,'../renderer/question-queue.js')).href);
