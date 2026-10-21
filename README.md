@@ -2,6 +2,8 @@
 
 # Parakeet REA Studio
 
+**[Product website & Windows downloads](https://ayaska-in.github.io/parakeet-rea-studio/)** · [Website maintenance](docs/WEBSITE.md)
+
 [Production readiness review and prioritized patch queue](docs/PRODUCTION_READINESS.md) — current gaps, completed response-integrity fixes, and acceptance gates.
 
 [![Windows build](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml/badge.svg)](https://github.com/AYASKA-in/parakeet-rea-studio/actions/workflows/windows.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-e9ae86?style=flat-square)](LICENSE) ![Windows x64](https://img.shields.io/badge/platform-Windows_x64-304c55?style=flat-square) ![Bring your own key](https://img.shields.io/badge/API-bring_your_own_key-304c55?style=flat-square)
