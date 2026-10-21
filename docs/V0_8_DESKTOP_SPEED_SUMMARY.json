@@ -1,0 +1,903 @@
+{
+  "schemaVersion": 1,
+  "clientDate": "2026-10-22",
+  "scope": "Typed/capture action or scheduled synthetic signal endpoint -> DOM text, generation completion and acknowledged save. DOM timestamps are not physical display paint. First40 is a length proxy, not semantic useful-answer timing.",
+  "screenScope": "Synthetic pixels replace native desktop acquisition; production capture encoding, validation and request path remain.",
+  "networkScope": "Unshaped current connection, plus HTTP-only application pacing (300ms initial delay, 256Kbps request body, 1Mbps response). WebSocket audio is not shaped; this is not OS link emulation.",
+  "audioPath": "Synthetic WebAudio microphone -> production AudioCapture/worklet -> live transcription -> question queue -> answer stream -> workspace/overlay -> durable save",
+  "sourceCommitBeforeInstrumentation": "0727fd52a3bc1809e0ec06b05de6bc6df0dcb4e1",
+  "sourceHashes": {
+    "package.json": "5af74545c836c69b55dd6aa5c6ab75ca92b53b862e73c13e3dd3c9ba1abb8c93",
+    "scripts/benchmark-desktop-live.cjs": "b0dd15e7cb18b1701519a253068fdfddc646478f011a6c746b09a3da7c3058a0",
+    "evals/desktop-live.cjs": "fa0b61e0da4eb075f61283bdf323762194bf3d7a82cddf8aae1c6bedf33f12b3",
+    "evals/v08.cjs": "bcf00dfad998d0302693efbf0b99539a25aa86c4a02c04a4513384338cc711f0",
+    "electron/audio-timing.cjs": "90ecdaa4ad288bbc1682e978e610c92083dd1fc00e9d70437e85cc81aabd7c89",
+    "electron/core.cjs": "051fcc449e229d9b9bbed14d82fd665fe10938d95ce68cb45b378dd69e93a9f8",
+    "electron/desktop-runtime.cjs": "ebe5b1cc4a6a62fdc5c3ae511a8bceabbb6c92b0a9e5e481b356e7aed6f395df",
+    "electron/diagnostics.cjs": "fe785efbf79478c1178fb8c4259485f9998824722d2bcfe4d1131994e40e1ee2",
+    "electron/document-import.cjs": "af3bda62302d261053c1e016e26b2714d7dadd4a25e262afe12d4dc115de993f",
+    "electron/gemini-live.cjs": "e76be6f3b7bc4b996e154efa93b736cdc61d84bf3ff351bb094913d26775f6d5",
+    "electron/grounding.cjs": "8e23184e40c5cd847761d980a28fcbd7a41b84089b4fd46d4f1a28a12e5911d7",
+    "electron/http.cjs": "fc838ce4ce2b80d5a8e2bb092c0bb0920db3570620f0e992c789de4c2416ccc3",
+    "electron/live-session.cjs": "ac24cddc15081242b1e584538205949c10c5986ba9e32d8e4a221815b2aff4cd",
+    "electron/local-provider.cjs": "a71e032db817ae8fb863ad87e3c99bd90e378528baff85812d438c64320247aa",
+    "electron/main.cjs": "202515b69923e2a9e7bb1ddef6b589bd68c46e713a3c11d49526de4e68eec5dd",
+    "electron/overlay-layout.cjs": "f2a61251ca78775a4e2720ebba216a2c1fb45f096f7a4509c757d0be1ea0a7c7",
+    "electron/preload.cjs": "97898c9768824034ce9d6c5869f5aebc8e1e9617ccc59401b9104599481668d0",
+    "electron/provider-status.cjs": "6f3b23fe32900494947fdf6bc15d1dc37260c204f31770d71c14b66b130f2b68",
+    "electron/reliable-live.cjs": "947d5bdd745b59d61a6de0df67ddc29a80198532efc47aa338220bfc415009cc",
+    "electron/response.cjs": "9afe7cdb8273a12d306add1a28c87faf26fac3a22d805d06e293ce814253a757",
+    "electron/resume.cjs": "665b16bd3ec5ccbc0684c2ce75be8dd74701add95ddc4329cfd185d36246ccc1",
+    "electron/safety.cjs": "adf6c95c94d2fef02a851cf587f3f75d0928d1b41acd4c7cd6c04e696aaf9e1a",
+    "electron/screen-capture.cjs": "ae9474445191036df9484c8d00474b607b520bb4966043f5d6d951fc1a984def",
+    "electron/storage.cjs": "d218aa08f94564c74f1a2d89dce6d4cf2a14d050e8af05ef0bc44a197aeaec25",
+    "electron/update-policy.cjs": "e5ce9f703fa56bb5e70402a63d7831bb5f26f42f2a51d288e11ac0e8c230d3f2",
+    "electron/workspace-privacy.cjs": "23d2f34fd02ec5028a20f533ca4b2dd5bd4a7565bc8b135a9e73d74d1eaed2ff",
+    "renderer/answer-format.js": "e35b1d61b45b1eb8ef178317a8e95e5768e1f4d14f09841a5e8457c94b826cdf",
+    "renderer/app.js": "bdd116205e0b7a93730e0062a8ba652f043635ae348065aeaa4ecb694907aeb4",
+    "renderer/attempt-timing.js": "35457c9bbf2e2faa6d57e69dedf6275509d23f5aad95efe571490ea58bcaaefc",
+    "renderer/audio-activity.js": "ff95a7e6bcbd1901fdffe79f3451a60f6003da9712736acb5b9aa8050414439d",
+    "renderer/audio.js": "3fde775717df8775b15fcb9836f954e45514a85935d2c4bdecb7c18144b23770",
+    "renderer/index.html": "4db8dd869c373790d857c0d26573a5782efa747b08b5e62b7cf0e9d44963c82b",
+    "renderer/overlay.css": "2ea2510f8228e305254f71b0a991c09ff7cd3645ead79fb7801a1b59c9f84e7f",
+    "renderer/overlay.html": "3bbfce46220a236c34d99d1791cc21e665bb0a54df417b907cf9762ba161a996",
+    "renderer/overlay.js": "cc2044ba17c6198b6d91c8b7983deab4a2cb68b95bd8421e0fdce04dbbf17c11",
+    "renderer/pcm-worklet.js": "1c97d86805a37801d6162ec03bbac6e5c2bf4a5c18ee2f82a5c486863613dc69",
+    "renderer/question-queue.js": "aa31af2fa99038d44cf5d91f3214c734c16e111532de743cdcd240c315b6790c",
+    "renderer/recovery-state.js": "8301e51447d0ce7ec6e15e7f61350b74054be7c5ab74bf254588c230a12e14c6",
+    "renderer/screen-analysis.js": "64e0c6c77e52725807116fc8a4a3132ef14796a41c534dea193ae545a7422488",
+    "renderer/styles.css": "56bacfe44c0cf24d717a13d3154db4ffa238b71a79dcacaeb3338de8867bc92d",
+    "renderer/workspace-theme.css": "2f269cfc69ce140cc6523dd871a231260a9c4a7847c3f506bd85a06f5ad5ec95"
+  },
+  "fixtureHashes": {
+    "audio": "e51b8fc3711f1f84da0de6857256c92ef08071d176750de61e993c31fa71b843",
+    "image": "527c26c7fde915650af01fc9a5c02b74c538a6a0b414f874589e12855ed50f65"
+  },
+  "syntheticAudio": {
+    "seconds": 6.4,
+    "scheduledEndpointSeconds": 5.6208125,
+    "voice": "Installed Windows synthetic voice, one phrase; no human speaker coverage"
+  },
+  "cloudRequests": 12,
+  "requestKinds": {
+    "answer-http": 9,
+    "transcription-websocket": 3
+  },
+  "authorizationCeiling": 12,
+  "authenticationOrQuotaStop": null,
+  "completedFlows": 9,
+  "successfulGenerations": 9,
+  "verifiedDurableSaves": 9,
+  "realMicrophoneUsed": false,
+  "realDesktopPixelsUsed": false,
+  "credentialsRemoved": true,
+  "groups": [
+    {
+      "group": "typed/unshaped",
+      "attempts": 2,
+      "successes": 2,
+      "failures": 0,
+      "durableSaves": 2,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4106.89990234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4248
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4106.89990234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4248
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4155.60009765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4294.5
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4741.89990234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 5365.10009765625
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4748.199951171875
+          },
+          "p95": {
+            "samples": 2,
+            "value": 5383.5
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7
+          },
+          "p95": {
+            "samples": 2,
+            "value": 20
+          }
+        }
+      },
+      "productionSloEstablished": false
+    },
+    {
+      "group": "screen/unshaped",
+      "attempts": 2,
+      "successes": 2,
+      "failures": 0,
+      "durableSaves": 2,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4498.60009765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4579.800048828125
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4498.60009765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4579.800048828125
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4546.500244140625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 4635
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 2,
+            "value": 5004.60009765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 5020
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 2,
+            "value": 5009.10009765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 5024.2001953125
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 2,
+            "value": 5
+          },
+          "p95": {
+            "samples": 2,
+            "value": 5
+          }
+        }
+      },
+      "productionSloEstablished": false
+    },
+    {
+      "group": "audio/unshaped",
+      "attempts": 2,
+      "successes": 2,
+      "failures": 0,
+      "durableSaves": 2,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7219.58740234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 7768.3876953125
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7219.58740234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 7768.3876953125
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7205.387451171875
+          },
+          "p95": {
+            "samples": 2,
+            "value": 7740.187744140625
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7719.08740234375
+          },
+          "p95": {
+            "samples": 2,
+            "value": 8213.6875
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 2,
+            "value": 7724.78759765625
+          },
+          "p95": {
+            "samples": 2,
+            "value": 8217.78759765625
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 2,
+            "value": 4
+          },
+          "p95": {
+            "samples": 2,
+            "value": 7
+          }
+        }
+      },
+      "productionSloEstablished": false
+    },
+    {
+      "group": "typed/http-paced",
+      "attempts": 1,
+      "successes": 1,
+      "failures": 0,
+      "durableSaves": 1,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 4474.5
+          },
+          "p95": {
+            "samples": 1,
+            "value": 4474.5
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 4474.5
+          },
+          "p95": {
+            "samples": 1,
+            "value": 4474.5
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 4482.2001953125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 4482.2001953125
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5327.5
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5327.5
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5333
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5333
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 1,
+            "value": 6
+          },
+          "p95": {
+            "samples": 1,
+            "value": 6
+          }
+        }
+      },
+      "productionSloEstablished": false
+    },
+    {
+      "group": "screen/http-paced",
+      "attempts": 1,
+      "successes": 1,
+      "failures": 0,
+      "durableSaves": 1,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5655.7001953125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5655.7001953125
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5655.7001953125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5655.7001953125
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5711.300048828125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5711.300048828125
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5961.10009765625
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5961.10009765625
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5966
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5966
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 1,
+            "value": 6
+          },
+          "p95": {
+            "samples": 1,
+            "value": 6
+          }
+        }
+      },
+      "productionSloEstablished": false
+    },
+    {
+      "group": "audio/http-paced",
+      "attempts": 1,
+      "successes": 1,
+      "failures": 0,
+      "durableSaves": 1,
+      "measurements": {
+        "firstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 8885.28759765625
+          },
+          "p95": {
+            "samples": 1,
+            "value": 8885.28759765625
+          }
+        },
+        "first40VisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 8885.28759765625
+          },
+          "p95": {
+            "samples": 1,
+            "value": 8885.28759765625
+          }
+        },
+        "overlayFirstVisibleMs": {
+          "p50": {
+            "samples": 1,
+            "value": 8857.8876953125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 8857.8876953125
+          }
+        },
+        "completeMs": {
+          "p50": {
+            "samples": 1,
+            "value": 9465.987548828125
+          },
+          "p95": {
+            "samples": 1,
+            "value": 9465.987548828125
+          }
+        },
+        "savedMs": {
+          "p50": {
+            "samples": 1,
+            "value": 9471.087646484375
+          },
+          "p95": {
+            "samples": 1,
+            "value": 9471.087646484375
+          }
+        },
+        "saveAfterCompleteMs": {
+          "p50": {
+            "samples": 1,
+            "value": 5
+          },
+          "p95": {
+            "samples": 1,
+            "value": 5
+          }
+        }
+      },
+      "productionSloEstablished": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "typed-0",
+      "kind": "typed",
+      "transport": "unshaped",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 1686,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 4248,
+        "first40VisibleMs": 4248,
+        "overlayFirstVisibleMs": 4294.5,
+        "completeMs": 5365.10009765625,
+        "savedMs": 5383.5,
+        "saveAfterCompleteMs": 20,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "typed",
+        "endpointSource": "request-start",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 0,
+        "firstTextMs": 4179,
+        "firstUsefulTextMs": 4180,
+        "firstRenderedMs": 4234,
+        "completedMs": 5353,
+        "attemptEndMs": 5353,
+        "savedMs": 5373,
+        "attemptId": "645cacc8-94a0-4f62-9b66-bb164e65c7cd"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 4179
+    },
+    {
+      "id": "screen-0",
+      "kind": "screen",
+      "transport": "unshaped",
+      "thinkingLevel": "HIGH",
+      "answerCharacters": 865,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 4498.60009765625,
+        "first40VisibleMs": 4498.60009765625,
+        "overlayFirstVisibleMs": 4546.500244140625,
+        "completeMs": 5020,
+        "savedMs": 5024.2001953125,
+        "saveAfterCompleteMs": 5,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "screen",
+        "endpointSource": "capture-action",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": 0,
+        "captureEndMs": 56,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 56,
+        "firstTextMs": 4443,
+        "firstUsefulTextMs": 4443,
+        "firstRenderedMs": 4497,
+        "completedMs": 5019,
+        "attemptEndMs": 5019,
+        "savedMs": 5024,
+        "attemptId": "84500f8e-4ab5-402f-980e-f2297037fb4f"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 4387
+    },
+    {
+      "id": "audio-0",
+      "kind": "audio",
+      "transport": "unshaped",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 918,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 7768.3876953125,
+        "first40VisibleMs": 7768.3876953125,
+        "overlayFirstVisibleMs": 7740.187744140625,
+        "completeMs": 8213.6875,
+        "savedMs": 8217.78759765625,
+        "saveAfterCompleteMs": 4,
+        "transcriptFinalMs": 1400.087646484375
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "audio",
+        "endpointSource": "estimated-audio",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": 0,
+        "finalTranscriptMs": 1187,
+        "requestMs": 3389,
+        "firstTextMs": 7503,
+        "firstUsefulTextMs": 7503,
+        "firstRenderedMs": 7553,
+        "completedMs": 7999,
+        "attemptEndMs": 7999,
+        "savedMs": 8003,
+        "attemptId": "c00fe49b-a03e-43d0-84cb-0d1e68487655"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": true,
+      "postFinalQueueMs": 2202,
+      "requestToFirstTextMs": 4114
+    },
+    {
+      "id": "typed-1",
+      "kind": "typed",
+      "transport": "unshaped",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 1049,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 4106.89990234375,
+        "first40VisibleMs": 4106.89990234375,
+        "overlayFirstVisibleMs": 4155.60009765625,
+        "completeMs": 4741.89990234375,
+        "savedMs": 4748.199951171875,
+        "saveAfterCompleteMs": 7,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "typed",
+        "endpointSource": "request-start",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 0,
+        "firstTextMs": 4048,
+        "firstUsefulTextMs": 4048,
+        "firstRenderedMs": 4105,
+        "completedMs": 4740,
+        "attemptEndMs": 4740,
+        "savedMs": 4747,
+        "attemptId": "368e38bd-6999-48fb-a170-436e17ee5c9d"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 4048
+    },
+    {
+      "id": "screen-1",
+      "kind": "screen",
+      "transport": "unshaped",
+      "thinkingLevel": "HIGH",
+      "answerCharacters": 739,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 4579.800048828125,
+        "first40VisibleMs": 4579.800048828125,
+        "overlayFirstVisibleMs": 4635,
+        "completeMs": 5004.60009765625,
+        "savedMs": 5009.10009765625,
+        "saveAfterCompleteMs": 5,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "screen",
+        "endpointSource": "capture-action",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": 0,
+        "captureEndMs": 40,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 40,
+        "firstTextMs": 4528,
+        "firstUsefulTextMs": 4528,
+        "firstRenderedMs": 4579,
+        "completedMs": 5004,
+        "attemptEndMs": 5004,
+        "savedMs": 5009,
+        "attemptId": "a404dc0a-af40-4250-a446-8ab9a13e19b0"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 4488
+    },
+    {
+      "id": "audio-1",
+      "kind": "audio",
+      "transport": "unshaped",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 933,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 7219.58740234375,
+        "first40VisibleMs": 7219.58740234375,
+        "overlayFirstVisibleMs": 7205.387451171875,
+        "completeMs": 7719.08740234375,
+        "savedMs": 7724.78759765625,
+        "saveAfterCompleteMs": 7,
+        "transcriptFinalMs": 1381.6875
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "audio",
+        "endpointSource": "estimated-audio",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": 0,
+        "finalTranscriptMs": 1195,
+        "requestMs": 3397,
+        "firstTextMs": 6974,
+        "firstUsefulTextMs": 6974,
+        "firstRenderedMs": 7031,
+        "completedMs": 7530,
+        "attemptEndMs": 7530,
+        "savedMs": 7537,
+        "attemptId": "d3400275-1394-4821-ac9d-a2921013fab7"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": true,
+      "postFinalQueueMs": 2202,
+      "requestToFirstTextMs": 3577
+    },
+    {
+      "id": "typed-2",
+      "kind": "typed",
+      "transport": "http-paced",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 1486,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 4474.5,
+        "first40VisibleMs": 4474.5,
+        "overlayFirstVisibleMs": 4482.2001953125,
+        "completeMs": 5327.5,
+        "savedMs": 5333,
+        "saveAfterCompleteMs": 6,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "typed",
+        "endpointSource": "request-start",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 0,
+        "firstTextMs": 4421,
+        "firstUsefulTextMs": 4421,
+        "firstRenderedMs": 4472,
+        "completedMs": 5326,
+        "attemptEndMs": 5326,
+        "savedMs": 5332,
+        "attemptId": "e828cdce-51f8-45b4-8f8d-b0162a335c85"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 4421
+    },
+    {
+      "id": "screen-2",
+      "kind": "screen",
+      "transport": "http-paced",
+      "thinkingLevel": "HIGH",
+      "answerCharacters": 519,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 5655.7001953125,
+        "first40VisibleMs": 5655.7001953125,
+        "overlayFirstVisibleMs": 5711.300048828125,
+        "completeMs": 5961.10009765625,
+        "savedMs": 5966,
+        "saveAfterCompleteMs": 6,
+        "transcriptFinalMs": null
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "screen",
+        "endpointSource": "capture-action",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": 0,
+        "captureEndMs": 42,
+        "speechEndMs": null,
+        "finalTranscriptMs": null,
+        "requestMs": 42,
+        "firstTextMs": 5604,
+        "firstUsefulTextMs": 5604,
+        "firstRenderedMs": 5655,
+        "completedMs": 5960,
+        "attemptEndMs": 5960,
+        "savedMs": 5966,
+        "attemptId": "e2785ccc-5b38-4a68-b2a7-658cba821180"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": null,
+      "postFinalQueueMs": null,
+      "requestToFirstTextMs": 5562
+    },
+    {
+      "id": "audio-2",
+      "kind": "audio",
+      "transport": "http-paced",
+      "thinkingLevel": "MEDIUM",
+      "answerCharacters": 977,
+      "retries": 0,
+      "timings": {
+        "firstVisibleMs": 8885.28759765625,
+        "first40VisibleMs": 8885.28759765625,
+        "overlayFirstVisibleMs": 8857.8876953125,
+        "completeMs": 9465.987548828125,
+        "savedMs": 9471.087646484375,
+        "saveAfterCompleteMs": 5,
+        "transcriptFinalMs": 1388.6875
+      },
+      "applicationStages": {
+        "mode": "balanced",
+        "network": "standard",
+        "kind": "audio",
+        "endpointSource": "estimated-audio",
+        "outcome": "success",
+        "save": "durable",
+        "failureCategory": "none",
+        "captureStartMs": null,
+        "captureEndMs": null,
+        "speechEndMs": 0,
+        "finalTranscriptMs": 1214,
+        "requestMs": 3417,
+        "firstTextMs": 8656,
+        "firstUsefulTextMs": 8656,
+        "firstRenderedMs": 8709,
+        "completedMs": 9290,
+        "attemptEndMs": 9290,
+        "savedMs": 9295,
+        "attemptId": "67db3516-c364-48c9-ab50-23dda5be46a3"
+      },
+      "persistedAnswerMatches": true,
+      "prematureAnswer": false,
+      "timingsPresent": true,
+      "audioQuestionPreserved": true,
+      "postFinalQueueMs": 2203,
+      "requestToFirstTextMs": 5239
+    }
+  ],
+  "screenshotQuality": {
+    "distinctProblems": 1,
+    "attempts": 3,
+    "originalWholeFencePasses": 1,
+    "reviewedStandaloneFunctionPasses": 3,
+    "note": "Two full fences include console example calls that contaminate the strict function harness stdout. All three manually selected standalone solve functions pass finite tests. Original grades retained; this is not three independent coding problems."
+  },
+  "semanticPrefixReview": "The sampled first-40-character DOM prefixes address the actual task, with a heading preceding one typed response. This is a reviewer observation on nine samples, not an automated semantic metric or calibrated useful-answer threshold.",
+  "productionSloEstablished": false
+}

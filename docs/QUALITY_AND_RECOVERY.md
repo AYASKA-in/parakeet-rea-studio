@@ -1,5 +1,7 @@
 # Quality, recovery and release checks
 
+Latest unreleased measurement: [actual desktop timing, 22 October](V0_8_DESKTOP_SPEED_2026_10_22.md) — nine real-provider flows through visible output and verified saving. Speech first text measured 7.2–7.8 seconds on the current connection; proposed speed targets remain unqualified. The v0.7.0 evidence below remains historical.
+
 For unreleased v0.8 work, see [development progress](V0_8_PROGRESS.md) and [the implementation plan](V0_8_REALTIME_PLAN.md). Published v0.7.0 binaries do not include those changes.
 
 Version 0.7.0 is an unsigned experimental candidate. These changes improve measurement and safeguards; they do not certify perfect answers or production availability.

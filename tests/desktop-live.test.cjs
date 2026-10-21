@@ -1,0 +1,14 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {reserveRequest,readPcmWave,summarize}=require('../evals/desktop-live.cjs');
+test('desktop request budget counts HTTP retries and WebSocket reconnects against one persistent cap',()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'parakeet-budget-')),file=path.join(dir,'budget.json');try{fs.writeFileSync(file,JSON.stringify({maximumCalls:2,used:0,requests:[],currentCase:'audio-0'}));assert.equal(reserveRequest(file,'transcription-websocket'),1);assert.equal(reserveRequest(file,'answer-http'),2);assert.throws(()=>reserveRequest(file,'answer-http'),error=>error.name==='AbortError');const r=JSON.parse(fs.readFileSync(file));assert.equal(r.used,2);assert.deepEqual(r.requests.map(x=>x.kind),['transcription-websocket','answer-http']);}finally{fs.rmSync(file);fs.rmdirSync(dir);}
+});
+test('authentication/quota block and corrupt budget accounting prevent any later reservation',()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'parakeet-budget-')),file=path.join(dir,'budget.json');try{fs.writeFileSync(file,JSON.stringify({maximumCalls:12,used:1,requests:[{}],blocked:'quota'}));assert.throws(()=>reserveRequest(file,'answer-http'),error=>error.name==='AbortError');fs.writeFileSync(file,JSON.stringify({maximumCalls:12,used:0,requests:[{}]}));assert.throws(()=>reserveRequest(file,'answer-http'),/Invalid/);assert.equal(JSON.parse(fs.readFileSync(file)).used,0);}finally{fs.rmSync(file);fs.rmdirSync(dir);}
+});
+test('synthetic audio endpoint comes from non-silent PCM and excludes the trailing silent tail',async()=>{
+ const {encodeWav}=await import('../renderer/audio.js');const samples=new Float32Array(16000);samples.fill(.1,1000,8000);const data=Buffer.from(encodeWav([samples],16000)),r=readPcmWave(data);assert.equal(r.endpointSeconds,.5);assert.equal(r.durationSeconds,1);assert.equal(r.pcm.length,32000);assert.throws(()=>readPcmWave(data.subarray(0,45)),/Truncated/);assert.throws(()=>readPcmWave(Buffer.from(encodeWav([new Float32Array(10)],16000))),/no speech/);assert.throws(()=>readPcmWave(Buffer.from(encodeWav([samples],48000))),/16 kHz/);
+});
+test('desktop summaries retain failed attempts and leave unknown timings unmeasured',()=>{
+ const r=summarize([{kind:'audio',transport:'unshaped',metric:{outcome:'success',save:'durable'},persistedAnswerMatches:true,timings:{firstVisibleMs:300,completeMs:500}},{kind:'audio',transport:'unshaped',metric:null},{kind:'audio',transport:'http-paced',metric:{outcome:'error'}}]);assert.equal(r.length,2);assert.equal(r[0].attempts,2);assert.equal(r[0].successes,1);assert.equal(r[0].failures,1);assert.equal(r[0].durableSaves,1);assert.equal(r[0].measurements.firstVisibleMs.p50.samples,1);assert.equal(r[0].measurements.savedMs.p95.value,null);assert.equal(r[0].productionSloEstablished,false);
+});

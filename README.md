@@ -17,7 +17,7 @@ The desktop app is named **Parakeet Studio**. This independently written, MIT-li
 
 **New in 0.7.0:** direct screenshot answers, visible recovery and source activity, stronger local-data controls, expanded quality checks and a per-user Windows installer. [Design and accessibility notes](docs/UI_DESIGN.md).
 
-**v0.8 development, source only:** [The 50-request synthetic baseline](docs/V0_8_BASELINE_2026_10_22.md) records coding/screens results, transcription preservation and unresolved grounding gaps. An unsuccessful prompt experiment was reverted. This work has not updated the downloadable EXEs or qualified the proposed real-time targets.
+**v0.8 development, source only:** [The 50-request synthetic baseline](docs/V0_8_BASELINE_2026_10_22.md) records coding/screens results, transcription preservation and unresolved grounding gaps. An unsuccessful prompt experiment was reverted. [Actual desktop timing](docs/V0_8_DESKTOP_SPEED_2026_10_22.md) now covers nine real-provider flows through visible text and verified disk save; observed speech first text was 7.2–7.8 seconds on the current connection. This work has not updated the downloadable EXEs or qualified the proposed real-time targets.
 
 **On this page:** [Release status](#release-status) · [Install](#download-and-run) · [First answer](#your-first-answer) · [Features](#what-you-can-do) · [Overlay & shortcuts](#glass-overlay-and-shortcuts) · [Privacy](#privacy-and-your-data) · [Reliability](#speed-and-reliability) · [Help](#quick-troubleshooting) · [Build](#build-from-source) · [Signing](#code-signing-policy) · [Validation](#validation-and-remaining-checks)
 

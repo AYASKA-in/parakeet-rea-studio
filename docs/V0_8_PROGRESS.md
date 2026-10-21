@@ -47,12 +47,20 @@ CI is configured to run the new desktop scenarios against the packaged app and r
 
 See [the full baseline and unsuccessful experiment](V0_8_BASELINE_2026_10_22.md), including measured provider intervals, frozen aggregates and remaining gates.
 
+## Fourth implementation slice — actual desktop timing
+
+- Completed a separate, newly authorized 12-request run: nine streamed answer HTTP requests and three real transcription WebSocket sessions. Nine desktop flows completed and matched their persisted workspace answers; no retries, reconnects or auth/quota failures were observed.
+- Synthetic speech passed through the production AudioCapture/worklet, real transcription, automatic question queue, real answer stream, workspace and glass overlay, and local save. Screenshot pixels were synthetic; native desktop acquisition remains outside the measured scope.
+- Unshaped first-visible ranges: typed 4.107–4.248 s, screenshots 4.499–4.580 s, speech 7.220–7.768 s. The speech path included about 1.4 s to final transcription, 2.2 s queued waiting and 3.6–4.1 s to the first answer event. These results do not qualify the proposed speed targets.
+- Added a reusable bounded benchmark command, independent DOM timing, persistent request reservations and disk-answer verification. Local rehearsal completed nine flows; all 154 deterministic tests passed.
+- Complete scope, limited HTTP pacing, screenshot code adjudication and frozen results are in [the desktop timing report](V0_8_DESKTOP_SPEED_2026_10_22.md). No runtime answer policy or published binary was changed.
+
 ## Remaining work, in order
 
 1. Validate the clarified grounding contract, author a fresh independent private holdout and expand language/vision coverage. Scoring/input-contract validation and the first content-free baseline are now implemented.
 2. Validate endpoint/correction behavior on consented real speech, including accents, long pauses and overlap. Current quiet windows are retained until evidence supports shortening them.
 3. Expand semantic screen contract extraction and resume claim/date/metric grounding beyond employment cues.
-4. Measure network bottlenecks and choose task/model/image optimizations using accuracy and end-to-end latency together. No unapproved parallel requests, paid fallback or new cloud benchmark budget is introduced here.
+4. Optimize the measured recognition, queued waiting and provider-first-text delays; distinguish conceptual answers from code tasks and compare screenshot Fast/Detail policies. Validate quality alongside speed on controlled networks. Both explicitly authorized cloud allowances are exhausted.
 5. Run the frozen holdout, constrained-network matrix, fresh endurance and deferred hardware/accessibility checks before a new release.
 
 See [the full plan](V0_8_REALTIME_PLAN.md). Its speed and accuracy thresholds remain proposed acceptance targets.
