@@ -7,6 +7,7 @@ const subscribe = channel => callback => {
 };
 contextBridge.exposeInMainWorld('copilot', {
   isDesktop: true,
+  getAppInfo: invoke('app:info'),
   recordMetric: invoke('diagnostics:add'), exportDiagnostics: invoke('diagnostics:export'), clearDiagnostics: invoke('diagnostics:clear'),
   getSettings: invoke('settings:get'), saveSettings: invoke('settings:save'),
   getProtectionStatus: invoke('protection:get'),

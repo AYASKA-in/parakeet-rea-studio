@@ -790,6 +790,9 @@ function bindEvents() {
 async function init() {
   hydrateIcons(); bindEvents();
   $('#preview-badge').hidden = desktop; $('#preview-notice').hidden = desktop; $('#window-controls').hidden = !desktop;
+  if (desktop && bridge.getAppInfo) {
+    try { const info=await bridge.getAppInfo(); $('.independent-label').textContent=`Independent open-source assistant · v${info.version}`; } catch {}
+  }
   if (!desktop) {
     $('#provider-key').disabled = true; $('#provider-key').placeholder = 'Connect securely in the desktop app';
     $('#save-settings').disabled = true; $('#reveal-key').disabled = true;for(const id of ['export-diagnostics','clear-diagnostics','check-local-provider'])$('#'+id).disabled=true;

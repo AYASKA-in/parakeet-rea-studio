@@ -205,6 +205,7 @@ function createOverlay() {
 
 function registerHandlers() {
   handle('app:runtime',()=>runtime.snapshot());
+  handle('app:info',()=>({version:app.getVersion(),workspace:{visible:mainWindow.isVisible(),minimized:mainWindow.isMinimized()}}));
   handle('app:lifecycle-ready',input=>{runtime.acknowledge(input?.epoch);publishRuntime();return runtime.snapshot();});
   handle('shortcuts:get',()=>shortcutRegistry?.status() || []);
   handle('shortcuts:retry',()=>{runtime.begin();return refreshShortcuts();});

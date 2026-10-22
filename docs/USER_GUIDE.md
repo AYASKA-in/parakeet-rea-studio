@@ -1,6 +1,6 @@
 # End-to-end user guide
 
-> Current Windows downloads: **[v0.8.0 portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-portable.exe)** or **[v0.8.0 setup EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.0/Parakeet-Studio-0.8.0-setup.exe)**. Both are experimental and unsigned. Portable runs directly; setup provides a per-user installation and uninstaller. Verify against [the same release's checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.0). Close other copies and back up an existing profile before upgrading; uninstall retains local data.
+> Current Windows downloads: **[v0.8.1 portable EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.1/Parakeet-Studio-0.8.1-portable.exe)** or **[v0.8.1 setup EXE](https://github.com/AYASKA-in/parakeet-rea-studio/releases/download/v0.8.1/Parakeet-Studio-0.8.1-setup.exe)**. Both are experimental and unsigned. Portable runs directly; setup provides a per-user installation and uninstaller. Verify against [the same release's checksums](https://github.com/AYASKA-in/parakeet-rea-studio/releases/tag/v0.8.1). Close other copies and back up an existing profile before upgrading; uninstall retains local data.
 
 [Install/download](../README.md#download-and-run) · [API setup](API_KEYS.md) · [Troubleshooting](TROUBLESHOOTING.md)
 

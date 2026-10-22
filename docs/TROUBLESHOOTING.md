@@ -6,11 +6,13 @@
 
 Use the Windows x64 portable EXE, not the source ZIP. Check its published SHA-256 checksum and Windows Security's actual message. The binary is unsigned; do not disable protection or run an untrusted download. First launch may take longer because it extracts the runtime.
 
-Capture protection hides taskbar buttons. Press Ctrl+Shift+M or reopen the same EXE to focus its existing workspace. Settings reports shortcut conflicts; close/reconfigure the conflicting app, then Retry global shortcuts. On a different Windows account, encrypted credentials may require re-entry.
+Capture protection hides taskbar buttons, so a minimized app can look closed. Press **Ctrl+Shift+M** to restore it. Before upgrading, close the running workspace with its **X** button and wait for it to finish saving; minimizing does not quit it. An older running copy can keep ownership of the same profile. Version 0.8.1 and newer show their version in the sidebar footer.
+
+The v0.8.1 portable launcher uses a separate temporary extraction directory for every launch. Earlier portable versions can stall when reopened while their runtime files are in use. Close the old copy before opening the newer download. Use the portable EXE directly, or the setup EXE to install; these are different distribution formats. Settings reports shortcut conflicts; close/reconfigure the conflicting app, then Retry global shortcuts. On a different Windows account, encrypted credentials may require re-entry.
 
 ## No AI answer
 
-Check the exact error. Configure a provider key, model IDs and data-use mode. “AI provider configured” is not an authentication test. Try one harmless typed question before audio/screenshots. Unknown policy blocks uploads. Unpaid practice deliberately excludes personal context and disables AI PDF upload/stored-session summaries.
+Check the exact error. **Choose data-use policy** means startup succeeded but uploads are blocked until you review a data-use mode in Settings. A retained key does not automatically choose consent after an upgrade. Configure a provider key, model IDs and data-use mode. “AI provider configured” is not an authentication test. Try one harmless typed question before audio/screenshots. Unknown policy blocks uploads. Unpaid practice deliberately excludes personal context and disables AI PDF upload/stored-session summaries.
 
 For 401/403, check key/project permissions/restrictions. For 404, check URL/model. For 429, check project quota/concurrency; another key in the same project does not help. For 503, provider capacity may be unavailable. Stop unnecessary sessions, wait and explicitly retry. No automatic paid fallback occurs. Use [Google's troubleshooting guide](https://ai.google.dev/gemini-api/docs/troubleshooting).
 
